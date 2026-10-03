@@ -1,0 +1,8 @@
+<aside class="auth-panel" aria-hidden="true">
+  <pw:logo onInk="true"/>
+  <pw:trail cssClass="auth-trail" onInk="true"/>
+  <figure>
+    <blockquote>“What should I learn next, and why?” Pathwise always answers both.</blockquote>
+    <figcaption>Explainable next steps · Learning you can see</figcaption>
+  </figure>
+</aside>

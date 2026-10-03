@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Honoured by a standalone Tomcat deployment. The embedded launcher applies the same settings in code. -->
+<Context>
+  <CookieProcessor className="org.apache.tomcat.util.http.Rfc6265CookieProcessor" sameSiteCookies="lax"/>
+  <!-- Sessions are not persisted across restarts; Pathwise sessions live in the database. -->
+  <Manager pathname=""/>
+</Context>

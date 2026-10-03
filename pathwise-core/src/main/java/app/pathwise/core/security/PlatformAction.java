@@ -1,0 +1,13 @@
+package app.pathwise.core.security;
+
+/** Platform-level actions. Room- and resource-level actions get their own policies in later modules. */
+public enum PlatformAction {
+    USE_STUDENT_AREA,
+    USE_TEACHER_AREA,
+    CREATE_ROOM,
+    USE_ADMIN_AREA,
+    MANAGE_USERS,
+    GRANT_ROLES,
+    VIEW_AUDIT_LOG,
+    MANAGE_OWN_ACCOUNT
+}

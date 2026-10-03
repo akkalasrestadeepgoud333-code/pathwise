@@ -1,0 +1,196 @@
+/* Pathwise design tokens — the single source of colour, type, space, radius, shadow and motion.
+   Light is the default; dark applies via the OS preference (unless the user chose light) or an explicit choice. */
+
+@font-face {
+  font-family: "Inter";
+  src: url("../fonts/inter-latin-var.woff2") format("woff2");
+  font-weight: 100 900;
+  font-display: swap;
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329,
+    U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+  font-family: "Inter";
+  src: url("../fonts/inter-latin-ext-var.woff2") format("woff2");
+  font-weight: 100 900;
+  font-display: swap;
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329,
+    U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+@font-face {
+  font-family: "Bricolage Grotesque";
+  src: url("../fonts/bricolage-latin-var.woff2") format("woff2");
+  font-weight: 200 800;
+  font-display: swap;
+}
+@font-face {
+  font-family: "JetBrains Mono";
+  src: url("../fonts/jetbrains-mono-latin-var.woff2") format("woff2");
+  font-weight: 100 800;
+  font-display: swap;
+}
+
+:root {
+  color-scheme: light;
+
+  /* Surfaces & text */
+  --bg: #f7f6f2;
+  --surface: #ffffff;
+  --surface-2: #f0eee8;
+  --surface-3: #e8e5dd;
+  --border: #e3e0d8;
+  --border-strong: #cfcbc0;
+  --text: #161a23;
+  --text-muted: #5b6272;
+  --text-subtle: #7a8091;
+
+  /* Brand */
+  --primary: #3f4fe0;
+  --primary-hover: #3341c4;
+  --primary-soft: #e9ebff;
+  --primary-ink: #ffffff;
+  --accent: #f2a93b;
+  --accent-soft: #fdf1dc;
+  --ink: #0d111a;           /* brand panel background in both themes */
+
+  /* Mastery & feedback (always paired with an icon or label, never colour alone) */
+  --mastered: #12a07a;
+  --proficient: #1f9db0;
+  --developing: #d9922b;
+  --needs: #e0604e;
+  --success: #12a07a;
+  --success-soft: #e3f6ef;
+  --info: #3f4fe0;
+  --info-soft: #e9ebff;
+  --warning: #b8741a;
+  --warning-soft: #fdf1dc;
+  --danger: #c8372d;
+  --danger-soft: #fbe7e5;
+
+  /* Rarity */
+  --rarity-common: #8a94a6;
+  --rarity-uncommon: #1f9db0;
+  --rarity-rare: #3f4fe0;
+  --rarity-epic: #8b5cf6;
+  --rarity-legendary: #f2a93b;
+
+  /* Typography */
+  --font-display: "Bricolage Grotesque", "Inter", system-ui, sans-serif;
+  --font-ui: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, "Cascadia Code", Consolas, monospace;
+  --text-xs: 0.75rem;
+  --text-sm: 0.875rem;
+  --text-md: 1rem;
+  --text-lg: 1.125rem;
+  --text-xl: 1.25rem;
+  --text-2xl: 1.5rem;
+  --text-3xl: 1.875rem;
+  --text-4xl: 2.25rem;
+  --text-5xl: 3rem;
+
+  /* Space (4px base) */
+  --s-1: 4px;  --s-2: 8px;  --s-3: 12px; --s-4: 16px; --s-5: 20px;
+  --s-6: 24px; --s-8: 32px; --s-10: 40px; --s-12: 48px; --s-16: 64px; --s-20: 80px;
+
+  /* Radius */
+  --r-sm: 6px;
+  --r-md: 10px;
+  --r-lg: 16px;
+  --r-xl: 24px;
+  --r-full: 999px;
+
+  /* Elevation */
+  --e1: 0 1px 2px rgb(16 20 30 / 0.06), 0 1px 1px rgb(16 20 30 / 0.04);
+  --e2: 0 4px 12px rgb(16 20 30 / 0.07), 0 1px 3px rgb(16 20 30 / 0.06);
+  --e3: 0 12px 28px rgb(16 20 30 / 0.12), 0 2px 6px rgb(16 20 30 / 0.06);
+  --e4: 0 24px 60px rgb(16 20 30 / 0.18);
+
+  /* Motion */
+  --ease: cubic-bezier(0.2, 0.8, 0.2, 1);
+  --t-micro: 120ms;
+  --t-standard: 200ms;
+  --t-emphasis: 320ms;
+
+  /* Focus */
+  --focus-ring: 0 0 0 2px var(--bg), 0 0 0 4px var(--primary);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+    --bg: #0d111a;
+    --surface: #151b27;
+    --surface-2: #1c2433;
+    --surface-3: #232d3f;
+    --border: #2a3446;
+    --border-strong: #3a465c;
+    --text: #e9ecf2;
+    --text-muted: #9aa4b6;
+    --text-subtle: #7f8a9e;
+    --primary: #8c98ff;
+    --primary-hover: #a3adff;
+    --primary-soft: #232a52;
+    --primary-ink: #0d111a;
+    --accent: #f5b95c;
+    --accent-soft: #3a2d17;
+    --mastered: #3ccb9e;
+    --proficient: #4cc3d3;
+    --developing: #efb052;
+    --needs: #f2836f;
+    --success: #3ccb9e;
+    --success-soft: #133328;
+    --info: #8c98ff;
+    --info-soft: #232a52;
+    --warning: #efb052;
+    --warning-soft: #3a2d17;
+    --danger: #f06a5f;
+    --danger-soft: #3d1c1a;
+    --e1: 0 1px 2px rgb(0 0 0 / 0.4);
+    --e2: 0 4px 14px rgb(0 0 0 / 0.35);
+    --e3: 0 12px 30px rgb(0 0 0 / 0.45);
+    --e4: 0 24px 60px rgb(0 0 0 / 0.55);
+  }
+}
+
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --bg: #0d111a;
+  --surface: #151b27;
+  --surface-2: #1c2433;
+  --surface-3: #232d3f;
+  --border: #2a3446;
+  --border-strong: #3a465c;
+  --text: #e9ecf2;
+  --text-muted: #9aa4b6;
+  --text-subtle: #7f8a9e;
+  --primary: #8c98ff;
+  --primary-hover: #a3adff;
+  --primary-soft: #232a52;
+  --primary-ink: #0d111a;
+  --accent: #f5b95c;
+  --accent-soft: #3a2d17;
+  --mastered: #3ccb9e;
+  --proficient: #4cc3d3;
+  --developing: #efb052;
+  --needs: #f2836f;
+  --success: #3ccb9e;
+  --success-soft: #133328;
+  --info: #8c98ff;
+  --info-soft: #232a52;
+  --warning: #efb052;
+  --warning-soft: #3a2d17;
+  --danger: #f06a5f;
+  --danger-soft: #3d1c1a;
+  --e1: 0 1px 2px rgb(0 0 0 / 0.4);
+  --e2: 0 4px 14px rgb(0 0 0 / 0.35);
+  --e3: 0 12px 30px rgb(0 0 0 / 0.45);
+  --e4: 0 24px 60px rgb(0 0 0 / 0.55);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --t-micro: 0ms;
+    --t-standard: 0ms;
+    --t-emphasis: 0ms;
+  }
+}

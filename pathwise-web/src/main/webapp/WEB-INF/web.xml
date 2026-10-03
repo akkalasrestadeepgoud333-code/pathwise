@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<web-app xmlns="https://jakarta.ee/xml/ns/jakartaee"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="https://jakarta.ee/xml/ns/jakartaee https://jakarta.ee/xml/ns/jakartaee/web-app_6_0.xsd"
+         version="6.0" metadata-complete="true">
+
+  <display-name>Pathwise</display-name>
+
+  <!-- Servlets and filters are registered explicitly by AppBootstrap (no annotation scanning). -->
+  <listener>
+    <listener-class>app.pathwise.web.platform.AppBootstrap</listener-class>
+  </listener>
+
+  <session-config>
+    <session-timeout>120</session-timeout>
+    <cookie-config>
+      <http-only>true</http-only>
+    </cookie-config>
+    <tracking-mode>COOKIE</tracking-mode>
+  </session-config>
+
+  <jsp-config>
+    <jsp-property-group>
+      <url-pattern>*.jsp</url-pattern>
+      <page-encoding>UTF-8</page-encoding>
+      <!-- No Java in JSPs: views use JSTL, EL and pw: tags only. Violations fail at compile time. -->
+      <scripting-invalid>true</scripting-invalid>
+      <include-prelude>/WEB-INF/views/_taglibs.jspf</include-prelude>
+      <trim-directive-whitespaces>true</trim-directive-whitespaces>
+    </jsp-property-group>
+    <jsp-property-group>
+      <!-- Statically included fragments: UTF-8, no scripting. -->
+      <url-pattern>*.jspf</url-pattern>
+      <page-encoding>UTF-8</page-encoding>
+      <scripting-invalid>true</scripting-invalid>
+    </jsp-property-group>
+  </jsp-config>
+
+  <error-page>
+    <error-code>400</error-code>
+    <location>/error</location>
+  </error-page>
+  <error-page>
+    <error-code>403</error-code>
+    <location>/error</location>
+  </error-page>
+  <error-page>
+    <error-code>404</error-code>
+    <location>/error</location>
+  </error-page>
+  <error-page>
+    <error-code>405</error-code>
+    <location>/error</location>
+  </error-page>
+  <error-page>
+    <error-code>500</error-code>
+    <location>/error</location>
+  </error-page>
+  <error-page>
+    <exception-type>java.lang.Throwable</exception-type>
+    <location>/error</location>
+  </error-page>
+
+  <welcome-file-list>
+    <welcome-file>none</welcome-file>
+  </welcome-file-list>
+</web-app>

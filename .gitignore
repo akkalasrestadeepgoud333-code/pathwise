@@ -1,0 +1,27 @@
+# Build output
+target/
+*.class
+
+# Local state: database files, uploads, generated secrets and demo passwords
+data/
+storage/
+config/pathwise.local.properties
+config/demo-accounts.txt
+
+# Tooling
+.idea/
+*.iml
+.vscode/*
+!.vscode/extensions.json
+node_modules/
+*.log
+.DS_Store
+Thumbs.db
+
+# Android (added in M9)
+android/.gradle/
+android/build/
+android/app/build/
+android/local.properties
+*.keystore
+*.jks
