@@ -1,0 +1,107 @@
+key: recursion-essentials
+topic: recursion
+title: "Recursion: solving smaller copies"
+summary: Base cases, recursive cases and the call stack. The thinking tool behind trees and divide-and-conquer.
+objectives:
+  - Write a recursive function with a correct base case
+  - Trace calls and returns on the call stack
+  - Convert a simple recursive function into a loop
+estMinutes: 16
+difficulty: 2
+skills: [base-case, recursive-case, call-stack, recursion-vs-iteration]
+sections:
+  - kind: overview
+    title: A function that calls itself
+    markdown: |
+      **Recursion** solves a problem by solving a *smaller version of the same problem*. Every
+      correct recursive function has two parts:
+
+      1. A **base case**: a version small enough to answer directly, with no recursion.
+      2. A **recursive case**: reduce the problem, call yourself, and combine the result.
+
+      ```java
+      int factorial(int n) {
+          if (n == 0) return 1;            // base case
+          return n * factorial(n - 1);     // recursive case: smaller n
+      }
+      ```
+
+      If you forget the base case, or the problem doesn't actually get smaller, the calls never stop.
+      In Java that ends in a `StackOverflowError`.
+
+  - kind: explanation
+    title: The call stack
+    markdown: |
+      Each call gets its own **frame** on the **call stack**, holding its own `n`. Calls pile up until
+      the base case is reached. Then frames are popped one by one as values return:
+
+      ```
+      factorial(3)
+      └─ 3 * factorial(2)
+             └─ 2 * factorial(1)
+                    └─ 1 * factorial(0)
+                           └─ returns 1          ← base case
+                    returns 1 * 1 = 1
+             returns 2 * 1 = 2
+      returns 3 * 2 = 6
+      ```
+
+      The stack is **LIFO**: the last call made is the first to finish. That's exactly the stack
+      from the previous topic. The maximum depth of calls is the extra memory used: **O(n)** here.
+
+  - kind: example
+    title: Recursion on the digits of a number
+    markdown: |
+      Sum the digits of a number: `digitSum(4719) = 4 + 7 + 1 + 9 = 21`.
+
+      ```java
+      int digitSum(int n) {
+          if (n < 10) return n;                 // one digit: answer directly
+          return n % 10 + digitSum(n / 10);     // last digit + sum of the rest
+      }
+      ```
+
+      `digitSum(4719)` → `9 + digitSum(471)` → `9 + 1 + digitSum(47)` → `9 + 1 + 7 + digitSum(4)` → `21`.
+
+      **As a loop:**
+
+      ```java
+      int digitSumLoop(int n) {
+          int sum = 0;
+          while (n >= 10) { sum += n % 10; n /= 10; }
+          return sum + n;
+      }
+      ```
+
+      Simple "reduce by one" recursion like this converts easily to a loop. Problems that branch, such
+      as visiting both subtrees of a tree, are where recursion really pays off. That's the next topic.
+
+  - kind: flashcards
+    title: Quick recall
+    cards:
+      - front: The two parts of every recursive function
+        back: A **base case** (answer directly) and a **recursive case** (a smaller self-call).
+        skill: base-case
+      - front: What happens without a reachable base case?
+        back: Infinite recursion, which ends in a **stack overflow**.
+        skill: base-case
+      - front: Which data structure tracks pending calls?
+        back: The **call stack** (LIFO).
+        skill: call-stack
+      - front: Extra memory used by recursion depth *d*
+        back: "**O(d)** stack frames."
+        skill: call-stack
+
+  - kind: summary
+    title: Summary
+    markdown: |
+      - Recursion = base case + recursive case on a smaller input.
+      - Calls stack up until the base case, then return in reverse order (LIFO).
+      - Recursion depth costs memory. "Reduce by one" recursion often converts to a loop.
+
+  - kind: resources
+    title: Go further
+    required: false
+    links:
+      - title: "VisuAlgo: recursion tree visualiser"
+        url: https://visualgo.net/en/recursion

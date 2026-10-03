@@ -1,0 +1,114 @@
+key: trees-introduction
+topic: trees
+title: "What is a tree?"
+summary: The vocabulary and shape of hierarchical data, from roots and leaves to height and depth.
+objectives:
+  - Identify the root, parents, children, siblings, leaves and subtrees of a tree
+  - Compute the depth of a node and the height of a tree
+  - Recognise problems that are naturally shaped like trees
+estMinutes: 12
+difficulty: 1
+skills: [tree-terms, tree-measures, tree-uses]
+sections:
+  - kind: overview
+    title: Data with a hierarchy
+    markdown: |
+      Arrays and linked lists put items in a **line**. Plenty of real data isn't a line, though:
+
+      - folders containing files and more folders
+      - a company: CEO → managers → teams
+      - an HTML page: `<html>` contains `<body>`, which contains `<div>`s
+      - a family tree, a tournament bracket, a chapter → section → paragraph outline
+
+      All of these are **trees**: one item at the top, and every other item sits under exactly one
+      item above it. Many fast algorithms rely on this shape.
+
+  - kind: explanation
+    title: The vocabulary
+    markdown: |
+      ```
+                 A          ← root (no parent)
+               / | \
+              B  C  D       ← children of A; siblings of each other
+             / \     \
+            E   F     G     ← E, F, G are leaves (no children)
+      ```
+
+      | Term | Meaning | In the picture |
+      |---|---|---|
+      | **Node** | One item in the tree | A, B, … G |
+      | **Root** | The only node with no parent | A |
+      | **Parent / child** | A node directly above / below another | B is E's parent |
+      | **Siblings** | Children of the same parent | B, C, D |
+      | **Leaf** | A node with no children | C, E, F, G |
+      | **Subtree** | A node together with everything below it | B, E, F |
+      | **Edge** | The link between a parent and a child | A–B |
+
+      A tree with *n* nodes always has exactly **n − 1 edges**, because every node except the root
+      has one edge up to its parent. A tree also never has a **cycle**: you can't follow edges down and
+      arrive back where you started.
+
+  - kind: explanation
+    title: Depth, level and height
+    markdown: |
+      - The **depth** of a node is the number of edges from the root down to it. The root has depth 0,
+        and in the picture E has depth 2.
+      - A **level** is all the nodes with the same depth. Level 1 is B, C and D.
+      - The **height of a node** is the number of edges on the *longest* path from it down to a leaf.
+        Leaves have height 0.
+      - The **height of the tree** is the height of the root. In the picture it's **2**.
+
+      Height matters a great deal. Many tree operations walk one path from the root to a leaf, so they
+      cost **O(height)**. A short, bushy tree is fast. A tall, thin tree is about as slow as a list.
+
+      > Some books count height in *nodes* rather than *edges*, which makes everything one bigger.
+      > Pathwise counts **edges**. Always check which convention a question uses.
+
+  - kind: visual
+    title: A tree you can read
+    alt: >-
+      A binary tree drawn level by level. Root 50 at level 0. Level 1 holds 30 and 70.
+      Level 2 holds 20 and 40 under 30, and 60 and 80 under 70. Height is 2.
+    markdown: |
+      Read off the root, the leaves, each node's depth and the tree's height. Then check:
+      **height = 2, leaves = 4, edges = 6**.
+    visual:
+      type: tree
+      tree: [50, 30, 70, 20, 40, 60, 80]
+      caption: "Root 50 · leaves 20, 40, 60, 80 · height 2 · 7 nodes, 6 edges"
+
+  - kind: flashcards
+    title: Quick recall
+    cards:
+      - front: What is a leaf?
+        back: A node with **no children**.
+        skill: tree-terms
+      - front: How many edges does a tree with *n* nodes have?
+        back: Exactly **n − 1**. Every node except the root has one edge to its parent.
+        skill: tree-terms
+      - front: Depth of the root?
+        back: "**0**. Depth counts edges from the root."
+        skill: tree-measures
+      - front: Height of a single leaf?
+        back: "**0** (counting edges)."
+        skill: tree-measures
+      - front: Why does a tree's height matter for speed?
+        back: Many operations follow one root-to-leaf path, so they cost **O(height)**.
+        skill: tree-measures
+
+  - kind: summary
+    title: Summary
+    markdown: |
+      - A tree has one **root**. Every other node has exactly one **parent**, and there are no cycles.
+      - **Leaves** have no children. A **subtree** is a node plus everything below it.
+      - **Depth** is measured down from the root. **Height** is measured from a node down to its
+        deepest leaf.
+      - *n* nodes means *n − 1* edges. Many operations cost **O(height)**.
+
+  - kind: resources
+    title: Go further
+    required: false
+    links:
+      - title: "Tree (abstract data type), Wikipedia"
+        url: https://en.wikipedia.org/wiki/Tree_(abstract_data_type)
+        licence: CC BY-SA

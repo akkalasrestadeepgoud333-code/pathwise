@@ -1,0 +1,195 @@
+key: tree-traversals
+topic: tree-traversals
+title: "Tree traversals: preorder, inorder, postorder, level order"
+summary: Learn the four standard orders for visiting every node, when to use each, and how to trace them by hand.
+objectives:
+  - Trace preorder, inorder and postorder traversals of any binary tree
+  - Trace a level-order traversal using a queue
+  - Pick the right traversal for copying, sorting or deleting a tree
+estMinutes: 20
+difficulty: 2
+skills: [preorder, inorder, postorder, level-order]
+sections:
+  - kind: overview
+    title: Why traversal order matters
+    markdown: |
+      A **traversal** visits every node of a tree exactly once. A list has only one natural order,
+      first to last. A tree branches, so at every node you must decide: *visit this node now, or
+      explore its children first?*
+
+      The three **depth-first** orders differ in only one thing: **when you visit the node** compared
+      with its two subtrees.
+
+      | Order | Rule | Memory hook |
+      |---|---|---|
+      | Preorder | **Node** → left → right | node comes *pre* (before) |
+      | Inorder | left → **Node** → right | node is *in* the middle |
+      | Postorder | left → right → **Node** | node comes *post* (after) |
+
+      The fourth order, **level order**, is breadth-first. It visits the tree one level at a time, top
+      to bottom and left to right.
+
+  - kind: explanation
+    title: The three depth-first orders
+    markdown: |
+      All three are short recursive functions. The only difference is where the `visit` line sits:
+
+      ```java
+      void preorder(Node n) {
+          if (n == null) return;      // base case: empty subtree
+          visit(n);                   // 1. node
+          preorder(n.left);           // 2. left subtree
+          preorder(n.right);          // 3. right subtree
+      }
+
+      void inorder(Node n) {
+          if (n == null) return;
+          inorder(n.left);
+          visit(n);                   // node in the middle
+          inorder(n.right);
+      }
+
+      void postorder(Node n) {
+          if (n == null) return;
+          postorder(n.left);
+          postorder(n.right);
+          visit(n);                   // node last
+      }
+      ```
+
+      Each call either stops at an empty subtree (the **base case**) or handles one node plus two
+      smaller subtrees. That's why traversals build directly on recursion.
+
+      > **Tip for tracing by hand:** write the node, then put each subtree in brackets and expand it
+      > with the same rule. For preorder of a root `8` with children `4` and `12`:
+      > `8 [preorder of 4's subtree] [preorder of 12's subtree]`.
+
+  - kind: visual
+    title: Watch each traversal
+    alt: >-
+      A binary tree with root 8. 8 has left child 4 and right child 12. 4 has children 2 and 6;
+      12 has children 10 and 14. Preorder visits 8, 4, 2, 6, 12, 10, 14. Inorder visits 2, 4, 6, 8,
+      10, 12, 14. Postorder visits 2, 6, 4, 10, 14, 12, 8. Level order visits 8, 4, 12, 2, 6, 10, 14.
+    markdown: |
+      Pick an order, then press **Step** to visit one node at a time, or **Play** to animate. Before
+      each step, predict which node comes next.
+    visual:
+      type: traversal
+      tree: [8, 4, 12, 2, 6, 10, 14]
+      orders: [preorder, inorder, postorder, level-order]
+
+  - kind: explanation
+    title: Level order uses a queue
+    markdown: |
+      Level order can't be written with the simple recursion above, because it jumps between
+      subtrees. Instead it uses a **queue** (first in, first out):
+
+      ```java
+      void levelOrder(Node root) {
+          if (root == null) return;
+          Queue<Node> queue = new ArrayDeque<>();
+          queue.add(root);
+          while (!queue.isEmpty()) {
+              Node n = queue.remove();          // oldest waiting node
+              visit(n);
+              if (n.left != null)  queue.add(n.left);
+              if (n.right != null) queue.add(n.right);
+          }
+      }
+      ```
+
+      Children join the back of the queue, so every node on level *k* is visited before any node on
+      level *k + 1*. Swap the queue for a **stack** and you get a depth-first order instead. The same
+      idea becomes BFS and DFS on graphs.
+
+  - kind: example
+    title: "Worked example: an uneven tree"
+    markdown: |
+      Real trees are rarely perfect. Take this one (`_` is a missing child):
+
+      ```
+              A
+             / \
+            B   C
+           /     \
+          D       E
+                 /
+                F
+      ```
+
+      **Preorder** (node, left, right): `A B D C E F`. Visit A, go left into B, then B's left child D.
+      B has no right child, so return to A's right subtree: C, then C's right child E, then E's left child F.
+
+      **Inorder** (left, node, right): `D B A C F E`. Go as far left as possible (D), then B, then A.
+      In C's subtree, C has no left child, so visit C first. Then comes E's subtree, where F (E's left
+      child) comes before E.
+
+      **Postorder** (left, right, node): `D B F E C A`. A is always last, because the root is visited
+      after everything below it.
+
+      **Level order**: `A B C D E F`.
+
+      > **Check yourself:** in postorder the root is always last. In preorder it's always first.
+      > Inorder puts it somewhere in the middle.
+
+  - kind: explanation
+    title: Which traversal do I use?
+    markdown: |
+      - **Preorder**: when a parent must be handled before its children. Examples: copying a tree,
+        printing a folder structure, or serialising a tree so it can be rebuilt.
+      - **Inorder**: on a **binary search tree** it visits the values in sorted order. That's the
+        foundation of the next topic.
+      - **Postorder**: when the children must be finished first. Examples: deleting a tree (free the
+        children before the parent), computing folder sizes, or evaluating an expression tree like
+        `(3 + 4) × 2`.
+      - **Level order**: when distance from the root matters. Examples: printing a tree level by level,
+        or finding the shallowest node that matches something.
+
+      All four take **O(n)** time, because every node is visited once. The recursive ones also use
+      **O(h)** extra space for the call stack, where *h* is the tree's height.
+
+  - kind: flashcards
+    title: Quick recall
+    cards:
+      - front: Preorder rule
+        back: Node → left subtree → right subtree.
+        skill: preorder
+      - front: Inorder rule
+        back: Left subtree → node → right subtree.
+        skill: inorder
+      - front: Postorder rule
+        back: Left subtree → right subtree → node.
+        skill: postorder
+      - front: Which data structure drives a level-order traversal?
+        back: A **queue** (FIFO). Children are added at the back and nodes are removed from the front.
+        skill: level-order
+      - front: Which traversal visits a BST's values in sorted order?
+        back: "**Inorder.**"
+        skill: inorder
+      - front: Which traversal should you use to delete every node safely?
+        back: "**Postorder**: the children are freed before their parent."
+        skill: postorder
+      - front: "Where is the root in a postorder sequence?"
+        back: Always **last**. (In preorder it's always first.)
+        skill: postorder
+
+  - kind: summary
+    title: Summary
+    markdown: |
+      - A traversal visits every node once. Depth-first orders differ only in *when* the node is
+        visited: **pre** (first), **in** (middle) or **post** (last).
+      - Recursive traversals: base case `if (n == null) return;`, then two smaller recursive calls.
+      - **Level order** visits level by level using a **queue**.
+      - Use preorder to copy, inorder to sort a BST, postorder to delete or evaluate, and level order
+        for anything about depth.
+      - Time **O(n)**. The recursion depth is the tree's height **h**.
+
+  - kind: resources
+    title: Go further
+    required: false
+    links:
+      - title: "Tree traversal (Wikipedia)"
+        url: https://en.wikipedia.org/wiki/Tree_traversal
+        licence: CC BY-SA
+      - title: "VisuAlgo: binary search tree visualisation"
+        url: https://visualgo.net/en/bst

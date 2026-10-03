@@ -2,6 +2,7 @@
 <%@ attribute name="title" required="true" %>
 <%@ attribute name="bodyClass" required="false" %>
 <%@ attribute name="description" required="false" %>
+<%@ attribute name="script" required="false" description="Extra page-specific ES module, context-relative" %>
 <%@ taglib prefix="c" uri="jakarta.tags.core" %>
 <%@ taglib prefix="fn" uri="jakarta.tags.functions" %>
 <c:set var="savedTheme" value="${requestScope.currentUser.theme}"/>
@@ -23,6 +24,7 @@
   <link rel="stylesheet" href="<c:url value='/static/css/base.css'/>">
   <link rel="stylesheet" href="<c:url value='/static/css/components.css'/>">
   <link rel="stylesheet" href="<c:url value='/static/css/layout.css'/>">
+  <link rel="stylesheet" href="<c:url value='/static/css/learn.css'/>">
   <script src="<c:url value='/static/js/theme-init.js'/>"></script>
 </head>
 <body class="<c:out value='${bodyClass}'/>">
@@ -30,5 +32,6 @@
   <jsp:doBody/>
   <script src="<c:url value='/static/vendor/htmx-2.0.11.min.js'/>" defer></script>
   <script src="<c:url value='/static/js/ui/app.js'/>" type="module"></script>
+  <c:if test="${not empty script}"><script src="<c:url value='${script}'/>" type="module"></script></c:if>
 </body>
 </html>

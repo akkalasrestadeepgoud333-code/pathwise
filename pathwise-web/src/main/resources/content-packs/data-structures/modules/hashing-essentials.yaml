@@ -1,0 +1,94 @@
+key: hashing-essentials
+topic: hashing
+title: "Hash tables: constant-time lookup"
+summary: Turn any key into an array index, then handle the collisions that inevitably follow.
+objectives:
+  - Explain what a hash function does and what makes it good
+  - Resolve collisions with chaining and with open addressing
+  - Use the load factor to decide when to resize
+estMinutes: 18
+difficulty: 3
+skills: [hash-function, collisions-chaining, open-addressing, load-factor]
+sections:
+  - kind: overview
+    title: An array you can index with anything
+    markdown: |
+      Arrays give O(1) access, but only by integer position. A **hash table** gives O(1) access *on
+      average* by **any key**: a name, an email, a product code.
+
+      The trick is a **hash function** that turns the key into a number, which is then reduced to a
+      bucket index, for example `index = hash(key) mod tableSize`. Java's `HashMap` and Python's `dict`
+      work this way.
+
+      A good hash function is **fast**, **deterministic** (same key, same hash) and **spreads keys
+      evenly** across the buckets.
+
+  - kind: visual
+    title: Watch keys land in buckets
+    alt: >-
+      Seven buckets with hash function k mod 7. Inserting 15, 22, 8, 31, 10, 29: 15 goes to bucket 1;
+      22 to bucket 1 (collision, chained after 15); 8 to bucket 1 (chained); 31 to bucket 3; 10 to
+      bucket 3 (chained); 29 to bucket 1 (chained).
+    markdown: Collisions are normal. Here, chaining keeps a small list in each bucket.
+    visual:
+      type: hash-table
+      buckets: 7
+      keys: [15, 22, 8, 31, 10, 29]
+
+  - kind: explanation
+    title: Two ways to handle collisions
+    markdown: |
+      **Separate chaining**: each bucket holds a small list, and colliding keys join it. Lookup hashes
+      to the bucket, then scans its short list.
+
+      **Open addressing**: every key lives in the array itself. On a collision, **probe** for another
+      slot. With **linear probing** you try `i + 1`, `i + 2`, … (wrapping around). Deleting needs
+      care: leave a "tombstone" marker, or later searches will stop too early.
+
+      | | Chaining | Open addressing |
+      |---|---|---|
+      | Extra memory | list nodes | none |
+      | Very full tables | degrades gently | degrades sharply (clustering) |
+
+  - kind: explanation
+    title: Load factor and resizing
+    markdown: |
+      The **load factor** is α = (number of keys) / (number of buckets). As α grows, chains get longer
+      or probe sequences get longer, and O(1) slips away.
+
+      Tables **resize** when α passes a threshold. Java's `HashMap` resizes at **0.75** by doubling
+      its capacity and **rehashing** every key into the new array. A single resize costs O(n), but
+      it's rare enough that inserts are still **O(1) amortised**.
+
+      The worst case is still **O(n)**: if every key collides, lookup becomes a list scan. That's why
+      the quality of the hash function matters.
+
+  - kind: flashcards
+    title: Quick recall
+    cards:
+      - front: Average cost of lookup in a hash table
+        back: "**O(1)** on average. The worst case is O(n) if everything collides."
+        skill: hash-function
+      - front: Separate chaining
+        back: Each bucket holds a **list** of the keys that hash to it.
+        skill: collisions-chaining
+      - front: Linear probing
+        back: On a collision, try the **next slots** in order (i + 1, i + 2, …), wrapping around.
+        skill: open-addressing
+      - front: Load factor
+        back: α = keys ÷ buckets. Resize when it passes a threshold (0.75 in Java's HashMap).
+        skill: load-factor
+
+  - kind: summary
+    title: Summary
+    markdown: |
+      - A hash function turns a key into an array index, giving O(1) average access.
+      - Collisions are resolved by chaining (lists) or open addressing (probing).
+      - Keep the load factor low by resizing and rehashing. Inserts stay O(1) amortised.
+
+  - kind: resources
+    title: Go further
+    required: false
+    links:
+      - title: "VisuAlgo: hash table (interactive)"
+        url: https://visualgo.net/en/hashtable

@@ -16,12 +16,13 @@ public class StudentController extends PageServlet {
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse res) throws ServletException, IOException {
-        require(req, PlatformAction.USE_STUDENT_AREA);
+        var actor = require(req, PlatformAction.USE_STUDENT_AREA);
         if (!"/app/today".equals(req.getServletPath())) {
             redirect(req, res, "/app/today");
             return;
         }
         req.setAttribute("greeting", Greeting.forNow(DEFAULT_ZONE));
+        req.setAttribute("today", app.pathwise.web.platform.view.ViewModels.of(app().learn().today(actor)));
         req.setAttribute("nav", "today");
         render(req, res, "student/today");
     }

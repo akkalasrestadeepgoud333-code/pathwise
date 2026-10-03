@@ -1,0 +1,95 @@
+key: arrays-essentials
+topic: arrays
+title: "Arrays: fast access, costly shifting"
+summary: Why indexing an array is instant, why inserting into the middle is slow, and how to reason about both.
+objectives:
+  - Access and update elements by zero-based index
+  - Traverse an array and avoid off-by-one errors
+  - Explain the O(1) and O(n) costs of common array operations
+estMinutes: 12
+difficulty: 1
+skills: [array-indexing, array-traversal, array-insert-delete, array-complexity]
+sections:
+  - kind: overview
+    title: A row of numbered slots
+    markdown: |
+      An **array** stores elements of the same type in one unbroken block of memory. Every slot is
+      the same size, so the computer finds slot `i` with a single calculation:
+
+      ```
+      address of a[i] = start address + i × size of one element
+      ```
+
+      That's why `a[i]` takes the **same time** whether `i` is 0 or 9,000,000. We call that
+      **O(1)**, or constant time.
+
+  - kind: visual
+    title: Indices start at zero
+    alt: "An array of six numbers: 7, 3, 9, 1, 8, 5 at indices 0 to 5. Index 2 holds 9."
+    markdown: In Java, C and Python the first element is at index **0**, so an array of length 6 has indices 0 to 5.
+    visual:
+      type: array
+      values: [7, 3, 9, 1, 8, 5]
+      highlight: [2]
+      pointers: { "a[2]": 2 }
+      caption: "a.length is 6 · valid indices are 0 to 5 · a[6] would be out of bounds"
+
+  - kind: explanation
+    title: Traversing without off-by-one errors
+    markdown: |
+      ```java
+      int[] a = {7, 3, 9, 1, 8, 5};
+      int sum = 0;
+      for (int i = 0; i < a.length; i++) {   // < length, not <=
+          sum += a[i];
+      }
+      ```
+
+      Using `i <= a.length` reads `a[6]`, which doesn't exist. Java throws
+      `ArrayIndexOutOfBoundsException`; C silently reads garbage. **Searching** for a value means
+      checking elements one by one, so it takes **O(n)** unless the array is sorted.
+
+  - kind: explanation
+    title: Why inserting in the middle is slow
+    markdown: |
+      To insert `4` at index 1 of `[7, 3, 9, 1]`, every element from index 1 onwards has to move one
+      slot right, starting from the end:
+
+      ```
+      [7, 3, 9, 1, _]   →   [7, _, 3, 9, 1]   →   [7, 4, 3, 9, 1]
+      ```
+
+      In the worst case (inserting at the front) all *n* elements move, so the cost is **O(n)**.
+      Deleting works the same way in reverse. Arrays also have a **fixed capacity**. Java's `ArrayList`
+      hides this by copying into a bigger array (about 1.5× larger) when it fills up.
+
+      | Operation | Cost |
+      |---|---|
+      | Read or write `a[i]` | O(1) |
+      | Search an unsorted array | O(n) |
+      | Insert or delete at the end (spare capacity) | O(1) |
+      | Insert or delete at the front or middle | O(n) |
+
+  - kind: flashcards
+    title: Quick recall
+    cards:
+      - front: Why is `a[i]` O(1)?
+        back: Its address is computed directly as start + i × element size. Nothing is searched.
+        skill: array-indexing
+      - front: Valid indices of an array of length *n*
+        back: "**0** to **n − 1**."
+        skill: array-indexing
+      - front: Cost of inserting at the front of an array of *n* elements
+        back: "**O(n)**: every element shifts one place right."
+        skill: array-insert-delete
+      - front: Loop condition to visit every element
+        back: "`i < a.length` (not `<=`)."
+        skill: array-traversal
+
+  - kind: summary
+    title: Summary
+    markdown: |
+      - Same-sized slots in one block, so `a[i]` is **O(1)**.
+      - Indices run from 0 to n − 1. Off-by-one errors are the classic bug.
+      - Searching unsorted data is O(n). Inserting or deleting in the middle is O(n) because of shifting.
+      - Next: **linked lists** trade fast indexing for cheap insertion.

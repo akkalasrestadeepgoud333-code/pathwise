@@ -53,10 +53,24 @@ class JspSafetyTest {
         assertThat(violations).as("Java code in views").isEmpty();
     }
 
+    /** The one audited exception: pw:html prints SafeHtml, which only the Markdown sanitiser can create. */
+    private static final Path SAFE_HTML_TAG = WEBAPP.resolve("WEB-INF/tags/pw/html.tag");
+
+    @Test
+    void safeHtmlTagOnlyAcceptsSanitisedValues() throws IOException {
+        String src = Files.readString(SAFE_HTML_TAG, StandardCharsets.UTF_8);
+        assertThat(src).contains("type=\"app.pathwise.web.content.SafeHtml\"");
+        assertThat(src.split("\\$\\{", -1)).hasSize(2); // exactly one expression
+        assertThat(src).contains("${value.html}");
+    }
+
     @Test
     void noUnescapedExpressions() throws IOException {
         List<String> violations = new ArrayList<>();
         for (Path p : views()) {
+            if (p.normalize().equals(SAFE_HTML_TAG.normalize())) {
+                continue;
+            }
             String src = Files.readString(p, StandardCharsets.UTF_8);
             src = COMMENT.matcher(src).replaceAll("");
             src = DIRECTIVE.matcher(src).replaceAll("");

@@ -1,0 +1,90 @@
+key: stacks-and-queues
+topic: stacks-queues
+title: "Stacks and queues: LIFO and FIFO"
+summary: Two simple rules for which item comes out next, and the many problems they solve.
+objectives:
+  - Use push, pop and peek on a stack
+  - Use enqueue and dequeue on a queue
+  - Choose LIFO or FIFO for a given problem
+estMinutes: 14
+difficulty: 1
+skills: [stack-ops, queue-ops, lifo-fifo, stack-applications]
+sections:
+  - kind: overview
+    title: Who goes next?
+    markdown: |
+      Both structures hold a collection and answer one question: **which item comes out next?**
+
+      - A **stack** is **LIFO**: *last in, first out*. Think of a stack of plates, where you take
+        the one you put on most recently.
+      - A **queue** is **FIFO**: *first in, first out*. Think of a ticket line, where whoever has
+        waited longest goes next.
+
+      Every operation on either structure is **O(1)**.
+
+  - kind: visual
+    title: A stack in action
+    alt: "A stack receives push 3, push 8, push 5, pop (removes 5), peek (sees 8), push 1, pop (removes 1). It ends with 3 at the bottom and 8 on top."
+    markdown: Step through and predict each result before you see it.
+    visual:
+      type: stack-queue
+      mode: stack
+      ops: [push 3, push 8, push 5, pop, peek, push 1, pop]
+
+  - kind: visual
+    title: A queue in action
+    alt: "A queue receives enqueue 3, enqueue 8, enqueue 5, dequeue (removes 3), enqueue 1, dequeue (removes 8). It ends with 5 at the front and 1 at the back."
+    visual:
+      type: stack-queue
+      mode: queue
+      ops: [enqueue 3, enqueue 8, enqueue 5, dequeue, enqueue 1, dequeue]
+
+  - kind: explanation
+    title: In Java, and where they're used
+    markdown: |
+      ```java
+      Deque<Integer> stack = new ArrayDeque<>();
+      stack.push(3); stack.push(8);
+      int top = stack.pop();        // 8
+
+      Queue<Integer> queue = new ArrayDeque<>();
+      queue.add(3); queue.add(8);
+      int first = queue.remove();   // 3
+      ```
+
+      | Stack (LIFO) | Queue (FIFO) |
+      |---|---|
+      | Undo history | Printer jobs, task scheduling |
+      | Matching brackets `( [ { } ] )` | Breadth-first search |
+      | The **call stack** behind recursion | Level-order tree traversal |
+      | Depth-first search | Buffers between a producer and a consumer |
+
+      Popping from an **empty** stack or queue is an error called **underflow**. Check `isEmpty()`
+      first.
+
+  - kind: flashcards
+    title: Quick recall
+    cards:
+      - front: Stack order
+        back: "**LIFO**: last in, first out."
+        skill: lifo-fifo
+      - front: Queue order
+        back: "**FIFO**: first in, first out."
+        skill: lifo-fifo
+      - front: "After push 1, push 2, push 3, pop: what's on top?"
+        back: "**2**"
+        skill: stack-ops
+      - front: "After enqueue 1, enqueue 2, enqueue 3, dequeue: what's at the front?"
+        back: "**2**"
+        skill: queue-ops
+      - front: Which structure checks balanced brackets?
+        back: A **stack**. Push each opener, and pop when its matching closer appears.
+        skill: stack-applications
+
+  - kind: summary
+    title: Summary
+    markdown: |
+      - A stack is LIFO (push, pop, peek). A queue is FIFO (enqueue, dequeue). Every operation is O(1).
+      - Stacks power undo, bracket matching, recursion and DFS. Queues power scheduling, BFS and level
+        order.
+      - In Java, use `ArrayDeque` for both.

@@ -34,4 +34,11 @@ Manual checks on the same date:
   - the sidebar background stopping at the viewport height
   - raw ISO timestamps
 
+### 2026-10-03: M1 Curriculum & content
+
+Command: `.\mvnw.cmd -q install`. Result: **117 tests, 117 passed, 0 failed**.
+New: GraphsAndLayoutTest, PackValidatorTest (core) · CatalogContentDaoTest (data) · ContentTest (web; validates the real bundled pack) · LearningFlowTest (end to end: import → map → topic → full module completion → events → Today → API → admin).
+
+Manual: `import-content` imported 13 topics / 13 modules / 87 sections into the dev database; headless Edge screenshots of Today, Learn, Map (light/dark, desktop/mobile), Topic, Player (overview, traversal visual, flashcards), BST/BFS/hash/stack visuals. Defects found and fixed: SVG attributes broken by Jasper whitespace trimming (regression test added); left-to-right map overflowed (replaced with top-down layout + waypoints); 0% ring dot; card stretching; singular/plural narration.
+
 Not yet done: accessibility audit with axe-core, Android tests, load tests and the dependency vulnerability scan. All of these are planned (see the blueprint, §35).

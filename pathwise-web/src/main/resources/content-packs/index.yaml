@@ -1,0 +1,3 @@
+# Content packs bundled with Pathwise. Each entry is a folder next to this file.
+packs:
+  - data-structures

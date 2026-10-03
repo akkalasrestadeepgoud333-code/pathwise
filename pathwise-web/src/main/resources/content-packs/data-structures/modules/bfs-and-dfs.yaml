@@ -1,0 +1,99 @@
+key: bfs-and-dfs
+topic: graph-traversal
+title: "BFS and DFS: exploring a graph"
+summary: Breadth-first spreads out level by level with a queue. Depth-first dives deep with a stack.
+objectives:
+  - Run BFS from a start vertex using a queue
+  - Run DFS using a stack or recursion
+  - Use a visited set so cycles don't cause infinite loops
+estMinutes: 20
+difficulty: 3
+skills: [bfs, dfs, visited-set]
+sections:
+  - kind: overview
+    title: Same goal, different order
+    markdown: |
+      Both algorithms visit every vertex **reachable** from a start vertex. They differ in which
+      waiting vertex they explore next:
+
+      - **BFS (breadth-first)** uses a **queue**. It visits everything 1 edge away, then 2 edges away,
+        and so on. On an unweighted graph it finds **shortest paths**.
+      - **DFS (depth-first)** uses a **stack** (or recursion). It follows one path as deep as possible,
+        then backtracks. Use it for cycle detection, topological sorting and maze solving.
+
+      These are exactly level-order and preorder traversal, generalised from trees to graphs.
+
+  - kind: visual
+    title: Run both on the same graph
+    alt: >-
+      A graph with vertices A to F. Edges: A–B, A–C, B–D, C–D, C–E, D–F, E–F. Starting from A, BFS
+      visits A, B, C, D, E, F. DFS with neighbours taken in alphabetical order visits A, B, D, C, E, F.
+    markdown: Neighbours are explored in alphabetical order. Watch how the queue and the stack change the visiting order.
+    visual:
+      type: graph-search
+      nodes: [A, B, C, D, E, F]
+      edges: [[A, B], [A, C], [B, D], [C, D], [C, E], [D, F], [E, F]]
+      start: A
+      positions: { A: [60, 150], B: [160, 60], C: [160, 240], D: [270, 150], E: [270, 270], F: [370, 200] }
+
+  - kind: explanation
+    title: The code
+    markdown: |
+      ```java
+      List<String> bfs(Map<String, List<String>> graph, String start) {
+          List<String> order = new ArrayList<>();
+          Set<String> visited = new HashSet<>(List.of(start));
+          Queue<String> queue = new ArrayDeque<>(List.of(start));
+          while (!queue.isEmpty()) {
+              String v = queue.remove();
+              order.add(v);
+              for (String w : graph.get(v)) {
+                  if (visited.add(w)) queue.add(w);   // mark when enqueued
+              }
+          }
+          return order;
+      }
+
+      void dfs(Map<String, List<String>> graph, String v, Set<String> visited, List<String> order) {
+          if (!visited.add(v)) return;     // already seen: stop (this is what handles cycles)
+          order.add(v);
+          for (String w : graph.get(v)) dfs(graph, w, visited, order);
+      }
+      ```
+
+      Without the **visited** set, the cycle A–B–D–C–A would loop forever. Each vertex and each edge is
+      handled once, so both algorithms run in **O(V + E)** with adjacency lists.
+
+  - kind: flashcards
+    title: Quick recall
+    cards:
+      - front: Data structure behind BFS
+        back: A **queue** (FIFO).
+        skill: bfs
+      - front: Data structure behind DFS
+        back: A **stack**, either explicit or the call stack in recursion.
+        skill: dfs
+      - front: Why keep a visited set?
+        back: Graphs can have **cycles**. Without it you'd revisit vertices forever.
+        skill: visited-set
+      - front: Which finds shortest paths in an unweighted graph?
+        back: "**BFS.**"
+        skill: bfs
+      - front: Running time with adjacency lists
+        back: "**O(V + E)** for both."
+        skill: dfs
+
+  - kind: summary
+    title: Summary
+    markdown: |
+      - BFS uses a queue and goes level by level. It finds shortest paths when edges are unweighted.
+      - DFS uses a stack or recursion and goes deep first. Use it for cycles, topological order and
+        backtracking.
+      - Always track **visited** vertices. Both run in O(V + E).
+
+  - kind: resources
+    title: Go further
+    required: false
+    links:
+      - title: "VisuAlgo: graph traversal (DFS/BFS)"
+        url: https://visualgo.net/en/dfsbfs

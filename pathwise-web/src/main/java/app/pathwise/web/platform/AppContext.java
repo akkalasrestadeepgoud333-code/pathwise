@@ -4,6 +4,11 @@ import app.pathwise.core.identity.PasswordHasher;
 import app.pathwise.core.security.RateLimiter;
 import app.pathwise.data.Database;
 import app.pathwise.web.admin.AdminService;
+import app.pathwise.web.catalog.CatalogService;
+import app.pathwise.web.content.ContentPackLoader;
+import app.pathwise.web.content.ContentPackService;
+import app.pathwise.web.content.ContentService;
+import app.pathwise.web.learn.LearnService;
 import app.pathwise.web.identity.IdentityService;
 import app.pathwise.web.platform.events.EventBus;
 import app.pathwise.web.platform.events.OutboxWorker;
@@ -25,6 +30,10 @@ public final class AppContext {
     private final OutboxWorker outboxWorker;
     private final IdentityService identity;
     private final AdminService admin;
+    private final CatalogService catalog;
+    private final ContentService content;
+    private final ContentPackService contentPacks;
+    private final LearnService learn;
     private final RateLimiter loginLimiter;
     private final RateLimiter registerLimiter;
 
@@ -39,6 +48,10 @@ public final class AppContext {
                 : new PasswordHasher();
         this.identity = new IdentityService(database.tx(), hasher, events, clock, config.webSessionTtl(), config.bearerSessionTtl());
         this.admin = new AdminService(database.tx());
+        this.catalog = new CatalogService(database.tx());
+        this.content = new ContentService(database.tx(), events, clock);
+        this.contentPacks = new ContentPackService(database.tx(), new ContentPackLoader(AppContext.class.getClassLoader()), events, clock);
+        this.learn = new LearnService(catalog, content);
         this.loginLimiter = new RateLimiter(config.loginAttemptsPerMinute(), 60_000, clock);      // per IP + email
         this.registerLimiter = new RateLimiter(config.registrationsPerHour(), 3_600_000, clock);  // per IP
     }
@@ -58,6 +71,10 @@ public final class AppContext {
     public OutboxWorker outboxWorker() { return outboxWorker; }
     public IdentityService identity() { return identity; }
     public AdminService admin() { return admin; }
+    public CatalogService catalog() { return catalog; }
+    public ContentService content() { return content; }
+    public ContentPackService contentPacks() { return contentPacks; }
+    public LearnService learn() { return learn; }
     public RateLimiter loginLimiter() { return loginLimiter; }
     public RateLimiter registerLimiter() { return registerLimiter; }
 }

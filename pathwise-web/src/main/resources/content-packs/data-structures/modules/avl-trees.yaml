@@ -1,0 +1,92 @@
+key: avl-trees
+topic: balanced-trees
+title: "AVL trees: staying balanced with rotations"
+summary: An optional deep dive. How a BST keeps its height near log n by rotating after every change.
+objectives:
+  - Compute the balance factor of a node
+  - Recognise the four imbalance cases
+  - Apply single and double rotations
+estMinutes: 20
+difficulty: 4
+skills: [balance-factor, rotations]
+sections:
+  - kind: overview
+    title: Fixing the degenerate BST
+    markdown: |
+      A plain BST becomes a chain if you insert values in sorted order. An **AVL tree** (named after
+      Adelson-Velsky and Landis, 1962) prevents that. After every insert or delete, it checks each
+      node on the path back to the root and **rotates** wherever the tree has become lopsided.
+
+      The rule: for every node, the heights of its left and right subtrees differ by **at most 1**.
+
+  - kind: explanation
+    title: Balance factor
+    markdown: |
+      **balance factor = height(left subtree) − height(right subtree)**, where the height of an empty
+      subtree counts as −1.
+
+      - −1, 0 or +1: fine
+      - +2: too heavy on the **left**
+      - −2: too heavy on the **right**
+
+      The guarantee keeps the height below about **1.44 log₂ n**, so search, insert and delete are all
+      **O(log n)**, always.
+
+  - kind: explanation
+    title: The four cases and their rotations
+    markdown: |
+      Let **z** be the lowest unbalanced node. Look at which grandchild the extra height came through:
+
+      | Case | Shape | Fix |
+      |---|---|---|
+      | Left-Left | heavy left child, heavy on *its* left | **right rotation** at z |
+      | Right-Right | mirror image | **left rotation** at z |
+      | Left-Right | heavy left child, heavy on *its* right | left rotation at the child, then right rotation at z |
+      | Right-Left | mirror image | right rotation at the child, then left rotation at z |
+
+      Right rotation at `z` (Left-Left case):
+
+      ```
+            z                y
+           /               /   \
+          y       →       x     z
+         /
+        x
+      ```
+
+      A rotation changes only a few pointers, so it costs **O(1)**, and it keeps the BST order intact.
+
+  - kind: example
+    title: "Inserting 10, 20, 30"
+    markdown: |
+      After inserting `10` then `20` (to the right), the tree leans right but is still legal. Inserting
+      `30` makes node 10's balance factor −2 (Right-Right case). A single **left rotation** at 10 makes
+      20 the root, with children 10 and 30. The height drops from 2 to 1.
+
+  - kind: flashcards
+    title: Quick recall
+    cards:
+      - front: AVL balance rule
+        back: For every node, the left and right subtree heights differ by **at most 1**.
+        skill: balance-factor
+      - front: Fix for the Left-Right case
+        back: Left-rotate the left child, then right-rotate the unbalanced node.
+        skill: rotations
+      - front: Cost of one rotation
+        back: "**O(1)**. A few pointer changes."
+        skill: rotations
+
+  - kind: summary
+    title: Summary
+    markdown: |
+      - AVL trees keep every balance factor in {−1, 0, +1}.
+      - There are four imbalance cases. Single rotations fix LL and RR; double rotations fix LR and RL.
+      - The height stays O(log n), so every operation is O(log n) in the worst case.
+
+  - kind: resources
+    title: Go further
+    required: false
+    links:
+      - title: "AVL tree (Wikipedia)"
+        url: https://en.wikipedia.org/wiki/AVL_tree
+        licence: CC BY-SA

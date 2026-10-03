@@ -60,7 +60,7 @@ class WebAuthFlowTest {
 
         HttpResponse<String> today = b.get("/app/today");
         assertThat(today.statusCode()).isEqualTo(200);
-        assertThat(today.body()).contains("Asha.").contains("Welcome to Pathwise, Asha.").contains("No subjects yet");
+        assertThat(today.body()).contains("Asha.").contains("Welcome to Pathwise, Asha.").contains("Explore on your own");
         assertThat(today.body()).doesNotContain("href=\"/teach\"").doesNotContain("href=\"/admin\"");
     }
 

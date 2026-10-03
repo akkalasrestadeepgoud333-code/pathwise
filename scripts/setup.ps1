@@ -7,7 +7,7 @@
   2. Builds every module with the Maven Wrapper (Maven itself is downloaded automatically, free).
      The first build also downloads the embedded PostgreSQL binaries (~30 MB) from Maven Central.
   3. Creates config\pathwise.local.properties with a random secret (only if missing).
-  4. Starts the embedded database once and applies all migrations.
+  4. Starts the embedded database once, applies all migrations and imports the bundled content packs.
   5. Optionally creates demo accounts (-Demo), with random passwords written to config\demo-accounts.txt.
 
 .EXAMPLE
@@ -58,6 +58,10 @@ $jar = Join-Path $root 'pathwise-app\target\pathwise-app.jar'
 Step 'Preparing configuration and database'
 & java -jar $jar migrate
 if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+
+Step 'Importing bundled learning content'
+& java -jar $jar import-content
+if ($LASTEXITCODE -ne 0) { Write-Host 'Content import reported problems (see above).' -ForegroundColor Yellow }
 
 if ($Demo) {
     Step 'Creating demo accounts'

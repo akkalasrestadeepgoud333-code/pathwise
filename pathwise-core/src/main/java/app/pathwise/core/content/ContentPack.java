@@ -1,0 +1,100 @@
+package app.pathwise.core.content;
+
+import java.util.List;
+import java.util.Map;
+
+/**
+ * A versioned bundle of curriculum and learning content, authored as YAML and imported idempotently.
+ * Keys (not database ids) identify everything, so re-importing an edited pack updates rows in place.
+ */
+public record ContentPack(
+        String key,
+        int version,
+        Catalog catalog,
+        List<TopicDef> topics,
+        List<ModuleDef> modules) {
+
+    public record NodeDef(String key, String title, String description) {}
+
+    public record Catalog(NodeDef level, NodeDef program, NodeDef course, NodeDef subject) {}
+
+    public record SkillDef(String key, String title, String description, Boolean core) {
+        public boolean isCore() {
+            return core == null || core;
+        }
+    }
+
+    public record PrereqDef(String topic, String strength) {
+        public String strengthOrDefault() {
+            return strength == null ? "required" : strength;
+        }
+    }
+
+    public record TopicDef(
+            String key,
+            String title,
+            String summary,
+            String parent,
+            Boolean optional,
+            Boolean advanced,
+            List<SkillDef> skills,
+            List<PrereqDef> prerequisites) {
+
+        public List<SkillDef> skillsOrEmpty() {
+            return skills == null ? List.of() : skills;
+        }
+
+        public List<PrereqDef> prerequisitesOrEmpty() {
+            return prerequisites == null ? List.of() : prerequisites;
+        }
+    }
+
+    public record CardDef(String front, String back, String skill) {}
+
+    public record LinkDef(String title, String url, String kind, String licence) {}
+
+    /**
+     * One section. Which fields apply depends on {@code kind}:
+     * text kinds use {@code markdown}; {@code visual} uses {@code visual}+{@code alt};
+     * {@code flashcards} uses {@code cards}; {@code resources} uses {@code links}.
+     */
+    public record SectionDef(
+            String key,
+            String kind,
+            String title,
+            Boolean required,
+            String markdown,
+            Map<String, Object> visual,
+            String alt,
+            List<CardDef> cards,
+            List<LinkDef> links) {
+
+        public boolean isRequired() {
+            return required == null || required;
+        }
+    }
+
+    public record ModuleDef(
+            String key,
+            String topic,
+            String title,
+            String summary,
+            List<String> objectives,
+            Integer estMinutes,
+            Integer difficulty,
+            List<String> skills,
+            List<SectionDef> sections) {
+
+        public List<String> objectivesOrEmpty() {
+            return objectives == null ? List.of() : objectives;
+        }
+
+        public List<String> skillsOrEmpty() {
+            return skills == null ? List.of() : skills;
+        }
+
+        public List<SectionDef> sectionsOrEmpty() {
+            return sections == null ? List.of() : sections;
+        }
+    }
+}

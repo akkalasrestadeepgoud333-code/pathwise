@@ -6,7 +6,7 @@ Statuses follow blueprint §44:
 - **PROPOSED:** designed, not built.
 - **FUTURE:** intentionally out of scope for v1.
 
-Last updated: **2026-10-03** (end of M0, Foundations).
+Last updated: **2026-10-03** (end of M1, Curriculum & content).
 
 ## Implemented (M0)
 
@@ -33,18 +33,36 @@ Last updated: **2026-10-03** (end of M0, Foundations).
 | Pages: landing, sign-in, sign-up, Today (empty state), Teaching (empty state), Admin, Settings, error | `WEB-INF/views/*` | `WebAuthFlowTest`, manual review |
 | Module boundaries enforced by tests | `ArchitectureTest` | `ArchitectureTest` |
 
+## Implemented (M1)
+
+| Feature | Where | Evidence |
+|---|---|---|
+| Catalogue: level → program → course → subject → topic (nested) → skill; parent kinds enforced by a DB trigger | `V002` migration, `CatalogDao` | `CatalogContentDaoTest` |
+| Prerequisite DAG with cycle detection (validated before every import) | `Graphs`, `PackValidator` | `GraphsAndLayoutTest`, `PackValidatorTest` |
+| Content packs (versioned YAML): validated, imported in one transaction, idempotent by checksum, progress-preserving re-import | `ContentPackService`, `content-packs/` | `ContentTest`, `LearningFlowTest`, `CatalogContentDaoTest` |
+| Data Structures pack: 13 topics, 51 skills, 13 modules, 87 sections; the Trees path is polished | `content-packs/data-structures` | `ContentTest` (validity + coverage) |
+| Learning Map: server-computed top-down layered layout (waypoints for long edges, crossing reduction, spread ports), SVG graph + accessible trail/list view; auto graph on desktop, trail on phones | `MapLayout`, `learn/map.jsp` | `GraphsAndLayoutTest`, `LearningFlowTest`, screenshots |
+| Topic page: skills, needed/helpful prerequisites, what it leads to, modules with state | `/app/topics/*` | `LearningFlowTest` |
+| Module player: outline, resume, sections (text, worked example, visual, flashcards, summary, resources), "done & continue", completion banner | `/app/modules/*` | `LearningFlowTest` |
+| Safe Markdown (escape + allow-list sanitiser), single audited raw-HTML tag | `Markdown`, `pw:html` | `ContentTest`, `JspSafetyTest` |
+| Interactive visuals: tree, traversal (4 orders), BST insertion, array, linked list, stack/queue, BFS/DFS, hash table | `static/js/visuals` | manual run, no console errors (2026-10-03) |
+| Coverage progress (labelled "Studied", explicitly not mastery); `content.module_completed` event emitted exactly once | `ProgressDao`, `ContentService` | `CatalogContentDaoTest`, `LearningFlowTest` |
+| Today: continue card, or a coverage-based suggested next step with a stated reason | `LearnService.today` | `LearningFlowTest` |
+| Admin › Content: pack status, validation problems, import/re-import | `/admin/content`, CLI `import-content` | `LearningFlowTest` |
+| Learning JSON API for the Android app: subjects, map, topic, module, complete section | `/api/v1/subjects*`, `/api/v1/modules/*` | `LearningFlowTest` |
+
 ## Partially implemented
 
 | Feature | Works | Missing |
 |---|---|---|
 | Learner profile | stored per user; the theme preference is used | timezone editing, goals and modalities UI (M2) |
-| Today page | greeting, account card, honest empty state | recommendations, progress and map (M1–M2) |
+| Next-step suggestion | coverage-based rule with a reason | evidence-based engine with mastery (M2) |
 | Teacher area | access control, empty state | rooms (M5) |
 | Security tooling | headers, CSRF, rate limits, audit | OWASP Dependency-Check run (planned for M11) |
 
 ## Proposed (designed in the blueprint, not built)
 
-Catalogue and topic graph (M1) · content packs and module player (M1) · Learning Map (M1) · evidence pipeline, learner model and recommendation engine (M2) · assessments (M3) · games framework and games (M4) · rooms, assignments and teacher analytics (M5) · doubts, community, moderation and knowledge base (M6) · XP, streaks, badges and notifications (M7) · AI tutor with Guided Help fallback (M8) · Android app (M9) · projects, live doubt sessions and full admin console (M10).
+Practice and check questions (M2/M3) · evidence pipeline, learner model and recommendation engine (M2) · assessments (M3) · games framework and games (M4) · rooms, assignments and teacher analytics (M5) · doubts, community, moderation and knowledge base (M6) · XP, streaks, badges and notifications (M7) · AI tutor with Guided Help fallback (M8) · Android app (M9) · projects, live doubt sessions and full admin console (M10).
 
 ## Future (out of scope for v1)
 
@@ -56,4 +74,7 @@ Knowledge tracing / ML models · embeddings-based retrieval · server-side code 
 - **Background jobs** are scheduled in-process (`AppBootstrap`). The durable `jobs` table will be added in M5, when deadline reminders need it.
 - **Theme preference** is stored on `learner_profiles.theme`.
 - **View models:** JSP EL in Tomcat 10.1 cannot read Java record accessors, so controllers pass records to views as read-only maps (`ViewModels`).
+- **Learning Map** uses a server-rendered SVG layout (`MapLayout`) instead of Cytoscape.js: no 400 KB library, works without JavaScript, testable.
+- **Section payloads** are validated by typed Java records + `PackValidator` instead of JSON Schema files.
+- **Flashcards** use native `<details>` (accessible, works without JS); self-rating evidence arrives with M2.
 - **Admin statistics** use a read-only reporting DAO (`PlatformStatsDao`) that aggregates across modules. Writes still go only through each module's own DAO.

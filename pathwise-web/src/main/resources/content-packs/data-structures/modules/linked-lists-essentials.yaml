@@ -1,0 +1,101 @@
+key: linked-lists-essentials
+topic: linked-lists
+title: "Linked lists: nodes and pointers"
+summary: Chains of nodes that are cheap to splice and slow to index. The opposite trade-off to arrays.
+objectives:
+  - Describe a node and how nodes link together
+  - Traverse a linked list from head to null
+  - Insert and delete nodes by redirecting pointers
+  - Decide when a linked list beats an array
+estMinutes: 14
+difficulty: 2
+skills: [ll-structure, ll-traversal, ll-insert-delete, ll-vs-array]
+sections:
+  - kind: overview
+    title: A chain instead of a block
+    markdown: |
+      A **linked list** stores each element in its own **node**. A node holds a value and a reference
+      (pointer) to the **next** node. The list remembers only its first node, the **head**. The last
+      node points to `null`.
+
+      Because nodes can sit anywhere in memory, you never shift anything. You just change which node
+      points where.
+
+  - kind: visual
+    title: Following the links
+    alt: "A singly linked list: head points to 12, which points to 7, then 31, then 4, and 4 points to null."
+    visual:
+      type: linked-list
+      values: [12, 7, 31, 4]
+      caption: "To reach 31 you must start at the head and follow two links. There's no jumping to an index."
+
+  - kind: explanation
+    title: Traversal and insertion
+    markdown: |
+      ```java
+      class Node {
+          int value;
+          Node next;
+          Node(int value, Node next) { this.value = value; this.next = next; }
+      }
+
+      // Traverse: start at head, follow next until null — O(n)
+      for (Node n = head; n != null; n = n.next) {
+          System.out.println(n.value);
+      }
+
+      // Insert at the front — O(1): no shifting, just one new link
+      head = new Node(99, head);
+
+      // Insert after node p — O(1) once you have p
+      p.next = new Node(5, p.next);
+
+      // Delete the node after p — O(1)
+      p.next = p.next.next;
+      ```
+
+      **Order matters** when you redirect pointers. In "insert after p", the new node must copy
+      `p.next` *before* `p.next` is overwritten. Otherwise the rest of the list is lost.
+
+  - kind: explanation
+    title: List or array?
+    markdown: |
+      | Need | Better choice | Why |
+      |---|---|---|
+      | Jump to the *i*-th element often | Array | O(1) vs O(n) |
+      | Insert or delete at the front often | Linked list | O(1) vs O(n) |
+      | Insert in the middle (position already known) | Linked list | Pointer swap, no shifting |
+      | Memory-friendly scanning | Array | Elements sit next to each other, which suits the CPU cache |
+
+      **Doubly linked lists** add a `prev` pointer, so you can walk backwards and delete a node in
+      O(1) when you hold a reference to it. Java's `LinkedList` is doubly linked.
+
+  - kind: flashcards
+    title: Quick recall
+    cards:
+      - front: What does a singly linked list node contain?
+        back: A **value** and a reference to the **next** node.
+        skill: ll-structure
+      - front: Cost of reading the *i*-th element of a linked list
+        back: "**O(n)**: you must follow i links from the head."
+        skill: ll-vs-array
+      - front: Insert a new value at the front
+        back: "`head = new Node(value, head);` takes **O(1)**."
+        skill: ll-insert-delete
+      - front: How do you know you've reached the end?
+        back: The current node's `next` is **null**.
+        skill: ll-traversal
+
+  - kind: summary
+    title: Summary
+    markdown: |
+      - Nodes hold a value and a `next` pointer. The list keeps the **head**, and the end points to `null`.
+      - Traversal and indexing are O(n). Front insertion and splicing are O(1).
+      - Redirect pointers in a safe order so you never lose the rest of the list.
+
+  - kind: resources
+    title: Go further
+    required: false
+    links:
+      - title: "VisuAlgo: linked list (interactive)"
+        url: https://visualgo.net/en/list

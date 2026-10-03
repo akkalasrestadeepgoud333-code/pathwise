@@ -1,0 +1,186 @@
+# Data Structures content pack.
+# Keys are stable identifiers: renaming a key creates a new topic/skill/module. Change titles freely.
+key: data-structures
+version: 1
+title: Data Structures
+
+catalog:
+  level: { key: undergraduate, title: Undergraduate }
+  program: { key: btech-cse, title: "B.Tech Computer Science & Engineering" }
+  course: { key: cse-core, title: Core Computer Science }
+  subject:
+    key: data-structures
+    title: Data Structures
+    description: >-
+      How programs organise data so they can find, change and process it quickly: arrays, lists,
+      stacks, queues, trees, heaps, graphs and hash tables.
+
+topics:
+  - key: arrays
+    title: Arrays
+    summary: A row of same-sized slots in memory, reached instantly by index. Most other structures start here.
+    skills:
+      - { key: array-indexing, title: Access elements by index, description: Use zero-based indices and spot out-of-bounds access. }
+      - { key: array-traversal, title: Traverse an array, description: Visit every element with a loop. }
+      - { key: array-insert-delete, title: Insert and delete by shifting, description: Explain why inserting in the middle costs O(n). }
+      - { key: array-complexity, title: Reason about array costs, description: "Compare O(1) access with O(n) search and shifting." }
+
+  - key: linked-lists
+    title: Linked Lists
+    summary: Nodes that point to the next node, so the list can grow and shrink without shifting anything.
+    skills:
+      - { key: ll-structure, title: Describe nodes and pointers }
+      - { key: ll-traversal, title: Traverse a linked list }
+      - { key: ll-insert-delete, title: Insert and delete nodes }
+      - { key: ll-vs-array, title: Choose between a list and an array }
+    prerequisites:
+      - { topic: arrays }
+
+  - key: stacks-queues
+    title: Stacks and Queues
+    summary: Two disciplined ways to hold items. A stack serves the newest item first; a queue serves the oldest.
+    skills:
+      - { key: stack-ops, title: "Use push, pop and peek" }
+      - { key: queue-ops, title: Use enqueue and dequeue }
+      - { key: lifo-fifo, title: Choose LIFO or FIFO for a problem }
+      - { key: stack-applications, title: Recognise stack and queue applications }
+    prerequisites:
+      - { topic: arrays }
+      - { topic: linked-lists, strength: recommended }
+
+  - key: recursion
+    title: Recursion
+    summary: Solving a problem by solving smaller copies of itself, and the call stack that makes it work.
+    skills:
+      - { key: base-case, title: Write a correct base case }
+      - { key: recursive-case, title: Reduce a problem to a smaller one }
+      - { key: call-stack, title: Trace the call stack }
+      - { key: recursion-vs-iteration, title: Convert between recursion and loops }
+    prerequisites:
+      - { topic: stacks-queues, strength: recommended }
+
+  - key: trees
+    title: Trees
+    summary: Hierarchical data with one root and no cycles, like folders on a disk or an organisation chart.
+    skills:
+      - { key: tree-terms, title: "Use root, parent, child, leaf and subtree correctly" }
+      - { key: tree-measures, title: "Measure depth, height and level" }
+      - { key: tree-uses, title: Recognise hierarchical data }
+    prerequisites:
+      - { topic: recursion }
+      - { topic: linked-lists }
+
+  - key: binary-trees
+    title: Binary Trees
+    parent: trees
+    summary: Trees where every node has at most two children, called left and right.
+    skills:
+      - { key: binary-tree-structure, title: Describe left and right children }
+      - { key: binary-tree-kinds, title: "Tell full, complete and perfect trees apart" }
+      - { key: binary-tree-representation, title: Store a binary tree with links or in an array }
+    prerequisites:
+      - { topic: trees }
+
+  - key: tree-traversals
+    title: Tree Traversals
+    parent: trees
+    summary: "Four standard ways to visit every node: preorder, inorder, postorder and level order."
+    skills:
+      - { key: preorder, title: Perform a preorder traversal, description: "Node, then left subtree, then right subtree." }
+      - { key: inorder, title: Perform an inorder traversal, description: "Left subtree, then node, then right subtree." }
+      - { key: postorder, title: Perform a postorder traversal, description: "Left subtree, then right subtree, then node." }
+      - { key: level-order, title: Perform a level-order traversal, description: Visit level by level using a queue. }
+    prerequisites:
+      - { topic: binary-trees }
+      - { topic: recursion }
+      - { topic: stacks-queues, strength: recommended }
+
+  - key: bst
+    title: Binary Search Trees
+    parent: trees
+    summary: Binary trees kept in order, so you can find, add and remove values by halving the search each step.
+    skills:
+      - { key: bst-property, title: State and check the BST property }
+      - { key: bst-search, title: Search for a value }
+      - { key: bst-insert, title: Insert a value }
+      - { key: bst-delete, title: Delete a value (all three cases) }
+      - { key: bst-complexity, title: Explain why shape decides speed }
+    prerequisites:
+      - { topic: tree-traversals }
+
+  - key: heaps
+    title: Heaps
+    parent: trees
+    summary: Complete binary trees where every parent beats its children. Ideal for "give me the smallest next".
+    skills:
+      - { key: heap-property, title: State the min-heap and max-heap property }
+      - { key: heap-array-index, title: Find parent and children by array index }
+      - { key: heap-insert, title: Insert with sift-up }
+      - { key: heap-extract, title: Remove the root with sift-down }
+    prerequisites:
+      - { topic: binary-trees }
+      - { topic: arrays }
+
+  - key: balanced-trees
+    title: Balanced Trees (AVL)
+    parent: trees
+    advanced: true
+    optional: true
+    summary: Search trees that rotate themselves to stay short, guaranteeing O(log n) operations.
+    skills:
+      - { key: balance-factor, title: Compute balance factors }
+      - { key: rotations, title: Fix imbalance with rotations }
+    prerequisites:
+      - { topic: bst }
+
+  - key: graphs
+    title: Graphs
+    summary: Things and the connections between them, such as cities and roads or people and friendships.
+    skills:
+      - { key: graph-terms, title: "Use vertex, edge, degree, path and cycle correctly" }
+      - { key: adjacency-list, title: Represent a graph with adjacency lists }
+      - { key: adjacency-matrix, title: Represent a graph with an adjacency matrix }
+    prerequisites:
+      - { topic: linked-lists }
+      - { topic: arrays }
+      - { topic: trees, strength: recommended }
+
+  - key: graph-traversal
+    title: BFS and DFS
+    parent: graphs
+    summary: Breadth-first and depth-first search, the two ways to explore everything reachable in a graph.
+    skills:
+      - { key: bfs, title: Run breadth-first search with a queue }
+      - { key: dfs, title: Run depth-first search with a stack or recursion }
+      - { key: visited-set, title: Use a visited set to avoid loops }
+    prerequisites:
+      - { topic: graphs }
+      - { topic: stacks-queues }
+      - { topic: tree-traversals, strength: recommended }
+
+  - key: hashing
+    title: Hashing
+    summary: Turning keys into array positions so lookups take constant time on average.
+    skills:
+      - { key: hash-function, title: Explain what a good hash function does }
+      - { key: collisions-chaining, title: Resolve collisions with chaining }
+      - { key: open-addressing, title: Resolve collisions with open addressing }
+      - { key: load-factor, title: Use the load factor to decide when to resize }
+    prerequisites:
+      - { topic: arrays }
+      - { topic: linked-lists, strength: recommended }
+
+modules:
+  - arrays-essentials.yaml
+  - linked-lists-essentials.yaml
+  - stacks-and-queues.yaml
+  - recursion-essentials.yaml
+  - trees-introduction.yaml
+  - binary-trees-essentials.yaml
+  - tree-traversals.yaml
+  - bst-essentials.yaml
+  - heaps-essentials.yaml
+  - avl-trees.yaml
+  - graphs-essentials.yaml
+  - bfs-and-dfs.yaml
+  - hashing-essentials.yaml

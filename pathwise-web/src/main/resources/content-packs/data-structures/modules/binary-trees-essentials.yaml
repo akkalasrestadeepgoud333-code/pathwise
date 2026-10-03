@@ -1,0 +1,114 @@
+key: binary-trees-essentials
+topic: binary-trees
+title: "Binary trees: structure and shapes"
+summary: At most two children per node. Learn the shapes (full, complete, perfect) and two ways to store them.
+objectives:
+  - Build a binary tree node class with left and right links
+  - Tell full, complete and perfect binary trees apart
+  - Store a complete binary tree in an array and find children by index
+estMinutes: 14
+difficulty: 2
+skills: [binary-tree-structure, binary-tree-kinds, binary-tree-representation]
+sections:
+  - kind: overview
+    title: Two children at most
+    markdown: |
+      A **binary tree** is a tree where every node has **at most two** children, called the **left**
+      child and the **right** child. Left and right are different positions: a node with only a left
+      child is not the same tree as a node with only a right child.
+
+      Binary trees power search trees, heaps, expression trees and Huffman codes, so you'll meet them
+      constantly.
+
+  - kind: explanation
+    title: The node class
+    markdown: |
+      ```java
+      class Node {
+          int value;
+          Node left;    // null when there is no left child
+          Node right;   // null when there is no right child
+
+          Node(int value) { this.value = value; }
+      }
+
+      // Build:      8
+      //            / \
+      //           4   12
+      Node root = new Node(8);
+      root.left = new Node(4);
+      root.right = new Node(12);
+      ```
+
+      This is the **linked representation**. Each node holds its value plus two references, much like
+      a linked list node with two `next` pointers.
+
+  - kind: explanation
+    title: Full, complete and perfect
+    markdown: |
+      These three words are easy to mix up:
+
+      | Shape | Rule | Example (by level) |
+      |---|---|---|
+      | **Full** | Every node has **0 or 2** children, never 1 | 1 / 2 3 / – – 6 7 |
+      | **Complete** | Every level is full except possibly the last, which is filled **from the left** | 1 / 2 3 / 4 5 |
+      | **Perfect** | Every internal node has 2 children **and** all leaves are on the same level | 1 / 2 3 / 4 5 6 7 |
+
+      A perfect tree of height *h* has exactly **2^(h+1) − 1** nodes. With *n* nodes, the shortest
+      possible binary tree has height **⌊log₂ n⌋**. That's why balanced binary trees give O(log n)
+      operations.
+
+  - kind: explanation
+    title: Storing a complete tree in an array
+    markdown: |
+      A **complete** binary tree can live in an array with no pointers at all. Write its nodes in level
+      order, so index 0 is the root. For the node at index `i`:
+
+      - left child → `2i + 1`
+      - right child → `2i + 2`
+      - parent → `(i − 1) / 2` (integer division)
+
+      ```
+      index:  0   1   2   3   4   5   6
+      value: [8,  4, 12,  2,  6, 10, 14]
+      ```
+
+      Node `4` is at index 1. Its children are at indices 3 and 4 (`2` and `6`), and its parent is at
+      index 0 (`8`). **Heaps** use exactly this layout. For trees with gaps it wastes space, so most
+      other binary trees use links.
+
+  - kind: visual
+    title: The same tree, as a picture
+    alt: >-
+      The array [8, 4, 12, 2, 6, 10, 14] drawn as a complete binary tree: root 8, children 4 and 12,
+      grandchildren 2 and 6 under 4, and 10 and 14 under 12.
+    markdown: Compare the picture with the array above. Each level fills the next block of indices, left to right.
+    visual:
+      type: tree
+      tree: [8, 4, 12, 2, 6, 10, 14]
+      caption: "Level 0 is index 0 · level 1 is indices 1–2 · level 2 is indices 3–6"
+
+  - kind: flashcards
+    title: Quick recall
+    cards:
+      - front: Full binary tree
+        back: Every node has **0 or 2** children.
+        skill: binary-tree-kinds
+      - front: Complete binary tree
+        back: All levels full except perhaps the last, which is filled **left to right**.
+        skill: binary-tree-kinds
+      - front: Number of nodes in a perfect binary tree of height *h*
+        back: "**2^(h+1) − 1**"
+        skill: binary-tree-kinds
+      - front: "Array layout: the children of index *i*"
+        back: "Left `2i + 1`, right `2i + 2`; parent `(i − 1) / 2`."
+        skill: binary-tree-representation
+
+  - kind: summary
+    title: Summary
+    markdown: |
+      - Binary tree: at most two children, and left and right are distinct positions.
+      - **Full** means 0 or 2 children. **Complete** means levels filled left to right. **Perfect**
+        means completely filled.
+      - Linked nodes suit any shape. An **array** suits complete trees (`2i+1`, `2i+2`).
+      - Minimum height with *n* nodes is ⌊log₂ n⌋, which is where O(log n) operations come from.

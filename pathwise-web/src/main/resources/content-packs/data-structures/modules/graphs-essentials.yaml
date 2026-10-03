@@ -1,0 +1,83 @@
+key: graphs-essentials
+topic: graphs
+title: "Graphs: vertices, edges and how to store them"
+summary: Model connections of any kind, then choose between adjacency lists and an adjacency matrix.
+objectives:
+  - Use graph vocabulary precisely
+  - Store a graph as adjacency lists and as an adjacency matrix
+  - Pick the representation that suits a sparse or dense graph
+estMinutes: 15
+difficulty: 2
+skills: [graph-terms, adjacency-list, adjacency-matrix]
+sections:
+  - kind: overview
+    title: Things and connections
+    markdown: |
+      A **graph** is a set of **vertices** (nodes) joined by **edges**. Unlike a tree, a graph has no
+      root, can contain **cycles**, and may not be connected at all.
+
+      - **Undirected** edges work both ways (friendship). **Directed** edges have an arrow (following
+        someone, or a one-way street).
+      - **Weighted** edges carry a number (distance, cost, time).
+      - The **degree** of a vertex is the number of edges touching it.
+      - A **path** is a sequence of edges. A **cycle** is a path that returns to its start.
+
+      Every tree is a graph: a connected one with no cycles.
+
+  - kind: explanation
+    title: Two ways to store a graph
+    markdown: |
+      For the undirected graph with edges A–B, A–C, B–D and C–D:
+
+      **Adjacency lists**, where each vertex keeps a list of its neighbours:
+
+      ```
+      A: B, C
+      B: A, D
+      C: A, D
+      D: B, C
+      ```
+
+      **Adjacency matrix**: a V × V grid where cell [u][v] is 1 if there is an edge:
+
+      ```
+          A B C D
+      A [ 0 1 1 0 ]
+      B [ 1 0 0 1 ]
+      C [ 1 0 0 1 ]
+      D [ 0 1 1 0 ]
+      ```
+
+      | | Adjacency lists | Adjacency matrix |
+      |---|---|---|
+      | Memory | O(V + E) | O(V²) |
+      | "Is u–v an edge?" | O(degree of u) | **O(1)** |
+      | List all neighbours of u | **O(degree of u)** | O(V) |
+      | Best for | **sparse** graphs (most real ones) | dense graphs, quick edge tests |
+
+      An undirected graph's matrix is **symmetric**, because u–v and v–u are the same edge.
+
+  - kind: flashcards
+    title: Quick recall
+    cards:
+      - front: Memory used by adjacency lists
+        back: "**O(V + E)**"
+        skill: adjacency-list
+      - front: Memory used by an adjacency matrix
+        back: "**O(V²)**"
+        skill: adjacency-matrix
+      - front: Fastest way to test whether u–v is an edge
+        back: An **adjacency matrix**, in O(1).
+        skill: adjacency-matrix
+      - front: How is a tree different from a general graph?
+        back: A tree is **connected** and has **no cycles** (and n − 1 edges).
+        skill: graph-terms
+
+  - kind: summary
+    title: Summary
+    markdown: |
+      - A graph is vertices plus edges, which can be directed or not, weighted or not, and may contain
+        cycles.
+      - Adjacency lists use O(V + E) memory and suit sparse graphs. A matrix uses O(V²) memory and
+        gives O(1) edge checks.
+      - Next: exploring a graph with **BFS** and **DFS**.

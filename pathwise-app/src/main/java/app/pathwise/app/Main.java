@@ -37,6 +37,7 @@ public final class Main {
                     + Database.flyway(db.dataSource()).info().current().getVersion() + ")."));
             case "create-admin" -> withDatabase(root, db -> createAdmin(db, opts));
             case "seed-demo" -> withDatabase(root, db -> DemoSeed.run(db, root, opts.containsKey("force")));
+            case "import-content" -> withDatabase(root, db -> importContent(db, opts));
             case "doctor" -> System.exit(Doctor.run(root) ? 0 : 1);
             default -> help();
         }
@@ -151,6 +152,31 @@ public final class Main {
         System.out.println("Administrator ready: " + email.trim().toLowerCase());
     }
 
+    private static void importContent(Database db, Map<String, String> opts) {
+        var service = new app.pathwise.web.content.ContentPackService(db.tx(),
+                new app.pathwise.web.content.ContentPackLoader(Main.class.getClassLoader()), new EventBus(), Clock.systemUTC());
+        boolean force = opts.containsKey("force");
+        var results = opts.containsKey("pack")
+                ? java.util.List.of(service.importPack(opts.get("pack"), null, force))
+                : service.importAll(force);
+        boolean failed = false;
+        for (var r : results) {
+            switch (r.outcome()) {
+                case IMPORTED -> System.out.println("  imported  " + r.key() + " (" + r.topics() + " topics, " + r.modules()
+                        + " modules, " + r.sections() + " sections)");
+                case UNCHANGED -> System.out.println("  unchanged " + r.key());
+                case INVALID -> {
+                    failed = true;
+                    System.out.println("  INVALID   " + r.key());
+                    r.errors().forEach(e -> System.out.println("            - " + e));
+                }
+            }
+        }
+        if (failed) {
+            System.exit(1);
+        }
+    }
+
     static Map<String, String> options(String[] args) {
         Map<String, String> out = new LinkedHashMap<>();
         for (int i = 0; i < args.length; i++) {
@@ -172,6 +198,7 @@ public final class Main {
                   migrate        Apply database migrations
                   create-admin   Create or promote an administrator  --email x --name "Name"
                   seed-demo      Create demo accounts (refused in production unless --force)
+                  import-content Import bundled content packs   --pack data-structures  --force
                   doctor         Check this machine's setup
                 """);
         if (!Files.exists(Path.of(LocalConfig.FILE))) {

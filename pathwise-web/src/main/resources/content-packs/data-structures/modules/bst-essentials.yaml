@@ -1,0 +1,142 @@
+key: bst-essentials
+topic: bst
+title: "Binary search trees: search, insert, delete"
+summary: Keep a binary tree in order and every comparison throws away half of what's left, if the tree stays balanced.
+objectives:
+  - State and check the binary search tree property
+  - Search for and insert values by walking a single path
+  - Delete a node in all three cases (leaf, one child, two children)
+  - Explain why a BST can degrade to O(n)
+estMinutes: 22
+difficulty: 3
+skills: [bst-property, bst-search, bst-insert, bst-delete, bst-complexity]
+sections:
+  - kind: overview
+    title: A tree that is also a sorted list
+    markdown: |
+      A **binary search tree (BST)** is a binary tree with one extra rule, the **BST property**:
+
+      > For every node, **all** values in its **left** subtree are smaller, and **all** values in its
+      > **right** subtree are larger.
+
+      The rule says *all*, not just the immediate children. A tree with root 8, left child 4, and 9 as
+      4's right child **breaks** the rule: 9 is in 8's left subtree but is bigger than 8.
+
+      One consequence you already know: an **inorder traversal of a BST visits the values in sorted
+      order**.
+
+  - kind: explanation
+    title: Searching walks a single path
+    markdown: |
+      ```java
+      boolean contains(Node n, int target) {
+          while (n != null) {
+              if (target == n.value) return true;
+              n = (target < n.value) ? n.left : n.right;   // discard the other half
+          }
+          return false;
+      }
+      ```
+
+      Each comparison sends you left or right, and the whole other subtree is never looked at. The
+      work is one root-to-leaf path: **O(h)**, where *h* is the height.
+
+  - kind: visual
+    title: Insert values step by step
+    alt: >-
+      Inserting 50, 30, 70, 20, 40, 60 and 80 into an empty BST. 50 becomes the root. 30 goes left of
+      50, 70 goes right. 20 goes left of 30, 40 right of 30. 60 goes left of 70, 80 right of 70.
+    markdown: |
+      Insertion is a search that fails, followed by placing the new value in the empty spot where the
+      search ended. Step through and say the comparison out loud each time.
+    visual:
+      type: bst-insert
+      values: [50, 30, 70, 20, 40, 60, 80]
+
+  - kind: explanation
+    title: Deleting has three cases
+    markdown: |
+      1. **Leaf**: just remove it.
+      2. **One child**: let the child take the node's place.
+      3. **Two children**: find the node's **inorder successor**, the smallest value in its *right*
+         subtree. Copy that value into the node, then delete the successor (which has at most one
+         child, so case 1 or 2 applies).
+
+      ```
+      Delete 30 (two children):         successor = 40
+
+              50                             50
+             /  \                           /  \
+           30    70          →            40    70
+          /  \                           /
+        20    40                       20
+      ```
+
+      The inorder predecessor (the largest value on the left) works equally well. Pick one and use it
+      consistently.
+
+  - kind: example
+    title: When a BST stops being fast
+    markdown: |
+      Insert `10, 20, 30, 40, 50` in that order. Every value is bigger than the last, so each one goes
+      to the right:
+
+      ```
+      10
+        \
+         20
+           \
+            30
+              \
+               40
+                 \
+                  50
+      ```
+
+      That's a linked list wearing a tree costume. The height is *n − 1*, so search becomes **O(n)**.
+
+      | Tree shape | Height | Search / insert / delete |
+      |---|---|---|
+      | Balanced | ≈ log₂ n | **O(log n)** |
+      | Degenerate (sorted inserts) | n − 1 | **O(n)** |
+
+      **Self-balancing** trees (AVL, red-black) rotate nodes after updates to keep the height
+      logarithmic. You can explore them in the optional *Balanced Trees* topic.
+
+  - kind: flashcards
+    title: Quick recall
+    cards:
+      - front: The BST property
+        back: For every node, **all** of its left subtree is smaller and **all** of its right subtree is larger.
+        skill: bst-property
+      - front: Cost of searching a BST of height *h*
+        back: "**O(h)**: one root-to-leaf path."
+        skill: bst-search
+      - front: Inorder successor of a node with two children
+        back: The **smallest value in its right subtree** (go right once, then left as far as possible).
+        skill: bst-delete
+      - front: What happens if you insert values in sorted order?
+        back: The tree degenerates into a chain, so the height is n − 1 and operations become **O(n)**.
+        skill: bst-complexity
+      - front: Where does a new value get inserted?
+        back: At the empty spot where an unsuccessful **search** for it ends. A new value is always a **leaf**.
+        skill: bst-insert
+
+  - kind: summary
+    title: Summary
+    markdown: |
+      - BST property: left subtree smaller, right subtree larger, **for every node**.
+      - Search and insert walk one path, so they cost **O(h)**. A new value is always inserted as a leaf.
+      - Delete: leaf → remove. One child → splice it in. Two children → replace with the inorder
+        successor.
+      - Balanced trees give O(log n). Sorted inserts can make the tree degenerate to O(n).
+
+  - kind: resources
+    title: Go further
+    required: false
+    links:
+      - title: "VisuAlgo: binary search tree (interactive)"
+        url: https://visualgo.net/en/bst
+      - title: "Binary search tree (Wikipedia)"
+        url: https://en.wikipedia.org/wiki/Binary_search_tree
+        licence: CC BY-SA

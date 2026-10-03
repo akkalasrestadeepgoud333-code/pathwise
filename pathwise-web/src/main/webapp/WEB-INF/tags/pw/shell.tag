@@ -1,23 +1,26 @@
 <%@ tag description="Signed-in app shell: sidebar (desktop), top bar, bottom tabs (mobile), flash message" pageEncoding="UTF-8" trimDirectiveWhitespaces="true" %>
 <%@ attribute name="title" required="true" %>
+<%@ attribute name="script" required="false" %>
 <%@ taglib prefix="c" uri="jakarta.tags.core" %>
 <%@ taglib prefix="pw" tagdir="/WEB-INF/tags/pw" %>
 <c:set var="user" value="${requestScope.currentUser}"/>
 <c:set var="nav" value="${requestScope.nav}"/>
-<pw:document title="${title}">
+<pw:document title="${title}" script="${script}">
 <div class="shell">
   <aside class="sidebar" aria-label="Main navigation">
     <pw:logo href="/app/today"/>
     <nav class="nav" aria-label="Primary">
       <div class="nav-section">Learn</div>
       <a href="<c:url value='/app/today'/>"<c:if test="${nav == 'today'}"> aria-current="page"</c:if>><pw:icon name="compass"/>Today</a>
+      <a href="<c:url value='/app/learn'/>"<c:if test="${nav == 'learn'}"> aria-current="page"</c:if>><pw:icon name="map"/>Learn</a>
       <c:if test="${user.teacher or user.admin}">
         <div class="nav-section">Teach</div>
         <a href="<c:url value='/teach'/>"<c:if test="${nav == 'teach'}"> aria-current="page"</c:if>><pw:icon name="school"/>Teaching</a>
       </c:if>
       <c:if test="${user.admin}">
         <div class="nav-section">Platform</div>
-        <a href="<c:url value='/admin'/>"<c:if test="${nav == 'admin'}"> aria-current="page"</c:if>><pw:icon name="shield"/>Admin</a>
+        <a href="<c:url value='/admin'/>"<c:if test="${nav == 'admin'}"> aria-current="page"</c:if>><pw:icon name="shield"/>Overview</a>
+        <a href="<c:url value='/admin/content'/>"<c:if test="${nav == 'admin-content'}"> aria-current="page"</c:if>><pw:icon name="book-open"/>Content</a>
       </c:if>
       <div class="nav-section">You</div>
       <a href="<c:url value='/app/settings'/>"<c:if test="${nav == 'settings'}"> aria-current="page"</c:if>><pw:icon name="settings"/>Settings</a>
@@ -59,6 +62,7 @@
 
   <nav class="tabbar" aria-label="Primary">
     <a href="<c:url value='/app/today'/>"<c:if test="${nav == 'today'}"> aria-current="page"</c:if>><pw:icon name="compass"/>Today</a>
+    <a href="<c:url value='/app/learn'/>"<c:if test="${nav == 'learn'}"> aria-current="page"</c:if>><pw:icon name="map"/>Learn</a>
     <c:if test="${user.teacher or user.admin}">
       <a href="<c:url value='/teach'/>"<c:if test="${nav == 'teach'}"> aria-current="page"</c:if>><pw:icon name="school"/>Teach</a>
     </c:if>
