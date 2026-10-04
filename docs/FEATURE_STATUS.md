@@ -115,6 +115,21 @@ Last updated: **2026-10-04** (end of M2, Evidence → learner model → engine).
 | To-grade count on the cockpit; missed and upcoming assignment deadlines in the attention list; assignment status (handed in, late, missing, graded, average) in analytics | cockpit, analytics | `AssignmentFlowTest` |
 | Room context in the student's next steps: per room, the next unfinished required item and what's due within a week (on Next steps and Today). This uses curriculum order and deadlines only; it doesn't change the rule-based recommender's scoring | `RoomService.roomNextSteps` | `AssignmentFlowTest` |
 
+## Implemented (M6: doubts, community, moderation, knowledge base)
+
+| Feature | Where | Evidence |
+|---|---|---|
+| Ask your teacher (L1): a private doubt to a room's teachers, with real names; only the author and the room's teachers can open it; unanswered count on the cockpit and a Doubts tab per room | `/app/doubts/ask`, `/teach/rooms/<id>/doubts` | `DoubtRulesTest`, `DoubtFlowTest` |
+| Open doubt network (L3): anonymous by default with a random per-thread alias ("Anonymous asker #4821"), or show your name; search (Postgres full-text) | `/app/doubts` | `DoubtFlowTest` |
+| Anonymity by construction: views and API responses are built from types with no user-id field; a leak scan checks pages, lists and the API for the author's id, name and email | `DoubtService` view records | `DoubtFlowTest` |
+| Answers, helpful votes (not your own), the asker accepts an answer (resolves the doubt and offers practice on its topic), Teacher Verified by room teachers (private) or Verified Educators (public); never on your own answer | thread page | `DoubtFlowTest` |
+| Duplicate deflection: "Check for similar answers" searches resolved doubts and KB articles before posting | ask page | `DoubtFlowTest` |
+| Reports (one per person per item), moderation queue (hide, remove, restore, dismiss) with a required reason, logged to `moderation_actions` and the audit log; identity reveal needs a 10+ character reason and is logged | `/admin/moderation` | `DoubtFlowTest` |
+| Blocking by alias: the blocked person's doubts and answers disappear for you | thread page | `DoubtFlowTest` |
+| Knowledge base: moderators promote a resolved public doubt (or write an article); search; articles link back to the doubt | `/app/kb`, `/admin/moderation/promote/<id>` | `DoubtFlowTest` |
+| Rate limits: 10 new doubts an hour, 30 answers per 10 minutes per person | `DoubtService` | code review (limits are in-process) |
+| Doubts API (list, view, ask, answer) | `/api/v1/doubts*` | `DoubtFlowTest` |
+
 ## Partially implemented
 
 | Feature | Works | Missing |
@@ -126,6 +141,7 @@ Last updated: **2026-10-04** (end of M2, Evidence → learner model → engine).
 | Assessment AI policy | stored and shown to students | enforced when the AI tutor exists (M8). Pathwise cannot control outside tools, and says so |
 | Assessment feedback policies | `immediate` and `manual_release` (score only until released) | the teacher release button and `after_due` (needs due dates from rooms, M5) |
 | Games in recommendations | games appear in the gallery, on Practice, and in Progress through their evidence | the engine does not yet suggest a game in the Explore slot |
+| Community (rest of the blueprint) | see the M6 table | room discussion (L2), live doubt sessions, attaching a question attempt to a doubt, KB links in modules' Common doubts, image uploads, a separate moderator role (moderation is an admin power for now) |
 | Game administration | templates can be disabled in the database (`game_templates.enabled`) | an admin screen for it (M10); the teachers' "Practice and play" panel (M5) |
 | Offline game submissions | the attempt id makes online finishing idempotent | idempotency keys for queued offline logs (M9, Android) |
 | SQL-query questions | — | deferred until a DBMS pack exists; the grader has no SQL type yet |
@@ -133,7 +149,7 @@ Last updated: **2026-10-04** (end of M2, Evidence → learner model → engine).
 
 ## Proposed (designed in the blueprint, not built)
 
-more games: Sequence Sort, True/False Sprint, Query Quest (P1) · rooms, assignments and teacher analytics (M5) · doubts, community, moderation and knowledge base (M6) · XP, streaks, badges and notifications (M7) · AI tutor with Guided Help fallback (M8) · Android app (M9) · projects, live doubt sessions and full admin console (M10).
+more games: Sequence Sort, True/False Sprint, Query Quest (P1) · rooms, assignments and teacher analytics (M5) · XP, streaks, badges and notifications (M7) · AI tutor with Guided Help fallback (M8) · Android app (M9) · projects, live doubt sessions and full admin console (M10).
 
 ## Future (out of scope for v1)
 

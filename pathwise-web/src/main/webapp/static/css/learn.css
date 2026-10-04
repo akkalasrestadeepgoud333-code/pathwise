@@ -564,3 +564,22 @@ fieldset.field { border: 0; padding: 0; margin: 0; display: grid; gap: var(--s-2
 .room-next .card-title { margin: 4px 0; }
 .room-next .meta { margin: 0; font-size: var(--text-sm); color: var(--text-muted); }
 .due-list { margin-top: var(--s-3); }
+/* Doubts */
+.search-row { margin-bottom: var(--s-4); }
+.doubt-list { padding: var(--s-2) var(--s-5); }
+.doubt-title { margin: 4px 0 var(--s-2); font-size: clamp(var(--text-xl), 2.4vw, var(--text-2xl)); }
+.doubt .meta, .answer .meta { color: var(--text-muted); font-size: var(--text-sm); }
+.who { font-weight: 600; }
+.who-anon { color: var(--text-muted); }
+.who-teacher, .who-verified { color: var(--primary); }
+.answer { margin-top: var(--s-3); }
+.answer.is-accepted { border-color: var(--success); }
+.answer.is-moderated { opacity: 0.7; border-style: dashed; }
+.answer-head { display: flex; flex-wrap: wrap; gap: var(--s-2); align-items: center; margin-bottom: var(--s-2); }
+.answer-actions { display: flex; flex-wrap: wrap; gap: var(--s-3); align-items: center; margin-top: var(--s-3); }
+.report summary, .report-inline summary { cursor: pointer; font-size: var(--text-xs); color: var(--text-subtle); }
+.report form, .report-inline form { margin-top: var(--s-2); }
+.resolved-next { display: flex; flex-wrap: wrap; gap: var(--s-3); align-items: center; justify-content: space-between; border-color: var(--success); }
+.resolved-next p { margin: 0; display: flex; gap: var(--s-2); align-items: center; }
+.similar { margin-bottom: var(--s-4); border-color: var(--accent); }
+.report-excerpt { white-space: pre-line; margin: var(--s-2) 0; }

@@ -127,4 +127,18 @@ PersonalisationFlowTest's check that practice is never official now names the al
 
 Manual: headless Edge screenshots of the assignments list, grading, the student's handed-in and graded views (desktop and mobile), and "From your rooms" on Next steps. No console or CSP errors. Defect fixed: a room's next item was listed twice when it was also due soon.
 
+### 2026-10-04: M6 Doubts, community and moderation
+
+Command: `.\mvnw.cmd install`, then the app module re-run after two test fixes. Result: every suite passed. The new tests are DoubtRulesTest (core) and DoubtFlowTest (3 end-to-end tests). Exact totals are in the M7 record below, which ran the whole build again.
+
+DoubtFlowTest covers:
+- the anonymity leak scan across the thread page, list and API, using a cookie-less API client
+- votes, acceptance, and verification by a Verified Educator, but not by the asker
+- private doubts: classmates and strangers get 404, the teacher's room tab and cockpit count, a teacher can't verify their own answer, and private doubts never appear publicly
+- reports, deduplicated; the moderation queue (403 for students); hiding with a required reason, logged
+- identity reveal: refused without a proper reason, then logged
+- blocking by alias, KB promotion, and duplicate deflection finding the new article
+
+Note: this run took 48 minutes. The machine slept or ran out of memory partway (the test JVM used about 10 s of CPU over that time). No test was at fault.
+
 Not yet done: accessibility audit with axe-core, Android tests, load tests and the dependency vulnerability scan. All of these are planned (see the blueprint, §35).

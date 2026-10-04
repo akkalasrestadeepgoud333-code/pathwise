@@ -23,6 +23,15 @@
     </a>
   </c:if>
 
+  <c:if test="${unansweredDoubts > 0}">
+    <a class="card card-interactive room-card to-grade" href="<c:url value='/teach/rooms/${h.id}/doubts'/>">
+      <span class="game-card-icon" aria-hidden="true"><pw:icon name="circle-help"/></span>
+      <div class="grow"><h2 class="card-title"><c:out value="${unansweredDoubts}"/> unanswered doubt<c:if test="${unansweredDoubts != 1}">s</c:if></h2>
+        <p class="meta">Students asked you privately</p></div>
+      <pw:icon name="arrow-right"/>
+    </a>
+  </c:if>
+
   <div class="grid grid-2 section-gap">
     <section class="card" aria-labelledby="pending-title">
       <h2 id="pending-title" class="card-title">Waiting to join</h2>

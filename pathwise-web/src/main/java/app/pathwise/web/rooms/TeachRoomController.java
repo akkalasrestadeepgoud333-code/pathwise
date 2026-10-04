@@ -40,6 +40,7 @@ public class TeachRoomController extends PageServlet {
             switch (section) {
                 case "" -> {
                     req.setAttribute("cockpit", ViewModels.of(app().roomInsights().cockpit(actor, roomId)));
+                    req.setAttribute("unansweredDoubts", app().doubts().unansweredInRoom(roomId));
                     render(req, res, "teacher/room-cockpit");
                 }
                 case "curriculum" -> {
@@ -67,6 +68,11 @@ public class TeachRoomController extends PageServlet {
                     } else {
                         res.sendError(HttpServletResponse.SC_NOT_FOUND);
                     }
+                }
+                case "doubts" -> {
+                    req.setAttribute("doubts", ViewModels.list(app().doubts().roomDoubts(actor, roomId)));
+                    req.setAttribute("header", ViewModels.of(app().rooms().header(actor, roomId)));
+                    render(req, res, "teacher/room-doubts");
                 }
                 case "analytics" -> {
                     req.setAttribute("analytics", ViewModels.of(app().roomInsights().analytics(actor, roomId)));

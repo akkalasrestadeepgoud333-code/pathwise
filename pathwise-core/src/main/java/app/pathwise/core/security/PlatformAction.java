@@ -9,5 +9,6 @@ public enum PlatformAction {
     MANAGE_USERS,
     GRANT_ROLES,
     VIEW_AUDIT_LOG,
+    MODERATE_COMMUNITY,
     MANAGE_OWN_ACCOUNT
 }

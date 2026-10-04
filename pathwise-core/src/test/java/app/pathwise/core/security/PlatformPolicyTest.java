@@ -32,7 +32,8 @@ class PlatformPolicyTest {
                 Arguments.of(USE_ADMIN_AREA, false, false, false, true),
                 Arguments.of(MANAGE_USERS, false, false, false, true),
                 Arguments.of(GRANT_ROLES, false, false, false, true),
-                Arguments.of(VIEW_AUDIT_LOG, false, false, false, true));
+                Arguments.of(VIEW_AUDIT_LOG, false, false, false, true),
+                Arguments.of(MODERATE_COMMUNITY, false, false, false, true));
     }
 
     @ParameterizedTest(name = "{0}")
