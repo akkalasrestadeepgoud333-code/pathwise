@@ -1,0 +1,195 @@
+# Unless stated, questions use the tree with root 8; 8's children 4 and 12; 4's children 2 and 6;
+# 12's children 10 and 14 (array form [8, 4, 12, 2, 6, 10, 14]).
+questions:
+  - key: trav-pre-basic
+    type: short_text
+    skills: [preorder]
+    difficulty: 1
+    stem: "Root 1 has left child 2 and right child 3. Give the **preorder** sequence (comma-separated)."
+    accepted: ["1, 2, 3"]
+  - key: trav-pre-7
+    type: short_text
+    skills: [preorder]
+    difficulty: 2
+    stem: "For the tree `[8, 4, 12, 2, 6, 10, 14]` (root 8; 8 → 4, 12; 4 → 2, 6; 12 → 10, 14), write the **preorder** traversal."
+    accepted: ["8, 4, 2, 6, 12, 10, 14"]
+    hints:
+      - "Node first, then the whole left subtree, then the whole right subtree."
+      - "After 8 comes the preorder of 4's subtree: 4, 2, 6."
+    explanation: "8 [4 2 6] [12 10 14]."
+  - key: trav-pre-first
+    type: single_choice
+    skills: [preorder]
+    difficulty: 2
+    stem: "In any preorder traversal, which node is visited **first**?"
+    options:
+      - text: "The root"
+        correct: true
+        why: "Preorder visits the node before its subtrees, starting at the root."
+      - text: "The leftmost leaf"
+        why: "That's first in inorder (and in postorder)."
+      - text: "The smallest value"
+        why: "Traversal order depends on structure, not values."
+      - text: "The deepest node"
+        why: "Depth doesn't decide preorder."
+  - key: trav-pre-uneven
+    type: short_text
+    skills: [preorder]
+    difficulty: 4
+    stem: |
+      Give the **preorder** traversal:
+
+      ```
+              A
+             / \
+            B   C
+           /     \
+          D       E
+                 /
+                F
+      ```
+    accepted: ["A, B, D, C, E, F"]
+    hints:
+      - "Visit A, then all of B's subtree, then all of C's subtree."
+  - key: trav-in-basic
+    type: short_text
+    skills: [inorder]
+    difficulty: 1
+    stem: "Root 1 has left child 2 and right child 3. Give the **inorder** sequence."
+    accepted: ["2, 1, 3"]
+  - key: trav-in-7
+    type: short_text
+    skills: [inorder]
+    difficulty: 2
+    stem: "For the tree `[8, 4, 12, 2, 6, 10, 14]`, write the **inorder** traversal."
+    accepted: ["2, 4, 6, 8, 10, 12, 14"]
+    hints:
+      - "Left subtree, then node, then right subtree."
+    explanation: "[2 4 6] 8 [10 12 14]: sorted, because this tree is a BST."
+  - key: trav-in-bst
+    type: single_choice
+    skills: [inorder]
+    difficulty: 3
+    stem: "On a binary search tree, an inorder traversal produces:"
+    options:
+      - text: "The values in increasing order"
+        correct: true
+        why: "Left (smaller) values come before the node, right (larger) ones after."
+      - text: "The values in the order they were inserted"
+        why: "Insertion order isn't preserved."
+      - text: "The values level by level"
+        why: "That's level order."
+      - text: "The values in decreasing order"
+        why: "That would be right, node, left."
+  - key: trav-in-uneven
+    type: short_text
+    skills: [inorder]
+    difficulty: 4
+    stem: |
+      Give the **inorder** traversal:
+
+      ```
+              A
+             / \
+            B   C
+           /     \
+          D       E
+                 /
+                F
+      ```
+    accepted: ["D, B, A, C, F, E"]
+    hints:
+      - "C has no left child, so C is visited right after A."
+      - "In E's subtree, F (its left child) comes before E."
+  - key: trav-post-basic
+    type: short_text
+    skills: [postorder]
+    difficulty: 1
+    stem: "Root 1 has left child 2 and right child 3. Give the **postorder** sequence."
+    accepted: ["2, 3, 1"]
+  - key: trav-post-7
+    type: short_text
+    skills: [postorder]
+    difficulty: 2
+    stem: "For the tree `[8, 4, 12, 2, 6, 10, 14]`, write the **postorder** traversal."
+    accepted: ["2, 6, 4, 10, 14, 12, 8"]
+    hints:
+      - "Both subtrees first, node last. The root is always last."
+  - key: trav-post-delete
+    type: single_choice
+    skills: [postorder]
+    difficulty: 3
+    stem: "To free every node of a tree safely (children before their parent), which traversal should you use?"
+    options:
+      - text: "Postorder"
+        correct: true
+        why: "Each node is visited after both of its subtrees."
+      - text: "Preorder"
+        why: "You'd free the parent while still needing its child links."
+      - text: "Inorder"
+        why: "The parent is freed before its right subtree."
+      - text: "Level order"
+        why: "Parents come before children."
+  - key: trav-post-uneven
+    type: short_text
+    skills: [postorder]
+    difficulty: 4
+    stem: |
+      Give the **postorder** traversal:
+
+      ```
+              A
+             / \
+            B   C
+           /     \
+          D       E
+                 /
+                F
+      ```
+    accepted: ["D, B, F, E, C, A"]
+  - key: trav-level-7
+    type: short_text
+    skills: [level-order]
+    difficulty: 2
+    stem: "For the tree `[8, 4, 12, 2, 6, 10, 14]`, write the **level-order** traversal."
+    accepted: ["8, 4, 12, 2, 6, 10, 14"]
+  - key: trav-level-ds
+    type: single_choice
+    skills: [level-order]
+    difficulty: 2
+    stem: "Which data structure does a level-order traversal use?"
+    options:
+      - text: "A queue"
+        correct: true
+        why: "Children join the back, so a whole level is visited before the next."
+      - text: "A stack"
+        why: "A stack gives a depth-first order instead."
+      - text: "A hash table"
+        why: "Order of visiting is what matters, not lookups."
+      - text: "No extra structure"
+        why: "You must remember which nodes are waiting."
+  - key: trav-level-queue
+    type: short_text
+    skills: [level-order]
+    difficulty: 3
+    stem: "Level order on `[8, 4, 12, 2, 6, 10, 14]`: just after visiting 4, what is in the queue, front first?"
+    accepted: ["12, 2, 6"]
+    hints:
+      - "Visiting 8 enqueued 4 and 12. Visiting 4 dequeues 4 and enqueues its children."
+  - key: trav-which-order
+    type: single_choice
+    skills: [preorder, inorder, postorder]
+    difficulty: 4
+    stem: "A traversal of some binary tree printed `D B A C`. Then the order was changed so that every node prints **before** its children, and it printed `A B D C`. Which order was used the first time?"
+    options:
+      - text: "Inorder"
+        correct: true
+        why: "Preorder A B D C means root A, left subtree B–D, right child C. Inorder of that tree is D B A C."
+      - text: "Postorder"
+        why: "Postorder of that tree is D B C A."
+      - text: "Preorder"
+        why: "The second run was preorder, and the outputs differ."
+      - text: "Level order"
+        why: "Level order of that tree is A B C D."
+    hints:
+      - "From the preorder, rebuild the tree: A is the root."

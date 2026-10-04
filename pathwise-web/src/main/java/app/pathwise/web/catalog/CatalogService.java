@@ -34,6 +34,10 @@ public final class CatalogService {
         }
     }
 
+    public List<CatalogDao.SkillRef> skillRefs(java.util.Collection<java.util.UUID> ids) {
+        return ids.isEmpty() ? List.of() : tx.read(c -> dao.skillRefs(c, ids));
+    }
+
     public List<SubjectRow> subjects() {
         return tx.read(dao::publishedSubjects);
     }

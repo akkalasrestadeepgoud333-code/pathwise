@@ -81,6 +81,11 @@ sections:
         back: "**O(log n)** each. Peeking is O(1)."
         skill: heap-insert
 
+  - kind: check
+    title: Check your understanding
+    markdown: Answer these to see how well it has sunk in. Your answers help Pathwise suggest what to do next.
+    questions: [heap-root, heap-parent-index, heap-extract-swap]
+
   - kind: summary
     title: Summary
     markdown: |

@@ -73,6 +73,11 @@ sections:
         back: A tree is **connected** and has **no cycles** (and n − 1 edges).
         skill: graph-terms
 
+  - kind: check
+    title: Check your understanding
+    markdown: Answer these to see how well it has sunk in. Your answers help Pathwise suggest what to do next.
+    questions: [graph-degree, graph-list-memory, graph-matrix-check]
+
   - kind: summary
     title: Summary
     markdown: |

@@ -1,0 +1,235 @@
+questions:
+  - key: graph-degree
+    type: numeric
+    skills: [graph-terms]
+    difficulty: 1
+    stem: "In the undirected graph with edges A–B, A–C, A–D and B–C, what is the degree of A?"
+    answer: 3
+  - key: graph-tree-vs-graph
+    type: single_choice
+    skills: [graph-terms]
+    difficulty: 2
+    stem: "Which statement is true?"
+    options:
+      - text: "Every tree is a graph, but not every graph is a tree"
+        correct: true
+        why: "A tree is a connected graph with no cycles."
+      - text: "Every graph is a tree"
+        why: "Graphs can have cycles or be disconnected."
+      - text: "Trees and graphs are unrelated"
+        why: "Trees are a special case of graphs."
+      - text: "A graph must have a root"
+        why: "Only rooted trees have roots."
+  - key: graph-list-memory
+    type: single_choice
+    skills: [adjacency-list]
+    difficulty: 2
+    stem: "How much memory do adjacency lists use for a graph with V vertices and E edges?"
+    options:
+      - text: "O(V + E)"
+        correct: true
+        why: "One list per vertex, plus one entry per edge end."
+      - text: "O(V²)"
+        why: "That's the adjacency matrix."
+      - text: "O(E²)"
+        why: "Each edge is stored a constant number of times."
+      - text: "O(V)"
+        why: "The edges need storing too."
+  - key: graph-list-neighbours
+    type: short_text
+    skills: [adjacency-list]
+    difficulty: 2
+    stem: "Undirected edges: A–B, A–C, B–D, C–D. Write D's adjacency list, alphabetically."
+    accepted: ["B, C"]
+  - key: graph-matrix-check
+    type: single_choice
+    skills: [adjacency-matrix]
+    difficulty: 2
+    stem: "Which representation answers \"is there an edge between u and v?\" in O(1)?"
+    options:
+      - text: "Adjacency matrix"
+        correct: true
+        why: "Just read cell [u][v]."
+      - text: "Adjacency lists"
+        why: "You must scan u's list: O(degree)."
+      - text: "Both equally"
+        why: "Lists need a scan."
+      - text: "Neither"
+        why: "The matrix does it directly."
+  - key: graph-matrix-symmetric
+    type: single_choice
+    skills: [adjacency-matrix]
+    difficulty: 3
+    stem: "Why is the adjacency matrix of an **undirected** graph symmetric?"
+    options:
+      - text: "Because u–v and v–u are the same edge, so [u][v] = [v][u]"
+        correct: true
+        why: "Each undirected edge is recorded in both cells."
+      - text: "Because the diagonal is always 1"
+        why: "The diagonal is 0 unless there are self-loops."
+      - text: "Because every vertex has the same degree"
+        why: "Degrees can differ; symmetry still holds."
+      - text: "It isn't symmetric"
+        why: "For undirected graphs it always is."
+  - key: bfs-order
+    type: short_text
+    skills: [bfs]
+    difficulty: 2
+    stem: "Edges: A–B, A–C, B–D, C–D, C–E, D–F, E–F. Run BFS from A, taking neighbours alphabetically. Give the visiting order."
+    accepted: ["A, B, C, D, E, F"]
+  - key: bfs-shortest
+    type: single_choice
+    skills: [bfs]
+    difficulty: 3
+    stem: "Which algorithm finds the fewest-edges path from a start vertex in an **unweighted** graph?"
+    options:
+      - text: "BFS"
+        correct: true
+        why: "It reaches every vertex at distance k before any at distance k + 1."
+      - text: "DFS"
+        why: "DFS may take a long detour before finding a short path."
+      - text: "Inorder traversal"
+        why: "That's for binary trees."
+      - text: "Either, always"
+        why: "Only BFS guarantees fewest edges."
+  - key: dfs-order
+    type: short_text
+    skills: [dfs]
+    difficulty: 3
+    stem: "Same graph (A–B, A–C, B–D, C–D, C–E, D–F, E–F). Run recursive DFS from A, neighbours alphabetically. Give the visiting order."
+    accepted: ["A, B, D, C, E, F"]
+    hints:
+      - "From A go to B, from B go to D, from D the first unvisited neighbour is C."
+  - key: dfs-structure
+    type: single_choice
+    skills: [dfs]
+    difficulty: 1
+    stem: "DFS can be implemented with recursion or with an explicit:"
+    options:
+      - text: "Stack"
+        correct: true
+        why: "The call stack does this job in the recursive version."
+      - text: "Queue"
+        why: "A queue gives BFS."
+      - text: "Heap"
+        why: "That's for priority-based searches."
+      - text: "Matrix"
+        why: "A matrix can store the graph but doesn't drive the order."
+  - key: visited-why
+    type: single_choice
+    skills: [visited-set]
+    difficulty: 2
+    stem: "What goes wrong if BFS on a graph with a cycle doesn't track visited vertices?"
+    options:
+      - text: "It can loop forever, revisiting vertices around the cycle"
+        correct: true
+        why: "Vertices keep being re-added to the queue."
+      - text: "Nothing; BFS never revisits"
+        why: "Without a visited set, it does."
+      - text: "It finds longer paths"
+        why: "The real problem is non-termination."
+      - text: "It only fails on trees"
+        why: "Trees have no cycles, so they're the safe case."
+  - key: visited-when
+    type: single_choice
+    skills: [visited-set, bfs]
+    difficulty: 4
+    stem: "In BFS, why is it better to mark a vertex visited when it is **enqueued** rather than when it is dequeued?"
+    options:
+      - text: "It stops the same vertex being enqueued several times"
+        correct: true
+        why: "Two neighbours could both add it before it is dequeued."
+      - text: "It makes BFS use a stack"
+        why: "The structure is still a queue."
+      - text: "It changes the visiting order to DFS"
+        why: "The order stays breadth-first."
+      - text: "There's no difference"
+        why: "Marking late can add duplicates and do extra work."
+  - key: hash-mod
+    type: numeric
+    skills: [hash-function]
+    difficulty: 1
+    stem: "With h(k) = k mod 7, which bucket does key 30 go into?"
+    answer: 2
+  - key: hash-good
+    type: multi_choice
+    skills: [hash-function]
+    difficulty: 3
+    stem: "Which properties make a good hash function? Select all that apply."
+    options:
+      - text: "Deterministic: the same key always gives the same hash"
+        correct: true
+        why: "Otherwise you could never find a key again."
+      - text: "Spreads keys evenly across buckets"
+        correct: true
+        why: "Even spreading keeps chains short."
+      - text: "Fast to compute"
+        correct: true
+        why: "It runs on every operation."
+      - text: "Returns a random value each time"
+        why: "That breaks lookups."
+  - key: hash-chain
+    type: short_text
+    skills: [collisions-chaining]
+    difficulty: 2
+    stem: "Insert 15, 22, 8 into 7 buckets with h(k) = k mod 7 and chaining. List bucket 1's chain in insertion order."
+    accepted: ["15, 22, 8"]
+  - key: hash-chain-worst
+    type: single_choice
+    skills: [collisions-chaining]
+    difficulty: 3
+    stem: "If every key hashes to the same bucket, lookup with chaining becomes:"
+    options:
+      - text: "O(n)"
+        correct: true
+        why: "The table degrades into one long list."
+      - text: "O(1)"
+        why: "That's the average case with a good spread."
+      - text: "O(log n)"
+        why: "A chain is a list, not a tree."
+      - text: "Impossible"
+        why: "It still works, just slowly."
+  - key: probe-linear
+    type: numeric
+    skills: [open-addressing]
+    difficulty: 3
+    stem: "Table size 7, h(k) = k mod 7, linear probing. Buckets 3 and 4 are occupied. Which bucket does key 10 land in?"
+    answer: 5
+    explanation: "10 mod 7 = 3 (taken) → 4 (taken) → 5."
+  - key: probe-tombstone
+    type: single_choice
+    skills: [open-addressing]
+    difficulty: 4
+    stem: "With linear probing, why do deletions leave a \"tombstone\" instead of emptying the slot?"
+    options:
+      - text: "An empty slot would stop later searches too early"
+        correct: true
+        why: "Keys placed beyond the deleted slot would become unreachable."
+      - text: "To save memory"
+        why: "Tombstones use the same memory."
+      - text: "Because deletion is not allowed"
+        why: "Deletion is allowed; it just needs care."
+      - text: "To keep keys sorted"
+        why: "Hash tables don't keep order."
+  - key: load-factor-value
+    type: numeric
+    skills: [load-factor]
+    difficulty: 1
+    stem: "A table has 16 buckets and 12 keys. What is its load factor?"
+    answer: 0.75
+    tolerance: 0.001
+  - key: load-factor-resize
+    type: single_choice
+    skills: [load-factor]
+    difficulty: 3
+    stem: "Java's HashMap doubles its capacity when the load factor passes 0.75. Why are inserts still O(1) amortised?"
+    options:
+      - text: "Resizes are rare enough that their O(n) cost spreads thinly across many inserts"
+        correct: true
+        why: "Doubling means each key is rehashed only a constant number of times on average."
+      - text: "Resizing is O(1)"
+        why: "Every key must be rehashed: O(n)."
+      - text: "Resizing never happens"
+        why: "It does, at the threshold."
+      - text: "Keys don't need rehashing"
+        why: "Bucket indices depend on the table size."

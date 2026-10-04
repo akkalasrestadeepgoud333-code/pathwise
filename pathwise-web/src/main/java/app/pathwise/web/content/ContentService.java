@@ -113,6 +113,33 @@ public final class ContentService {
         }
     }
 
+    public Optional<String> moduleKey(UUID moduleId) {
+        return tx.read(c -> content.moduleKey(c, moduleId));
+    }
+
+    public Map<UUID, Integer> sectionCounts() {
+        return tx.read(content::sectionCounts);
+    }
+
+    public List<UUID> skillIdsOfModule(UUID moduleId) {
+        return tx.read(c -> content.skillIdsOfModule(c, moduleId));
+    }
+
+    public Instant latestActivityAt(Actor actor) {
+        requireUser(actor);
+        return tx.read(c -> progress.latestActivityAt(c, actor.userId()));
+    }
+
+    public Map<UUID, ModuleProgress> allProgress(Actor actor) {
+        requireUser(actor);
+        return tx.read(c -> progress.allProgress(c, actor.userId()));
+    }
+
+    public Map<UUID, Integer> completedSectionCounts(Actor actor) {
+        requireUser(actor);
+        return tx.read(c -> progress.completedSectionCounts(c, actor.userId()));
+    }
+
     /** Lets other services check timestamps consistently. */
     public Instant now() {
         return clock.instant();

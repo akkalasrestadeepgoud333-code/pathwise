@@ -1,0 +1,190 @@
+questions:
+  - key: bst-property
+    type: single_choice
+    skills: [bst-property]
+    difficulty: 1
+    stem: "In a binary search tree, where are values **smaller** than a node stored?"
+    options:
+      - text: "Anywhere in its left subtree"
+        correct: true
+        why: "The whole left subtree holds smaller values."
+      - text: "Only in its left child"
+        why: "The rule covers the entire subtree, not just the child."
+      - text: "In its right subtree"
+        why: "Larger values go right."
+      - text: "Above it, in the parent"
+        why: "The parent can be larger or smaller."
+  - key: bst-violation
+    type: single_choice
+    skills: [bst-property]
+    difficulty: 3
+    stem: "Root 8 has left child 4; 4 has a right child 9. Is this a valid BST?"
+    options:
+      - text: "No: 9 is in 8's left subtree but bigger than 8"
+        correct: true
+        why: "The property applies to every value in the subtree, not just direct children."
+      - text: "Yes: 9 is bigger than its parent 4"
+        why: "That only checks one level."
+      - text: "Yes: every node has at most two children"
+        why: "That only makes it a binary tree."
+      - text: "No: 4 should be on the right"
+        why: "4 < 8, so left is correct."
+    hints:
+      - "Check 9 against every ancestor, not just its parent."
+  - key: bst-valid-multi
+    type: multi_choice
+    skills: [bst-property]
+    difficulty: 3
+    stem: "Which level-order arrays describe valid BSTs? (Root first; `_` means no node.)"
+    options:
+      - text: "[10, 5, 15, 2, 7, 12, 20]"
+        correct: true
+        why: "Every left subtree is smaller and every right subtree larger."
+      - text: "[10, 5, 15, 2, 11, 12, 20]"
+        why: "11 sits in 10's left subtree but is larger than 10."
+      - text: "[10, 5, 15]"
+        correct: true
+        why: "Root with a smaller left and a larger right child."
+      - text: "[10, 15, 5]"
+        why: "15 on the left of 10 breaks the rule."
+  - key: bst-search-path
+    type: short_text
+    skills: [bst-search]
+    difficulty: 2
+    stem: "In the BST `[50, 30, 70, 20, 40, 60, 80]`, list the nodes visited when searching for 60."
+    accepted: ["50, 70, 60"]
+    hints:
+      - "60 > 50, so go right."
+  - key: bst-search-cost
+    type: single_choice
+    skills: [bst-search, bst-complexity]
+    difficulty: 2
+    stem: "Searching a BST of height h takes:"
+    options:
+      - text: "O(h)"
+        correct: true
+        why: "One comparison per level along a single path."
+      - text: "O(n) always"
+        why: "Only when the tree is degenerate (h ≈ n)."
+      - text: "O(1)"
+        why: "You must walk down from the root."
+      - text: "O(n log n)"
+        why: "That's the cost of sorting, not searching."
+  - key: bst-search-miss
+    type: numeric
+    skills: [bst-search]
+    difficulty: 3
+    stem: "In the BST `[50, 30, 70, 20, 40, 60, 80]`, how many nodes are compared when searching for 65 (which isn't there)?"
+    answer: 3
+    explanation: "50 → right to 70 → left to 60 → right is empty. Three comparisons."
+  - key: bst-insert-place
+    type: single_choice
+    skills: [bst-insert]
+    difficulty: 2
+    stem: "Insert 45 into the BST `[50, 30, 70, 20, 40, 60, 80]`. Where does it go?"
+    options:
+      - text: "Right child of 40"
+        correct: true
+        why: "45 < 50 → left to 30; 45 > 30 → right to 40; 45 > 40 → right of 40."
+      - text: "Left child of 50"
+        why: "That spot is taken by 30."
+      - text: "Left child of 60"
+        why: "45 < 50, so it never goes right of the root."
+      - text: "It replaces 40"
+        why: "Insertion never replaces; it adds a leaf."
+  - key: bst-insert-order
+    type: short_text
+    skills: [bst-insert, bst-property]
+    difficulty: 3
+    stem: "Insert 5, 3, 8, 1, 4 into an empty BST. Give the **level-order** traversal of the result."
+    accepted: ["5, 3, 8, 1, 4"]
+  - key: bst-insert-leaf
+    type: single_choice
+    skills: [bst-insert]
+    difficulty: 2
+    stem: "A newly inserted value in a (non-balancing) BST always becomes a:"
+    options:
+      - text: "Leaf"
+        correct: true
+        why: "It goes into the empty spot where the search ended."
+      - text: "Root"
+        why: "Only the very first value becomes the root."
+      - text: "Node with two children"
+        why: "Nothing is below it yet."
+      - text: "Parent of the old root"
+        why: "Plain BSTs never restructure on insert."
+  - key: bst-delete-two
+    type: single_choice
+    skills: [bst-delete]
+    difficulty: 3
+    stem: "Delete 30 from the BST `[50, 30, 70, 20, 40, 60, 80]` using the inorder successor. What replaces 30?"
+    options:
+      - text: "40"
+        correct: true
+        why: "The successor is the smallest value in 30's right subtree: 40."
+      - text: "20"
+        why: "That's the predecessor, the other valid convention, but not the successor."
+      - text: "50"
+        why: "50 is an ancestor, not in 30's subtrees."
+      - text: "60"
+        why: "60 is in 50's right subtree."
+  - key: bst-delete-leaf
+    type: single_choice
+    skills: [bst-delete]
+    difficulty: 2
+    stem: "How do you delete a leaf from a BST?"
+    options:
+      - text: "Set its parent's link to it to null"
+        correct: true
+        why: "Nothing hangs below a leaf, so it can simply be removed."
+      - text: "Replace it with its successor"
+        why: "That's for nodes with two children."
+      - text: "Rebuild the tree"
+        why: "Far more work than needed."
+      - text: "Swap it with the root"
+        why: "That would break the BST property."
+  - key: bst-delete-successor-shape
+    type: single_choice
+    skills: [bst-delete]
+    difficulty: 4
+    stem: "When deleting a node with two children, why is removing the inorder successor afterwards always easy?"
+    options:
+      - text: "The successor has no left child, so it's a leaf or has one child"
+        correct: true
+        why: "It's the leftmost node of the right subtree, so nothing is to its left."
+      - text: "The successor is always a leaf"
+        why: "It can still have a right child."
+      - text: "The successor is always the root's child"
+        why: "It can be anywhere in the right subtree."
+      - text: "It doesn't need to be removed"
+        why: "Otherwise its value would appear twice."
+  - key: bst-degenerate
+    type: single_choice
+    skills: [bst-complexity]
+    difficulty: 3
+    stem: "Insert 1, 2, 3, 4, 5, 6 into an empty BST in that order. What is the height (edges)?"
+    options:
+      - text: "5"
+        correct: true
+        why: "Each value goes right of the previous one, making a chain."
+      - text: "2"
+        why: "That's what a balanced tree with 6 nodes would have."
+      - text: "3"
+        why: "Sorted input never branches."
+      - text: "6"
+        why: "Height counts edges: 6 nodes in a chain have 5."
+  - key: bst-balanced-speed
+    type: single_choice
+    skills: [bst-complexity]
+    difficulty: 4
+    stem: "A BST holds about 1,000,000 values and is perfectly balanced. Roughly how many comparisons does a search need, at most?"
+    options:
+      - text: "About 20"
+        correct: true
+        why: "log₂(1,000,000) ≈ 20."
+      - text: "About 1,000"
+        why: "That's √n, not log n."
+      - text: "About 500,000"
+        why: "That's a linear scan of half the data."
+      - text: "Exactly 1"
+        why: "You still walk down one level per comparison."

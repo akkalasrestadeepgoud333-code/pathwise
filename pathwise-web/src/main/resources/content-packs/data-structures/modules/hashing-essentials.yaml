@@ -79,6 +79,11 @@ sections:
         back: α = keys ÷ buckets. Resize when it passes a threshold (0.75 in Java's HashMap).
         skill: load-factor
 
+  - kind: check
+    title: Check your understanding
+    markdown: Answer these to see how well it has sunk in. Your answers help Pathwise suggest what to do next.
+    questions: [hash-mod, hash-chain, load-factor-value]
+
   - kind: summary
     title: Summary
     markdown: |

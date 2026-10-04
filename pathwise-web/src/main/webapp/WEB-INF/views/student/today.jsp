@@ -1,31 +1,18 @@
 <%@ page contentType="text/html;charset=UTF-8" %>
-<c:set var="cont" value="${today.continueCard}"/>
-<c:set var="sug" value="${today.suggestion}"/>
 <pw:shell title="Today">
   <div class="page-header">
     <div>
       <h1><c:out value="${greeting}"/>, <c:out value="${currentUser.firstName}"/>.</h1>
-      <p>Here's where you are, and a good next step.</p>
+      <p>Here's a good next step and why. You're always free to choose something else.</p>
     </div>
   </div>
 
   <div class="grid grid-main-aside">
     <c:choose>
-      <c:when test="${not empty cont and not cont.completed}">
-        <section class="hero-card" aria-labelledby="next-title">
-          <p class="card-eyebrow">Continue where you left off</p>
-          <h2 id="next-title"><c:out value="${cont.title}"/></h2>
-          <p><c:out value="${cont.subjectTitle}"/> · <c:out value="${cont.topicTitle}"/> · <c:out value="${cont.percent}"/>% through</p>
-          <a class="btn btn-primary btn-lg" href="<c:url value='/app/modules/${cont.moduleKey}'/>">Resume <pw:icon name="arrow-right"/></a>
-          <pw:trail cssClass="hero-trail" onInk="true"/>
-        </section>
-      </c:when>
-      <c:when test="${not empty sug}">
-        <section class="hero-card" aria-labelledby="next-title">
-          <p class="card-eyebrow">Suggested next step</p>
-          <h2 id="next-title"><c:out value="${sug.title}"/></h2>
-          <p><span class="chip chip-accent"><pw:icon name="circle-help" size="sm"/>Why this?</span> <c:out value="${sug.reason}"/></p>
-          <a class="btn btn-primary btn-lg" href="<c:url value='/app/modules/${sug.moduleKey}'/>">Start <pw:icon name="arrow-right"/></a>
+      <c:when test="${not empty top}">
+        <section class="hero-card hero-rec" aria-label="Your next step">
+          <p class="card-eyebrow">Your next step</p>
+          <pw:rec rec="${top}" from="today" hero="true"/>
           <pw:trail cssClass="hero-trail" onInk="true"/>
         </section>
       </c:when>
@@ -47,19 +34,27 @@
           <span class="list-icon"><pw:icon name="map"/></span>
           <div class="grow"><div class="title"><a href="<c:url value='/app/learn'/>">Browse subjects</a></div><div class="meta">Open a Learning Map and start anywhere</div></div>
         </li>
-        <c:if test="${not empty cont and cont.completed}">
-          <li class="list-item">
-            <span class="list-icon"><pw:icon name="circle-check"/></span>
-            <div class="grow"><div class="title">Last studied: <c:out value="${cont.title}"/></div><div class="meta"><a href="<c:url value='/app/modules/${cont.moduleKey}'/>">Review it</a></div></div>
-          </li>
-        </c:if>
         <li class="list-item">
-          <span class="list-icon"><pw:icon name="laptop"/></span>
-          <div class="grow"><div class="title">Your devices</div><div class="meta"><a href="<c:url value='/app/settings#sessions'/>">See where you're signed in</a></div></div>
+          <span class="list-icon"><pw:icon name="target"/></span>
+          <div class="grow"><div class="title"><a href="<c:url value='/app/practice'/>">Quick practice</a></div><div class="meta">Five questions at your level</div></div>
+        </li>
+        <li class="list-item">
+          <span class="list-icon"><pw:icon name="activity"/></span>
+          <div class="grow"><div class="title"><a href="<c:url value='/app/progress'/>">Your progress</a></div><div class="meta">How each skill is going</div></div>
         </li>
       </ul>
     </section>
   </div>
+
+  <c:if test="${not empty more}">
+    <div class="section-head section-gap">
+      <h2>More next steps</h2>
+      <a href="<c:url value='/app/next'/>">See all and set goals →</a>
+    </div>
+    <div class="grid grid-2">
+      <c:forEach var="r" items="${more}" end="3"><div class="card"><pw:rec rec="${r}" from="today"/></div></c:forEach>
+    </div>
+  </c:if>
 
   <c:choose>
     <c:when test="${empty today.subjects}">

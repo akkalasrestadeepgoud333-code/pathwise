@@ -1,0 +1,127 @@
+questions:
+  - key: rec-missing-base
+    type: single_choice
+    skills: [base-case]
+    difficulty: 1
+    stem: |
+      What happens when `count(3)` is called?
+
+      ```java
+      int count(int n) {
+          return 1 + count(n - 1);
+      }
+      ```
+    options:
+      - text: "It never stops and ends in StackOverflowError"
+        correct: true
+        why: "There's no base case, so n keeps decreasing forever."
+      - text: "It returns 3"
+        why: "Nothing stops the recursion at 0."
+      - text: "It returns 4"
+        why: "There's no point where it returns at all."
+      - text: "It doesn't compile"
+        why: "It compiles; the problem is at run time."
+    hints:
+      - "Where does the function stop calling itself?"
+  - key: rec-factorial-value
+    type: numeric
+    skills: [base-case, recursive-case]
+    difficulty: 1
+    stem: "With `fact(0) = 1` and `fact(n) = n × fact(n − 1)`, what is `fact(4)`?"
+    answer: 24
+    explanation: "4 × 3 × 2 × 1 × 1 = 24."
+  - key: rec-base-correct
+    type: single_choice
+    skills: [base-case]
+    difficulty: 2
+    stem: "Which is the right base case for `sum(n) = n + sum(n − 1)`, the sum of 1..n, for n ≥ 0?"
+    options:
+      - text: "if (n == 0) return 0;"
+        correct: true
+        why: "The sum of no numbers is 0, and every n ≥ 0 reaches it."
+      - text: "if (n == 1) return 0;"
+        why: "sum(1) should be 1, and sum(0) would recurse forever."
+      - text: "if (n == 0) return 1;"
+        why: "This adds an extra 1 to every result."
+      - text: "if (n < 0) return n;"
+        why: "This returns negative values, making every result wrong."
+  - key: rec-trace-output
+    type: short_text
+    skills: [recursive-case, call-stack]
+    difficulty: 3
+    stem: |
+      What does `f(3)` print (comma-separated)?
+
+      ```java
+      void f(int n) {
+          if (n == 0) return;
+          f(n - 1);
+          System.out.print(n + ",");
+      }
+      ```
+    accepted: ["1, 2, 3", "1,2,3,", "1, 2, 3,"]
+    hints:
+      - "The print happens after the recursive call returns."
+      - "f(3) waits for f(2), which waits for f(1)…"
+    explanation: "The deepest call prints first: 1, then 2, then 3."
+  - key: rec-digit-sum
+    type: numeric
+    skills: [recursive-case]
+    difficulty: 2
+    stem: "`ds(n) = n` if n < 10, else `n % 10 + ds(n / 10)`. What is `ds(905)`?"
+    answer: 14
+    explanation: "5 + ds(90) = 5 + 0 + ds(9) = 5 + 0 + 9 = 14."
+  - key: rec-stack-depth
+    type: numeric
+    skills: [call-stack]
+    difficulty: 2
+    stem: "How many frames for `fact` are on the call stack at the moment `fact(0)` is called during `fact(5)`?"
+    answer: 6
+    hints:
+      - "Count fact(5), fact(4), … down to fact(0)."
+    explanation: "fact(5) through fact(0) are all waiting: 6 frames."
+  - key: rec-call-stack-ds
+    type: single_choice
+    skills: [call-stack]
+    difficulty: 2
+    stem: "Pending function calls are tracked by which structure?"
+    options:
+      - text: "A stack (last call made finishes first)"
+        correct: true
+        why: "Calls return in reverse order: LIFO."
+      - text: "A queue"
+        why: "The first call made finishes last, not first."
+      - text: "A hash table"
+        why: "Order matters, not lookup."
+      - text: "A heap"
+        why: "There is no priority; just most-recent-first."
+  - key: rec-to-loop
+    type: single_choice
+    skills: [recursion-vs-iteration]
+    difficulty: 3
+    stem: "Which recursive function is the **easiest** to rewrite as a simple loop?"
+    options:
+      - text: "Summing 1..n with sum(n) = n + sum(n − 1)"
+        correct: true
+        why: "One recursive call that reduces by one becomes a counting loop."
+      - text: "Visiting both subtrees of a binary tree"
+        why: "Two branching calls need an explicit stack to replace."
+      - text: "Generating all permutations of a list"
+        why: "Many branching calls; loops need explicit bookkeeping."
+      - text: "Merge sort"
+        why: "It splits into two halves each time; harder to flatten."
+  - key: rec-memory
+    type: single_choice
+    skills: [recursion-vs-iteration, call-stack]
+    difficulty: 4
+    stem: "Recursive `sum(n)` and a loop computing the same total both take O(n) time. What's the difference in extra memory?"
+    options:
+      - text: "Recursion uses O(n) stack frames; the loop uses O(1)"
+        correct: true
+        why: "Each pending call keeps a frame until the base case returns."
+      - text: "Both use O(1)"
+        why: "Every recursive call adds a frame."
+      - text: "The loop uses O(n)"
+        why: "A loop reuses the same variables."
+      - text: "Recursion uses O(log n)"
+        why: "Reducing by one gives depth n, not log n."

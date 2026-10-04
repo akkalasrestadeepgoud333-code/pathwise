@@ -104,6 +104,11 @@ sections:
         back: "Left `2i + 1`, right `2i + 2`; parent `(i − 1) / 2`."
         skill: binary-tree-representation
 
+  - kind: check
+    title: Check your understanding
+    markdown: Answer these to see how well it has sunk in. Your answers help Pathwise suggest what to do next.
+    questions: [bt-full, bt-array-children, bt-left-right]
+
   - kind: summary
     title: Summary
     markdown: |

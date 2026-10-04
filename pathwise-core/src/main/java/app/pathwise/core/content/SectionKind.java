@@ -5,7 +5,7 @@ import java.util.Optional;
 
 /** Module section types (M1 set). New kinds are added here, in the validator and as a JSP fragment. */
 public enum SectionKind {
-    OVERVIEW, EXPLANATION, EXAMPLE, VISUAL, FLASHCARDS, SUMMARY, RESOURCES, COMMON_DOUBTS;
+    OVERVIEW, EXPLANATION, EXAMPLE, VISUAL, FLASHCARDS, CHECK, SUMMARY, RESOURCES, COMMON_DOUBTS;
 
     public String dbValue() {
         return name().toLowerCase(Locale.ROOT);

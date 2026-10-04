@@ -79,13 +79,19 @@
 
     <aside class="grid">
       <section class="card" aria-labelledby="skills-title">
-        <h2 id="skills-title" class="card-title">Skills you'll build</h2>
+        <h2 id="skills-title" class="card-title">Skills and your levels</h2>
         <ul class="list">
           <c:forEach var="k" items="${t.skills}">
-            <li class="list-item">
-              <span class="list-icon"><pw:icon name="target"/></span>
+            <li class="list-item skill-item">
               <div class="grow"><div class="title"><c:out value="${k.title}"/></div>
-                <c:if test="${not empty k.description}"><div class="meta"><c:out value="${k.description}"/></div></c:if></div>
+                <div class="meta"><span class="state-chip state-<c:out value='${k.state}'/>"><c:out value="${k.stateLabel}"/></span>
+                  <c:if test="${k.evidence > 0}"> from <c:out value="${k.evidence}"/> answer<c:if test="${k.evidence != 1}">s</c:if></c:if></div></div>
+              <c:if test="${k.practicable}">
+                <pw:form action="/app/practice/start">
+                  <input type="hidden" name="mode" value="practice"><input type="hidden" name="skill" value="<c:out value='${k.id}'/>">
+                  <button type="submit" class="btn btn-sm">Practise</button>
+                </pw:form>
+              </c:if>
             </li>
           </c:forEach>
         </ul>

@@ -163,7 +163,7 @@ public final class Main {
         for (var r : results) {
             switch (r.outcome()) {
                 case IMPORTED -> System.out.println("  imported  " + r.key() + " (" + r.topics() + " topics, " + r.modules()
-                        + " modules, " + r.sections() + " sections)");
+                        + " modules, " + r.sections() + " sections, " + r.questions() + " questions)");
                 case UNCHANGED -> System.out.println("  unchanged " + r.key());
                 case INVALID -> {
                     failed = true;

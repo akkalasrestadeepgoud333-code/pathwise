@@ -12,6 +12,7 @@ import app.pathwise.core.security.PlatformPolicy;
 import app.pathwise.data.Tx;
 import app.pathwise.data.catalog.CatalogDao;
 import app.pathwise.data.content.ContentDao;
+import app.pathwise.data.questions.QuestionDao;
 import app.pathwise.data.platform.AuditDao;
 import app.pathwise.web.platform.Json;
 import app.pathwise.web.platform.events.EventBus;
@@ -38,7 +39,12 @@ public final class ContentPackService {
 
     public enum Outcome { IMPORTED, UNCHANGED, INVALID }
 
-    public record ImportResult(String key, Outcome outcome, List<String> errors, int topics, int modules, int sections) {}
+    public record ImportResult(String key, Outcome outcome, List<String> errors, int topics, int modules, int sections,
+                               int questions) {
+        ImportResult(String key, Outcome outcome, List<String> errors, int topics, int modules, int sections) {
+            this(key, outcome, errors, topics, modules, sections, 0);
+        }
+    }
 
     public record PackStatus(String key, String title, int availableVersion, Integer importedVersion, Instant importedAt,
                              boolean upToDate, List<String> problems) {}
@@ -49,6 +55,7 @@ public final class ContentPackService {
     private final Clock clock;
     private final CatalogDao catalog = new CatalogDao();
     private final ContentDao content = new ContentDao();
+    private final QuestionDao questions = new QuestionDao();
     private final AuditDao audit = new AuditDao();
 
     public ContentPackService(Tx tx, ContentPackLoader loader, EventBus events, Clock clock) {
@@ -136,6 +143,24 @@ public final class ContentPackService {
             }
             catalog.replacePrerequisites(c, subject, edges);
 
+            for (ContentPack.QuestionDef q : pack.questionsOrEmpty()) {
+                Map<String, Object> spec = new LinkedHashMap<>();
+                if (q.answer() != null) {
+                    spec.put("answer", q.answer());
+                    spec.put("tolerance", q.tolerance() == null ? 0.0 : q.tolerance());
+                }
+                if (q.accepted() != null) {
+                    spec.put("accepted", q.accepted());
+                }
+                UUID qid = questions.upsertPlatformQuestion(c, q.key(), q.type(), q.stem().strip(), Json.write(spec),
+                        q.difficulty(), Json.write(q.hintsOrEmpty()), q.explanation() == null ? null : q.explanation().strip());
+                questions.replaceOptions(c, qid, q.optionsOrEmpty().stream()
+                        .map(o -> new String[]{o.text().strip(), Boolean.toString(o.isCorrect()), o.why() == null ? null : o.why().strip()})
+                        .toList());
+                questions.setSkills(c, qid, q.skillsOrEmpty().stream().map(skillIds::get).toList());
+            }
+            questions.retireNotIn(c, skillIds.values(), pack.questionsOrEmpty().stream().map(ContentPack.QuestionDef::key).toList());
+
             Map<String, Integer> positionInTopic = new HashMap<>();
             for (ModuleDef m : pack.modules()) {
                 int position = positionInTopic.merge(m.topic(), 1, Integer::sum) - 1;
@@ -179,7 +204,8 @@ public final class ContentPackService {
                     Json.write(Map.of("version", pack.version(), "modules", pack.modules().size())), null);
             events.publish(c, EVENT_PACK_IMPORTED, Map.of("pack", pack.key(), "version", pack.version()));
         });
-        return new ImportResult(key, Outcome.IMPORTED, List.of(), pack.topics().size(), pack.modules().size(), sectionCount[0]);
+        return new ImportResult(key, Outcome.IMPORTED, List.of(), pack.topics().size(), pack.modules().size(), sectionCount[0],
+                pack.questionsOrEmpty().size());
     }
 
     /** The JSON stored in {@code module_sections.body} for each kind. Cards and links live in their own tables. */
@@ -195,7 +221,10 @@ public final class ContentPackService {
                 body.put("markdown", s.markdown().strip());
             }
         }
-        if (kind == SectionKind.FLASHCARDS || kind == SectionKind.RESOURCES) {
+        if (kind == SectionKind.CHECK) {
+            body.put("questions", s.questionsOrEmpty());
+        }
+        if (kind == SectionKind.FLASHCARDS || kind == SectionKind.RESOURCES || kind == SectionKind.CHECK) {
             if (s.markdown() != null) {
                 body.put("markdown", s.markdown().strip());
             }

@@ -6,7 +6,7 @@ Statuses follow blueprint §44:
 - **PROPOSED:** designed, not built.
 - **FUTURE:** intentionally out of scope for v1.
 
-Last updated: **2026-10-03** (end of M1, Curriculum & content).
+Last updated: **2026-10-04** (end of M2, Evidence → learner model → engine).
 
 ## Implemented (M0)
 
@@ -51,18 +51,35 @@ Last updated: **2026-10-03** (end of M1, Curriculum & content).
 | Admin › Content: pack status, validation problems, import/re-import | `/admin/content`, CLI `import-content` | `LearningFlowTest` |
 | Learning JSON API for the Android app: subjects, map, topic, module, complete section | `/api/v1/subjects*`, `/api/v1/modules/*` | `LearningFlowTest` |
 
+## Implemented (M2)
+
+| Feature | Where | Evidence |
+|---|---|---|
+| Question bank in content packs: single/multi choice, numeric, short text; hint ladders; a "why" for every option; 114 questions for Data Structures | `questions/*.yaml`, `QuestionDao` | `ContentTest`, `PackValidatorTest` |
+| Server-side grading (partial credit for multi-choice, tolerance for numbers, normalised text); answers never sent before answering; options shuffled per student | `Grader`, `QuestionService` | `LearnerCoreTest`, `QuestionServiceTest`, `PersonalisationFlowTest` |
+| Module check sections: graded together; cannot be skipped with "done"; results with explanations | `/app/modules/*/check` | `LearningFlowTest`, `PersonalisationFlowTest` |
+| Practice: adaptive selection near the learner's level, avoids repeats, hints (with reduced credit), final answers, feedback, summary with level changes | `/app/practice/*`, `PracticeService` | `PersonalisationFlowTest` |
+| Learning evidence: append-only (DB trigger), never official for practice/checks, weighted by source; repeats within 24 h count less | `learning_evidence`, `LearnerService` | `PersonalisationFlowTest` |
+| Learner model: per-skill estimate, confidence and state (heuristic-v1, blueprint §12); recomputed in the same transaction as new evidence; spaced review dates; rebuildable | `MasteryModel`, `skill_mastery` | `LearnerCoreTest` (golden values) |
+| Recommendation engine (rules-v1): Continue / Strengthen (with prerequisite root cause) / Challenge / Explore / Revise; named weighted factors; evidence-quoting reasons; goals; suppressions | `Recommender`, `RecommendationService` | `RecommenderTest` (persona fixtures), `PersonalisationFlowTest` |
+| Student controls: Start, Not now (1 day), Not relevant (topic hidden 7 days), I already know this (short check instead of blind trust) | `/app/next/*` | `PersonalisationFlowTest` |
+| Today and Recommendation Center with "Why this?" panels; goals; history | `/app/today`, `/app/next` | `LearningFlowTest`, `PersonalisationFlowTest`, screenshots |
+| Progress page: every skill's level, evidence count and confidence in plain language | `/app/progress` | `PersonalisationFlowTest` |
+| Mastery on the Learning Map and topic pages, with per-skill Practise buttons | map, topic | `LearningFlowTest`, screenshots |
+| Learner API: recommendations + actions, practice start/view/answer/hint, mastery | `/api/v1/me/*`, `/api/v1/practice*`, `/api/v1/recommendations/*` | `PersonalisationFlowTest` |
+
 ## Partially implemented
 
 | Feature | Works | Missing |
 |---|---|---|
 | Learner profile | stored per user; the theme preference is used | timezone editing, goals and modalities UI (M2) |
-| Next-step suggestion | coverage-based rule with a reason | evidence-based engine with mastery (M2) |
+| "Ask" recommendation slot | not generated | needs the AI tutor (M8) and doubts (M6) |
 | Teacher area | access control, empty state | rooms (M5) |
 | Security tooling | headers, CSRF, rate limits, audit | OWASP Dependency-Check run (planned for M11) |
 
 ## Proposed (designed in the blueprint, not built)
 
-Practice and check questions (M2/M3) · evidence pipeline, learner model and recommendation engine (M2) · assessments (M3) · games framework and games (M4) · rooms, assignments and teacher analytics (M5) · doubts, community, moderation and knowledge base (M6) · XP, streaks, badges and notifications (M7) · AI tutor with Guided Help fallback (M8) · Android app (M9) · projects, live doubt sessions and full admin console (M10).
+Assessments (official results, M3) · games framework and games (M4) · rooms, assignments and teacher analytics (M5) · doubts, community, moderation and knowledge base (M6) · XP, streaks, badges and notifications (M7) · AI tutor with Guided Help fallback (M8) · Android app (M9) · projects, live doubt sessions and full admin console (M10).
 
 ## Future (out of scope for v1)
 
@@ -77,4 +94,7 @@ Knowledge tracing / ML models · embeddings-based retrieval · server-side code 
 - **Learning Map** uses a server-rendered SVG layout (`MapLayout`) instead of Cytoscape.js: no 400 KB library, works without JavaScript, testable.
 - **Section payloads** are validated by typed Java records + `PackValidator` instead of JSON Schema files.
 - **Flashcards** use native `<details>` (accessible, works without JS); self-rating evidence arrives with M2.
+- **Activities table** (blueprint §10.4) is not created yet: practice and checks are generated attempts. The table arrives with games (M4).
+- **Recommendations** are regenerated on demand when evidence or progress is newer than the last run (or after 6 hours), not via the outbox. This is simpler and was fast enough at this scale.
+- **Questions** are updated in place on re-import. Immutable question versioning arrives with official assessments (M3).
 - **Admin statistics** use a read-only reporting DAO (`PlatformStatsDao`) that aggregates across modules. Writes still go only through each module's own DAO.

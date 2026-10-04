@@ -4,6 +4,10 @@ import app.pathwise.core.catalog.Graphs;
 import app.pathwise.core.catalog.MapLayout;
 import app.pathwise.core.content.Coverage;
 import app.pathwise.core.content.SectionKind;
+import app.pathwise.core.learner.MasteryState;
+import app.pathwise.data.learner.EvidenceDao.MasteryRow;
+import app.pathwise.web.learner.LearnerService;
+import app.pathwise.web.questions.QuestionService;
 import app.pathwise.core.security.Actor;
 import app.pathwise.data.catalog.CatalogDao.PrereqRow;
 import app.pathwise.data.catalog.CatalogDao.SubjectRow;
@@ -40,10 +44,37 @@ public final class LearnService {
 
     private final CatalogService catalog;
     private final ContentService content;
+    private final LearnerService learner;
+    private final QuestionService questions;
 
-    public LearnService(CatalogService catalog, ContentService content) {
+    public LearnService(CatalogService catalog, ContentService content, LearnerService learner, QuestionService questions) {
         this.catalog = catalog;
         this.content = content;
+        this.learner = learner;
+        this.questions = questions;
+    }
+
+    /**
+     * A topic's mastery summary from its core skills that have evidence: Mastered if all are mastered,
+     * Proficient if all are at least proficient, Needs practice if any needs it, otherwise Developing.
+     * Null when there is no evidence yet (the map then shows coverage instead).
+     */
+    static MasteryState topicMastery(List<UUID> coreSkills, Map<UUID, MasteryRow> mastery) {
+        List<MasteryState> states = coreSkills.stream().filter(mastery::containsKey)
+                .map(s -> MasteryState.fromDb(mastery.get(s).state())).toList();
+        if (states.isEmpty() || states.stream().allMatch(s -> s == MasteryState.EXPLORING)) {
+            return states.isEmpty() ? null : MasteryState.EXPLORING;
+        }
+        if (states.size() == coreSkills.size() && states.stream().allMatch(s -> s == MasteryState.MASTERED)) {
+            return MasteryState.MASTERED;
+        }
+        if (states.size() == coreSkills.size() && states.stream().allMatch(s -> s.atLeast(MasteryState.PROFICIENT))) {
+            return MasteryState.PROFICIENT;
+        }
+        if (states.contains(MasteryState.NEEDS_SUPPORT)) {
+            return MasteryState.NEEDS_SUPPORT;
+        }
+        return MasteryState.DEVELOPING;
     }
 
     // ------------------------------------------------------------------ view models
@@ -53,7 +84,7 @@ public final class LearnService {
 
     public record MapNode(String key, String title, String parentTitle, int x, int y, String coverage, String coverageLabel,
                           int modulesDone, int modulesTotal, String ringDash, boolean optional, boolean advanced,
-                          boolean current, List<String> buildsOn, int stage) {}
+                          boolean current, List<String> buildsOn, int stage, String mastery, String masteryLabel) {}
 
     public record MapEdge(String path, boolean required, boolean studied) {}
 
@@ -64,7 +95,8 @@ public final class LearnService {
 
     public record TopicLink(String key, String title, String strength, String coverageLabel, boolean met) {}
 
-    public record SkillItem(String title, String description, boolean core) {}
+    public record SkillItem(UUID id, String title, String description, boolean core, String state, String stateLabel,
+                            int evidence, boolean practicable) {}
 
     public record ModuleItem(String key, String title, String summary, int estMinutes, int difficulty, String state) {}
 
@@ -81,7 +113,7 @@ public final class LearnService {
     public record Link(String title, String url, String kind, String licence) {}
 
     public record SectionContent(String key, String title, String kind, SafeHtml html, String visualJson, String alt,
-                                 List<Card> cards, List<Link> links) {}
+                                 List<Card> cards, List<Link> links, List<String> questionKeys, String id) {}
 
     public record PlayerView(String subjectKey, String subjectTitle, String topicKey, String topicTitle,
                              String moduleKey, String moduleTitle, String moduleSummary, List<String> objectives,
@@ -129,6 +161,7 @@ public final class LearnService {
         Map<UUID, Coverage> coverage = coverage(g, modules, progress);
         Map<UUID, int[]> counts = counts(g, modules, progress);
         UUID current = currentTopic(modules, progress);
+        Map<UUID, MasteryRow> mastery = learner.mastery(actor);
 
         List<String> keys = g.topics().stream().map(TopicRow::key).toList();
         Map<UUID, String> keyOf = g.topics().stream().collect(Collectors.toMap(TopicRow::id, TopicRow::key));
@@ -152,7 +185,9 @@ public final class LearnService {
                     c[1] == 0 ? 0 : RING_CIRCUMFERENCE * c[0] / c[1], RING_CIRCUMFERENCE);
             MapNode node = new MapNode(t.key(), t.title(), parentTitle(g, t), n.x(), n.y(), cov.cssClass(), cov.label(),
                     c[0], c[1], dash, t.optional(), t.advanced(), t.id().equals(current),
-                    unmetRequired(g, t, coverage), n.layer() + 1);
+                    unmetRequired(g, t, coverage), n.layer() + 1,
+                    masteryOf(g, t, mastery) == null ? null : masteryOf(g, t, mastery).cssClass(),
+                    masteryOf(g, t, mastery) == null ? null : masteryOf(g, t, mastery).label());
             nodes.add(node);
             byKey.put(t.key(), node);
         }
@@ -166,6 +201,10 @@ public final class LearnService {
         String currentTitle = current == null ? null : g.topicById(current).map(TopicRow::title).orElse(null);
         return Optional.of(new MapView(card(actor, g, modules), layout.width(), layout.height(), nodes, mapEdges,
                 stageList, currentTitle));
+    }
+
+    private static MasteryState masteryOf(SubjectGraph g, TopicRow t, Map<UUID, MasteryRow> mastery) {
+        return topicMastery(g.skillsOf(t.id()).stream().filter(s -> s.core()).map(s -> s.id()).toList(), mastery);
     }
 
     // ------------------------------------------------------------------ topic
@@ -208,8 +247,19 @@ public final class LearnService {
         return Optional.of(new TopicView(g.subject().key(), g.subject().title(), t.key(), t.title(), t.summary(),
                 parent.map(TopicRow::key).orElse(null), parent.map(TopicRow::title).orElse(null), t.optional(), t.advanced(),
                 cov.cssClass(), cov.label(),
-                g.skillsOf(t.id()).stream().map(s -> new SkillItem(s.title(), s.description(), s.core())).toList(),
+                skillItems(actor, g, t),
                 prereqs, unlocks, subtopics, moduleItems, unmetRequired(g, t, coverage), start));
+    }
+
+    private List<SkillItem> skillItems(Actor actor, SubjectGraph g, TopicRow t) {
+        Map<UUID, MasteryRow> mastery = learner.mastery(actor);
+        var supply = questions.supply();
+        return g.skillsOf(t.id()).stream().map(s -> {
+            MasteryRow m = mastery.get(s.id());
+            MasteryState st = m == null ? MasteryState.NOT_STARTED : MasteryState.fromDb(m.state());
+            return new SkillItem(s.id(), s.title(), s.description(), s.core(), st.cssClass(), st.label(),
+                    m == null ? 0 : m.evidenceCount(), supply.containsKey(s.id()));
+        }).toList();
     }
 
     // ------------------------------------------------------------------ module player
@@ -269,15 +319,27 @@ public final class LearnService {
                 progress.map(ModuleProgress::completed).orElse(false)));
     }
 
-    /** Marks the section done and says where to go next. Empty if the module or section does not exist. */
+    /**
+     * Marks the section done and says where to go next. Empty if the module or section does not exist,
+     * or if it is a check section: those are completed only by submitting answers ({@link #completeCheckedSection}).
+     */
     public Optional<CompleteResult> completeSection(Actor actor, String moduleKey, String sectionKey) {
+        return complete(actor, moduleKey, sectionKey, false);
+    }
+
+    /** Completes a check section after its answers were graded. */
+    public Optional<CompleteResult> completeCheckedSection(Actor actor, String moduleKey, String sectionKey) {
+        return complete(actor, moduleKey, sectionKey, true);
+    }
+
+    private Optional<CompleteResult> complete(Actor actor, String moduleKey, String sectionKey, boolean checked) {
         Optional<ModuleBundle> bundle = content.module(moduleKey);
         if (bundle.isEmpty()) {
             return Optional.empty();
         }
         List<SectionRow> sections = bundle.get().sections();
         int index = indexOf(sections, sectionKey);
-        if (index < 0) {
+        if (index < 0 || (SectionKind.CHECK.dbValue().equals(sections.get(index).kind()) && !checked)) {
             return Optional.empty();
         }
         ContentService.SectionOutcome outcome = content.completeSection(actor, bundle.get().module(), sections.get(index));
@@ -301,7 +363,9 @@ public final class LearnService {
         List<Link> links = SectionKind.RESOURCES.dbValue().equals(s.kind())
                 ? b.resources().stream().map(r -> new Link(r.title(), r.url(), r.kind(), r.licenceNote())).toList()
                 : List.of();
-        return new SectionContent(s.key(), s.title(), s.kind(), html, visualJson, alt, cards, links);
+        List<String> questionKeys = new ArrayList<>();
+        body.path("questions").forEach(q -> questionKeys.add(q.asText()));
+        return new SectionContent(s.key(), s.title(), s.kind(), html, visualJson, alt, cards, links, questionKeys, s.id().toString());
     }
 
     // ------------------------------------------------------------------ today

@@ -9,7 +9,11 @@ import app.pathwise.web.identity.AuthApiServlet;
 import app.pathwise.web.identity.AuthController;
 import app.pathwise.web.identity.MeApiServlet;
 import app.pathwise.web.identity.SettingsController;
+import app.pathwise.web.engine.LearnerApiServlet;
+import app.pathwise.web.engine.NextController;
 import app.pathwise.web.learn.LearnApiServlet;
+import app.pathwise.web.learner.ProgressController;
+import app.pathwise.web.practice.PracticeController;
 import app.pathwise.web.learn.LearnController;
 import app.pathwise.web.learn.ModuleController;
 import app.pathwise.web.pages.HomeController;
@@ -75,6 +79,11 @@ public class AppBootstrap implements ServletContextListener {
         servlet(sc, "teacher", new TeacherController(), "/teach");
         servlet(sc, "learn", new LearnController(), "/app/learn", "/app/map/*", "/app/topics/*");
         servlet(sc, "modules", new ModuleController(), "/app/modules/*");
+        servlet(sc, "practice", new PracticeController(), "/app/practice", "/app/practice/*");
+        servlet(sc, "next", new NextController(), "/app/next", "/app/next/*");
+        servlet(sc, "progress", new ProgressController(), "/app/progress");
+        servlet(sc, "apiLearner", new LearnerApiServlet(), "/api/v1/me/recommendations", "/api/v1/me/mastery",
+                "/api/v1/recommendations/*", "/api/v1/practice", "/api/v1/practice/*");
         servlet(sc, "admin", new AdminController(), "/admin");
         servlet(sc, "adminContent", new AdminContentController(), "/admin/content");
         servlet(sc, "apiLearn", new LearnApiServlet(), "/api/v1/subjects", "/api/v1/subjects/*", "/api/v1/modules/*");

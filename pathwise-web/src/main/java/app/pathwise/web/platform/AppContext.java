@@ -8,7 +8,11 @@ import app.pathwise.web.catalog.CatalogService;
 import app.pathwise.web.content.ContentPackLoader;
 import app.pathwise.web.content.ContentPackService;
 import app.pathwise.web.content.ContentService;
+import app.pathwise.web.engine.RecommendationService;
 import app.pathwise.web.learn.LearnService;
+import app.pathwise.web.learner.LearnerService;
+import app.pathwise.web.practice.PracticeService;
+import app.pathwise.web.questions.QuestionService;
 import app.pathwise.web.identity.IdentityService;
 import app.pathwise.web.platform.events.EventBus;
 import app.pathwise.web.platform.events.OutboxWorker;
@@ -34,6 +38,10 @@ public final class AppContext {
     private final ContentService content;
     private final ContentPackService contentPacks;
     private final LearnService learn;
+    private final QuestionService questions;
+    private final LearnerService learner;
+    private final PracticeService practice;
+    private final RecommendationService recommendations;
     private final RateLimiter loginLimiter;
     private final RateLimiter registerLimiter;
 
@@ -51,7 +59,11 @@ public final class AppContext {
         this.catalog = new CatalogService(database.tx());
         this.content = new ContentService(database.tx(), events, clock);
         this.contentPacks = new ContentPackService(database.tx(), new ContentPackLoader(AppContext.class.getClassLoader()), events, clock);
-        this.learn = new LearnService(catalog, content);
+        this.questions = new QuestionService(database.tx());
+        this.learner = new LearnerService(database.tx(), events, clock);
+        this.learn = new LearnService(catalog, content, learner, questions);
+        this.practice = new PracticeService(database.tx(), questions, learner, catalog, content, clock);
+        this.recommendations = new RecommendationService(database.tx(), catalog, content, learner, questions, practice, clock);
         this.loginLimiter = new RateLimiter(config.loginAttemptsPerMinute(), 60_000, clock);      // per IP + email
         this.registerLimiter = new RateLimiter(config.registrationsPerHour(), 3_600_000, clock);  // per IP
     }
@@ -75,6 +87,10 @@ public final class AppContext {
     public ContentService content() { return content; }
     public ContentPackService contentPacks() { return contentPacks; }
     public LearnService learn() { return learn; }
+    public QuestionService questions() { return questions; }
+    public LearnerService learner() { return learner; }
+    public PracticeService practice() { return practice; }
+    public RecommendationService recommendations() { return recommendations; }
     public RateLimiter loginLimiter() { return loginLimiter; }
     public RateLimiter registerLimiter() { return registerLimiter; }
 }

@@ -173,6 +173,11 @@ sections:
         back: Always **last**. (In preorder it's always first.)
         skill: postorder
 
+  - kind: check
+    title: Check your understanding
+    markdown: Answer these to see how well it has sunk in. Your answers help Pathwise suggest what to do next.
+    questions: [trav-pre-7, trav-in-7, trav-post-7, trav-level-ds]
+
   - kind: summary
     title: Summary
     markdown: |

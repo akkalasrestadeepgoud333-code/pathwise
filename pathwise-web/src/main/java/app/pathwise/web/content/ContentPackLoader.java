@@ -28,7 +28,10 @@ public final class ContentPackLoader {
 
     /** {@code content-packs/<key>/pack.yaml}: the pack minus its modules, plus the module file list. */
     public record PackFile(String key, int version, String title, ContentPack.Catalog catalog,
-                           List<ContentPack.TopicDef> topics, List<String> modules) {}
+                           List<ContentPack.TopicDef> topics, List<String> modules, List<String> questions) {}
+
+    /** {@code content-packs/<key>/questions/<file>.yaml}. */
+    public record QuestionFile(List<ContentPack.QuestionDef> questions) {}
 
     public record Loaded(ContentPack pack, String title, String checksum) {}
 
@@ -76,7 +79,22 @@ public final class ContentPackLoader {
             digest.update(bytes);
             modules.add(parse(bytes, ContentPack.ModuleDef.class, base + "modules/" + moduleFile));
         }
-        ContentPack pack = new ContentPack(file.key(), file.version(), file.catalog(), file.topics(), modules);
+        List<ContentPack.QuestionDef> questions = new ArrayList<>();
+        for (String questionFile : file.questions() == null ? List.<String>of() : file.questions()) {
+            if (!questionFile.matches("[a-z0-9][a-z0-9-]{0,80}\\.yaml")) {
+                throw new PackFormatException("Invalid question file name: " + questionFile);
+            }
+            byte[] bytes = read(base + "questions/" + questionFile);
+            if (bytes == null) {
+                throw new PackFormatException("Question file missing: " + base + "questions/" + questionFile);
+            }
+            digest.update(bytes);
+            QuestionFile qf = parse(bytes, QuestionFile.class, base + "questions/" + questionFile);
+            if (qf.questions() != null) {
+                questions.addAll(qf.questions());
+            }
+        }
+        ContentPack pack = new ContentPack(file.key(), file.version(), file.catalog(), file.topics(), modules, questions);
         return new Loaded(pack, file.title(), HexFormat.of().formatHex(digest.digest()));
     }
 

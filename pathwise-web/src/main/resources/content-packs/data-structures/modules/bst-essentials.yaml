@@ -122,6 +122,11 @@ sections:
         back: At the empty spot where an unsuccessful **search** for it ends. A new value is always a **leaf**.
         skill: bst-insert
 
+  - kind: check
+    title: Check your understanding
+    markdown: Answer these to see how well it has sunk in. Your answers help Pathwise suggest what to do next.
+    questions: [bst-property, bst-insert-place, bst-delete-two]
+
   - kind: summary
     title: Summary
     markdown: |

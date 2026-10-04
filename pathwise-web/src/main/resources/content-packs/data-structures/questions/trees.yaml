@@ -1,0 +1,119 @@
+questions:
+  - key: tree-leaf
+    type: single_choice
+    skills: [tree-terms]
+    difficulty: 1
+    stem: "In a tree, what is a **leaf**?"
+    options:
+      - text: "A node with no children"
+        correct: true
+        why: "Leaves are at the bottom: nothing hangs below them."
+      - text: "A node with no parent"
+        why: "That's the root."
+      - text: "Any node at the deepest level"
+        why: "Leaves can appear at different depths."
+      - text: "A node with exactly one child"
+        why: "That's an internal node with one child."
+  - key: tree-edges
+    type: numeric
+    skills: [tree-terms]
+    difficulty: 2
+    stem: "A tree has 15 nodes. How many edges does it have?"
+    answer: 14
+    hints:
+      - "Every node except the root has exactly one edge to its parent."
+  - key: tree-subtree
+    type: single_choice
+    skills: [tree-terms]
+    difficulty: 2
+    stem: |
+      ```
+              A
+            / | \
+           B  C  D
+          / \     \
+         E   F     G
+      ```
+      Which nodes make up the **subtree rooted at B**?
+    options:
+      - text: "B, E, F"
+        correct: true
+        why: "A subtree is a node plus everything below it."
+      - text: "E, F"
+        why: "The subtree includes B itself."
+      - text: "A, B, E, F"
+        why: "A is above B, not below it."
+      - text: "B, C, D"
+        why: "C and D are B's siblings, not its descendants."
+  - key: tree-depth
+    type: numeric
+    skills: [tree-measures]
+    difficulty: 1
+    stem: "In the tree A → B → E (A is the root, B its child, E B's child), what is the depth of E (counting edges)?"
+    answer: 2
+  - key: tree-height
+    type: numeric
+    skills: [tree-measures]
+    difficulty: 2
+    stem: |
+      What is the **height** of this tree, counting edges?
+
+      ```
+            A
+           / \
+          B   C
+         /
+        D
+         \
+          E
+      ```
+    answer: 3
+    hints:
+      - "Height = edges on the longest path from the root down to a leaf."
+    explanation: "The longest path is A–B–D–E: 3 edges."
+  - key: tree-height-speed
+    type: single_choice
+    skills: [tree-measures]
+    difficulty: 3
+    stem: "Many tree operations follow a single path from the root to a leaf. Their cost therefore depends mainly on:"
+    options:
+      - text: "The tree's height"
+        correct: true
+        why: "One root-to-leaf path has at most height + 1 nodes."
+      - text: "The number of leaves"
+        why: "You only visit one leaf on a single path."
+      - text: "The total number of nodes, always"
+        why: "Only when the tree is shaped like a list does height equal n − 1."
+      - text: "The values stored in the nodes"
+        why: "The shape matters, not the values."
+  - key: tree-uses
+    type: multi_choice
+    skills: [tree-uses]
+    difficulty: 2
+    stem: "Which of these are naturally shaped like trees? Select all that apply."
+    options:
+      - text: "Folders and files on a disk"
+        correct: true
+        why: "Each folder has one parent folder."
+      - text: "A company's reporting structure"
+        correct: true
+        why: "Each employee reports to one manager."
+      - text: "A city's road network with loops"
+        why: "Roads form cycles: that's a general graph."
+      - text: "A queue at a ticket counter"
+        why: "That's a line (FIFO), not a hierarchy."
+  - key: tree-not-tree
+    type: single_choice
+    skills: [tree-uses, tree-terms]
+    difficulty: 3
+    stem: "A structure has a node whose child is also one of its ancestors. Is it a tree?"
+    options:
+      - text: "No: that creates a cycle, and trees have none"
+        correct: true
+        why: "Following edges down would return you to where you started."
+      - text: "Yes, as long as it has a root"
+        why: "Having a root is not enough; trees must be acyclic."
+      - text: "Yes, if it has fewer than 10 nodes"
+        why: "Size doesn't matter; the cycle does."
+      - text: "Only if it is a binary tree"
+        why: "No kind of tree allows cycles."

@@ -12,7 +12,10 @@
     <nav class="nav" aria-label="Primary">
       <div class="nav-section">Learn</div>
       <a href="<c:url value='/app/today'/>"<c:if test="${nav == 'today'}"> aria-current="page"</c:if>><pw:icon name="compass"/>Today</a>
+      <a href="<c:url value='/app/next'/>"<c:if test="${nav == 'next'}"> aria-current="page"</c:if>><pw:icon name="route"/>Next steps</a>
       <a href="<c:url value='/app/learn'/>"<c:if test="${nav == 'learn'}"> aria-current="page"</c:if>><pw:icon name="map"/>Learn</a>
+      <a href="<c:url value='/app/practice'/>"<c:if test="${nav == 'practice'}"> aria-current="page"</c:if>><pw:icon name="target"/>Practice</a>
+      <a href="<c:url value='/app/progress'/>"<c:if test="${nav == 'progress'}"> aria-current="page"</c:if>><pw:icon name="activity"/>Progress</a>
       <c:if test="${user.teacher or user.admin}">
         <div class="nav-section">Teach</div>
         <a href="<c:url value='/teach'/>"<c:if test="${nav == 'teach'}"> aria-current="page"</c:if>><pw:icon name="school"/>Teaching</a>
@@ -63,6 +66,7 @@
   <nav class="tabbar" aria-label="Primary">
     <a href="<c:url value='/app/today'/>"<c:if test="${nav == 'today'}"> aria-current="page"</c:if>><pw:icon name="compass"/>Today</a>
     <a href="<c:url value='/app/learn'/>"<c:if test="${nav == 'learn'}"> aria-current="page"</c:if>><pw:icon name="map"/>Learn</a>
+    <a href="<c:url value='/app/practice'/>"<c:if test="${nav == 'practice'}"> aria-current="page"</c:if>><pw:icon name="target"/>Practice</a>
     <c:if test="${user.teacher or user.admin}">
       <a href="<c:url value='/teach'/>"<c:if test="${nav == 'teach'}"> aria-current="page"</c:if>><pw:icon name="school"/>Teach</a>
     </c:if>

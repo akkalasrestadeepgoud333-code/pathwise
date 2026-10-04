@@ -1,0 +1,110 @@
+questions:
+  - key: sq-stack-top
+    type: numeric
+    skills: [stack-ops, lifo-fifo]
+    difficulty: 1
+    stem: "Starting empty, a stack does: push 4, push 7, push 1, pop, push 9, pop. What is on top now?"
+    answer: 7
+    hints:
+      - "Write the stack after each step, top on the right."
+    explanation: "[4] → [4,7] → [4,7,1] → [4,7] → [4,7,9] → [4,7]. Top is 7."
+  - key: sq-pop-sequence
+    type: short_text
+    skills: [stack-ops]
+    difficulty: 2
+    stem: "Push 1, 2, 3, 4 onto an empty stack, then pop everything. In what order do the values come out (comma-separated)?"
+    accepted: ["4, 3, 2, 1"]
+    hints:
+      - "The last one pushed is the first one popped."
+  - key: sq-peek
+    type: single_choice
+    skills: [stack-ops]
+    difficulty: 1
+    stem: "What does `peek` do on a stack?"
+    options:
+      - text: "Returns the top item without removing it"
+        correct: true
+        why: "Peek looks; pop removes."
+      - text: "Removes and returns the top item"
+        why: "That's pop."
+      - text: "Returns the bottom item"
+        why: "Only the top of a stack is accessible."
+      - text: "Returns the number of items"
+        why: "That's size()."
+  - key: sq-queue-front
+    type: numeric
+    skills: [queue-ops, lifo-fifo]
+    difficulty: 1
+    stem: "Starting empty, a queue does: enqueue 5, enqueue 8, enqueue 2, dequeue, enqueue 6. What is at the front?"
+    answer: 8
+    hints:
+      - "The first one in is the first one out."
+    explanation: "[5,8,2] → dequeue 5 → [8,2] → [8,2,6]. Front is 8."
+  - key: sq-dequeue-order
+    type: short_text
+    skills: [queue-ops]
+    difficulty: 2
+    stem: "Enqueue 1, 2, 3, 4, then dequeue everything. In what order do they come out (comma-separated)?"
+    accepted: ["1, 2, 3, 4"]
+  - key: sq-printer
+    type: single_choice
+    skills: [lifo-fifo, stack-applications]
+    difficulty: 2
+    stem: "Print jobs should be printed in the order they were sent. Which structure fits?"
+    options:
+      - text: "Queue"
+        correct: true
+        why: "FIFO: the oldest job prints first."
+      - text: "Stack"
+        why: "A stack would print the newest job first."
+      - text: "Either works the same"
+        why: "The order of removal differs completely."
+      - text: "Neither; use a sorted array"
+        why: "Sorting isn't needed; arrival order is the rule."
+  - key: sq-undo
+    type: single_choice
+    skills: [lifo-fifo, stack-applications]
+    difficulty: 2
+    stem: "An editor's **Undo** reverses your most recent action first. Which structure stores the history?"
+    options:
+      - text: "Stack"
+        correct: true
+        why: "LIFO: the last action done is the first undone."
+      - text: "Queue"
+        why: "A queue would undo your oldest action first."
+      - text: "Hash table"
+        why: "Undo needs order, not lookup by key."
+      - text: "Binary search tree"
+        why: "Sorting actions by value doesn't model 'most recent first'."
+  - key: sq-brackets
+    type: single_choice
+    skills: [stack-applications]
+    difficulty: 3
+    stem: "Using a stack to check brackets, what happens with the input `( [ ) ]`?"
+    options:
+      - text: "Unbalanced: ')' arrives while '[' is on top"
+        correct: true
+        why: "Each closer must match the most recent unmatched opener, which is '['."
+      - text: "Balanced: there are two openers and two closers"
+        why: "Counts match, but the nesting order is wrong."
+      - text: "Balanced, because '(' and ')' both appear"
+        why: "Order matters, not just presence."
+      - text: "The stack underflows"
+        why: "The stack still holds '(' when ')' arrives; the problem is a mismatch."
+    hints:
+      - "Push each opener. When a closer arrives, what must be on top?"
+  - key: sq-underflow
+    type: single_choice
+    skills: [stack-ops, queue-ops]
+    difficulty: 3
+    stem: "What is **underflow**?"
+    options:
+      - text: "Removing from an empty stack or queue"
+        correct: true
+        why: "There's nothing to pop or dequeue."
+      - text: "Adding to a full stack or queue"
+        why: "That's overflow."
+      - text: "A queue holding fewer items than a stack"
+        why: "Underflow is about removing from empty."
+      - text: "A value smaller than the minimum integer"
+        why: "That's numeric underflow, a different concept."

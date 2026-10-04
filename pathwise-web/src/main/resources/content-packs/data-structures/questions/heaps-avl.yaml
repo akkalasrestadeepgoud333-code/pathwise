@@ -1,0 +1,146 @@
+questions:
+  - key: heap-root
+    type: single_choice
+    skills: [heap-property]
+    difficulty: 1
+    stem: "In a min-heap, where is the smallest value?"
+    options:
+      - text: "At the root"
+        correct: true
+        why: "Every parent is ≤ its children, so the minimum rises to the top."
+      - text: "In the leftmost leaf"
+        why: "Leaves are the largest along their paths, not the smallest."
+      - text: "At the last array index"
+        why: "The last element is just the most recently filled slot."
+      - text: "Anywhere; a heap isn't ordered"
+        why: "The heap property places the minimum at the root."
+  - key: heap-valid
+    type: multi_choice
+    skills: [heap-property]
+    difficulty: 3
+    stem: "Which arrays are valid **min-heaps**? Select all that apply."
+    options:
+      - text: "[1, 3, 2, 7, 4]"
+        correct: true
+        why: "1 ≤ 3, 2; 3 ≤ 7, 4. Every parent is ≤ its children."
+      - text: "[2, 5, 3, 9, 6, 8, 4]"
+        correct: true
+        why: "Check each parent: 2 ≤ 5, 3; 5 ≤ 9, 6; 3 ≤ 8, 4."
+      - text: "[1, 4, 2, 3, 5]"
+        why: "4 at index 1 has child 3 at index 3, which is smaller."
+      - text: "[3, 1, 2]"
+        why: "The root 3 is larger than its child 1."
+  - key: heap-parent-index
+    type: numeric
+    skills: [heap-array-index]
+    difficulty: 2
+    stem: "In an array-based heap, what is the index of the parent of the element at index 11?"
+    answer: 5
+    explanation: "(11 − 1) / 2 = 5."
+  - key: heap-children-index
+    type: short_text
+    skills: [heap-array-index]
+    difficulty: 2
+    stem: "What are the indices of the children of the element at index 3? Answer as `left, right`."
+    accepted: ["7, 8"]
+  - key: heap-insert-result
+    type: short_text
+    skills: [heap-insert]
+    difficulty: 3
+    stem: "Insert 1 into the min-heap `[2, 5, 3, 9, 6, 8, 4]` (append, then sift up). Write the resulting array."
+    accepted: ["1, 2, 3, 5, 6, 8, 4, 9"]
+    hints:
+      - "1 starts at index 7. Its parent is index 3 (value 9)."
+      - "Keep swapping with the parent while 1 is smaller."
+  - key: heap-insert-cost
+    type: single_choice
+    skills: [heap-insert]
+    difficulty: 2
+    stem: "Inserting into a heap of n elements costs:"
+    options:
+      - text: "O(log n)"
+        correct: true
+        why: "Sift-up climbs at most the height of a complete tree."
+      - text: "O(1)"
+        why: "Appending is O(1), but sift-up may need log n swaps."
+      - text: "O(n)"
+        why: "You never visit more than one path."
+      - text: "O(n log n)"
+        why: "That's building a heap by repeated insertion, for all n elements."
+  - key: heap-extract-swap
+    type: single_choice
+    skills: [heap-extract]
+    difficulty: 3
+    stem: "During sift-down in a min-heap, the moving value is larger than both children. Which child do you swap with?"
+    options:
+      - text: "The smaller child"
+        correct: true
+        why: "Then the new parent is ≤ both of its children."
+      - text: "The larger child"
+        why: "The smaller child would end up below a larger parent."
+      - text: "The left child, always"
+        why: "If the right child is smaller, the property breaks."
+      - text: "Neither; stop"
+        why: "It must keep moving down while it's larger than a child."
+  - key: heap-extract-result
+    type: short_text
+    skills: [heap-extract]
+    difficulty: 4
+    stem: "Remove the minimum from `[1, 3, 2, 7, 4]` (move the last element to the root, then sift down). Write the resulting array."
+    accepted: ["2, 3, 4, 7"]
+    hints:
+      - "4 moves to the root: [4, 3, 2, 7]. Its smaller child is 2."
+  - key: avl-balance-factor
+    type: numeric
+    skills: [balance-factor]
+    difficulty: 3
+    stem: "A node's left subtree has height 3 and its right subtree has height 1. What is its balance factor (left − right)?"
+    answer: 2
+    explanation: "3 − 1 = 2: too heavy on the left, so it needs a rotation."
+  - key: avl-allowed
+    type: multi_choice
+    skills: [balance-factor]
+    difficulty: 2
+    stem: "Which balance factors are allowed in an AVL tree?"
+    options:
+      - text: "−1"
+        correct: true
+        why: "Within the limit."
+      - text: "0"
+        correct: true
+        why: "Perfectly balanced."
+      - text: "+1"
+        correct: true
+        why: "Within the limit."
+      - text: "+2"
+        why: "Heights differ by more than 1: a rotation is required."
+  - key: avl-rr-case
+    type: single_choice
+    skills: [rotations]
+    difficulty: 3
+    stem: "Inserting 10, 20, 30 in order makes node 10 unbalanced (Right-Right case). What fixes it?"
+    options:
+      - text: "A single left rotation at 10"
+        correct: true
+        why: "20 becomes the root with children 10 and 30."
+      - text: "A single right rotation at 10"
+        why: "That would make the tree lean further right."
+      - text: "A right rotation at 20, then a left rotation at 10"
+        why: "That's the Right-Left case."
+      - text: "No rotation is needed"
+        why: "10's balance factor is −2."
+  - key: avl-lr-case
+    type: single_choice
+    skills: [rotations]
+    difficulty: 4
+    stem: "Inserting 30, 10, 20 creates a Left-Right imbalance at 30. What is the fix?"
+    options:
+      - text: "Left-rotate 10, then right-rotate 30"
+        correct: true
+        why: "The double rotation makes 20 the root with children 10 and 30."
+      - text: "Right-rotate 30 only"
+        why: "A single rotation leaves the tree unbalanced in the LR case."
+      - text: "Left-rotate 30 only"
+        why: "That's the fix for the Right-Right case."
+      - text: "Swap the values 30 and 20"
+        why: "AVL trees fix shape with rotations, not by swapping values."

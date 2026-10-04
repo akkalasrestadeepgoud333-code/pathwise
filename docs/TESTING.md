@@ -41,4 +41,11 @@ New: GraphsAndLayoutTest, PackValidatorTest (core) · CatalogContentDaoTest (dat
 
 Manual: `import-content` imported 13 topics / 13 modules / 87 sections into the dev database; headless Edge screenshots of Today, Learn, Map (light/dark, desktop/mobile), Topic, Player (overview, traversal visual, flashcards), BST/BFS/hash/stack visuals. Defects found and fixed: SVG attributes broken by Jasper whitespace trimming (regression test added); left-to-right map overflowed (replaced with top-down layout + waypoints); 0% ring dot; card stretching; singular/plural narration.
 
+### 2026-10-04: M2 Evidence → learner model → engine
+
+Command: `.\mvnw.cmd -q install`. Result: **146 tests, 146 passed, 0 failed**.
+New: LearnerCoreTest (grader + golden mastery values), RecommenderTest (9 persona fixtures), QuestionServiceTest (shuffle, no answer leakage), PersonalisationFlowTest (end to end: failed check → Strengthen suggestion quoting "2 of your last 2 answers" → practice with hints and final answers → model and reason change; Not now / Already know / goals; privacy; API).
+
+Manual: pack v2 imported (114 questions, 100 sections). Headless Edge screenshots of Today (with "Why this?"), Next steps, a practice question with a hint, feedback, summary, progress, practice hub and topic. No console errors. Defects found and fixed: correct answer always shown first (now shuffled per student); "Getting started → Needs practice" was labelled an improvement (levels are now ranked by meaning); a SQL type error in the suppressions query (caught by the tests).
+
 Not yet done: accessibility audit with axe-core, Android tests, load tests and the dependency vulnerability scan. All of these are planned (see the blueprint, §35).

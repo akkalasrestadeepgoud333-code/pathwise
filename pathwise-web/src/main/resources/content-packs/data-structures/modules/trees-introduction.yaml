@@ -96,6 +96,11 @@ sections:
         back: Many operations follow one root-to-leaf path, so they cost **O(height)**.
         skill: tree-measures
 
+  - kind: check
+    title: Check your understanding
+    markdown: Answer these to see how well it has sunk in. Your answers help Pathwise suggest what to do next.
+    questions: [tree-leaf, tree-edges, tree-height]
+
   - kind: summary
     title: Summary
     markdown: |

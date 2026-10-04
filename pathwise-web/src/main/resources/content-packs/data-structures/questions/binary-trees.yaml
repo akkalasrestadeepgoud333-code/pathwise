@@ -1,0 +1,102 @@
+questions:
+  - key: bt-max-children
+    type: single_choice
+    skills: [binary-tree-structure]
+    difficulty: 1
+    stem: "What is the maximum number of children a node in a binary tree can have?"
+    options:
+      - text: "2"
+        correct: true
+        why: "A left child and a right child."
+      - text: "1"
+        why: "That's a chain, a special case."
+      - text: "3"
+        why: "Binary means two."
+      - text: "Unlimited"
+        why: "That's a general tree."
+  - key: bt-left-right
+    type: single_choice
+    skills: [binary-tree-structure]
+    difficulty: 2
+    stem: "Tree X has root 5 with only a **left** child 3. Tree Y has root 5 with only a **right** child 3. As binary trees, are X and Y the same?"
+    options:
+      - text: "No: left and right are different positions"
+        correct: true
+        why: "Binary trees distinguish the left child from the right child."
+      - text: "Yes: they contain the same values"
+        why: "Same values, but the structure differs."
+      - text: "Yes: each node has one child"
+        why: "Which side the child is on matters."
+      - text: "Only if they are search trees"
+        why: "They differ as binary trees regardless."
+  - key: bt-full
+    type: single_choice
+    skills: [binary-tree-kinds]
+    difficulty: 2
+    stem: "A binary tree in which every node has either 0 or 2 children is called:"
+    options:
+      - text: "Full"
+        correct: true
+        why: "Full means no node has exactly one child."
+      - text: "Complete"
+        why: "Complete is about filling levels left to right."
+      - text: "Perfect"
+        why: "Perfect also requires all leaves on the same level."
+      - text: "Balanced"
+        why: "Balanced is about height differences."
+  - key: bt-complete
+    type: single_choice
+    skills: [binary-tree-kinds]
+    difficulty: 3
+    stem: "Level by level, a tree is: `1 / 2 3 / 4 _ 6`, so node 2 has a left child 4 and no right child, and node 3 has a left child 6. Is it complete?"
+    options:
+      - text: "No: the last level has a gap before 6"
+        correct: true
+        why: "The last level must be filled from the left with no gaps."
+      - text: "Yes: every level except the last is full"
+        why: "That's half the rule; the last level must also be left-packed."
+      - text: "Yes: it's full"
+        why: "Node 2 has one child, so it isn't even full."
+      - text: "Yes: it has 5 nodes"
+        why: "Completeness is about shape, not count."
+  - key: bt-perfect-count
+    type: numeric
+    skills: [binary-tree-kinds]
+    difficulty: 3
+    stem: "How many nodes does a **perfect** binary tree of height 3 (counting edges) have?"
+    answer: 15
+    hints:
+      - "Levels 0, 1, 2, 3 hold 1, 2, 4, 8 nodes."
+    explanation: "2^(3+1) − 1 = 15."
+  - key: bt-array-children
+    type: short_text
+    skills: [binary-tree-representation]
+    difficulty: 2
+    stem: "In the array representation of a complete binary tree, what are the indices of the children of the node at index 4? Answer as `left, right`."
+    accepted: ["9, 10"]
+    hints:
+      - "Left child = 2i + 1, right child = 2i + 2."
+  - key: bt-array-parent
+    type: numeric
+    skills: [binary-tree-representation]
+    difficulty: 2
+    stem: "In the same array layout, what is the index of the parent of the node at index 9?"
+    answer: 4
+    explanation: "(9 − 1) / 2 = 4 (integer division)."
+  - key: bt-array-value
+    type: numeric
+    skills: [binary-tree-representation]
+    difficulty: 3
+    stem: "The complete tree `[8, 4, 12, 2, 6, 10, 14]` is stored as an array. What is the value of the right child of 12?"
+    answer: 14
+    explanation: "12 is at index 2; its right child is at 2·2 + 2 = 6, which holds 14."
+  - key: bt-min-height
+    type: numeric
+    skills: [binary-tree-kinds]
+    difficulty: 4
+    stem: "What is the minimum possible height (edges) of a binary tree with 100 nodes?"
+    answer: 6
+    hints:
+      - "A perfect tree of height h holds 2^(h+1) − 1 nodes."
+      - "Height 5 holds at most 63 nodes; height 6 holds up to 127."
+    explanation: "⌊log₂ 100⌋ = 6."

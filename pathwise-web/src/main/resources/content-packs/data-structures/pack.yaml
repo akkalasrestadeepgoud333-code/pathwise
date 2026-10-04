@@ -1,7 +1,7 @@
 # Data Structures content pack.
 # Keys are stable identifiers: renaming a key creates a new topic/skill/module. Change titles freely.
 key: data-structures
-version: 1
+version: 2
 title: Data Structures
 
 catalog:
@@ -184,3 +184,15 @@ modules:
   - graphs-essentials.yaml
   - bfs-and-dfs.yaml
   - hashing-essentials.yaml
+
+questions:
+  - arrays.yaml
+  - linked-lists.yaml
+  - stacks-queues.yaml
+  - recursion.yaml
+  - trees.yaml
+  - binary-trees.yaml
+  - tree-traversals.yaml
+  - bst.yaml
+  - heaps-avl.yaml
+  - graphs-hashing.yaml

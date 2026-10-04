@@ -12,7 +12,42 @@ public record ContentPack(
         int version,
         Catalog catalog,
         List<TopicDef> topics,
-        List<ModuleDef> modules) {
+        List<ModuleDef> modules,
+        List<QuestionDef> questions) {
+
+    public ContentPack(String key, int version, Catalog catalog, List<TopicDef> topics, List<ModuleDef> modules) {
+        this(key, version, catalog, topics, modules, List.of());
+    }
+
+    public List<QuestionDef> questionsOrEmpty() {
+        return questions == null ? List.of() : questions;
+    }
+
+    public record OptionDef(String text, Boolean correct, String why) {
+        public boolean isCorrect() {
+            return Boolean.TRUE.equals(correct);
+        }
+    }
+
+    /**
+     * A bank question. Choice types use {@code options}; {@code numeric} uses {@code answer} and
+     * {@code tolerance}; {@code short_text} uses {@code accepted}. Hints are revealed one at a time.
+     */
+    public record QuestionDef(String key, String type, List<String> skills, Integer difficulty, String stem,
+                              List<OptionDef> options, Double answer, Double tolerance, List<String> accepted,
+                              List<String> hints, String explanation) {
+        public List<String> skillsOrEmpty() {
+            return skills == null ? List.of() : skills;
+        }
+
+        public List<OptionDef> optionsOrEmpty() {
+            return options == null ? List.of() : options;
+        }
+
+        public List<String> hintsOrEmpty() {
+            return hints == null ? List.of() : hints;
+        }
+    }
 
     public record NodeDef(String key, String title, String description) {}
 
@@ -56,7 +91,7 @@ public record ContentPack(
     /**
      * One section. Which fields apply depends on {@code kind}:
      * text kinds use {@code markdown}; {@code visual} uses {@code visual}+{@code alt};
-     * {@code flashcards} uses {@code cards}; {@code resources} uses {@code links}.
+     * {@code flashcards} uses {@code cards}; {@code resources} uses {@code links}; {@code check} uses {@code questions}.
      */
     public record SectionDef(
             String key,
@@ -67,7 +102,17 @@ public record ContentPack(
             Map<String, Object> visual,
             String alt,
             List<CardDef> cards,
-            List<LinkDef> links) {
+            List<LinkDef> links,
+            List<String> questions) {
+
+        public SectionDef(String key, String kind, String title, Boolean required, String markdown,
+                          Map<String, Object> visual, String alt, List<CardDef> cards, List<LinkDef> links) {
+            this(key, kind, title, required, markdown, visual, alt, cards, links, null);
+        }
+
+        public List<String> questionsOrEmpty() {
+            return questions == null ? List.of() : questions;
+        }
 
         public boolean isRequired() {
             return required == null || required;

@@ -86,6 +86,11 @@ sections:
         back: "`i < a.length` (not `<=`)."
         skill: array-traversal
 
+  - kind: check
+    title: Check your understanding
+    markdown: Answer these to see how well it has sunk in. Your answers help Pathwise suggest what to do next.
+    questions: [arr-index-last, arr-insert-front-cost, arr-complexity-match]
+
   - kind: summary
     title: Summary
     markdown: |

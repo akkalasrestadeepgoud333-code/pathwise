@@ -27,7 +27,7 @@
       <span class="list-icon"><pw:icon name="award"/></span>
       <div>
         <h2>Module complete: you've studied <c:out value="${p.moduleTitle}"/></h2>
-        <p>Nice work. Practice questions that measure what you've learned are coming next in Pathwise.</p>
+        <p>Nice work. Your check answers now feed your levels. See <a href="<c:url value='/app/next'/>">your next steps</a>.</p>
       </div>
       <a class="btn" href="<c:url value='/app/topics/${p.subjectKey}/${p.topicKey}'/>">Back to topic</a>
     </div>
@@ -68,6 +68,7 @@
           <c:when test="${sec.kind == 'visual'}"><pw:icon name="sparkles" size="sm"/>Interactive</c:when>
           <c:when test="${sec.kind == 'flashcards'}"><pw:icon name="layout-dashboard" size="sm"/>Flashcards</c:when>
           <c:when test="${sec.kind == 'example'}"><pw:icon name="target" size="sm"/>Worked example</c:when>
+          <c:when test="${sec.kind == 'check'}"><pw:icon name="circle-check" size="sm"/>Check your understanding</c:when>
           <c:when test="${sec.kind == 'summary'}"><pw:icon name="circle-check" size="sm"/>Summary</c:when>
           <c:when test="${sec.kind == 'resources'}"><pw:icon name="book-open" size="sm"/>Go further</c:when>
           <c:when test="${sec.kind == 'overview'}"><pw:icon name="compass" size="sm"/>Overview</c:when>
@@ -99,6 +100,32 @@
         </div>
       </c:if>
 
+      <c:if test="${sec.kind == 'check'}">
+        <c:choose>
+          <c:when test="${not empty checkResults}">
+            <div class="check-score" role="status"><pw:icon name="award"/>You got <strong><c:out value="${checkScore}"/></strong> right. Your answers now count toward your levels.</div>
+            <ol class="check-list">
+              <c:forEach var="item" items="${checkResults}">
+                <li class="check-item">
+                  <div class="q-stem prose"><pw:html value="${item.question.stem}"/></div>
+                  <pw:feedback f="${item.feedback}"/>
+                </li>
+              </c:forEach>
+            </ol>
+          </c:when>
+          <c:otherwise>
+            <pw:form action="/app/modules/${p.moduleKey}/${sec.key}/check" id="check-form">
+              <ol class="check-list">
+                <c:forEach var="q" items="${checkQuestions}">
+                  <li class="check-item"><pw:question q="${q}" optionName="q-${q.id}" textName="t-${q.id}"/></li>
+                </c:forEach>
+              </ol>
+              <button type="submit" class="btn btn-primary">Check my answers <pw:icon name="check" size="sm"/></button>
+            </pw:form>
+          </c:otherwise>
+        </c:choose>
+      </c:if>
+
       <c:if test="${sec.kind == 'resources'}">
         <ul class="links-list">
           <c:forEach var="l" items="${sec.links}">
@@ -114,14 +141,25 @@
           <c:when test="${not empty p.prevKey}"><a class="btn btn-ghost" href="<c:url value='/app/modules/${p.moduleKey}/${p.prevKey}'/>">← Previous</a></c:when>
           <c:otherwise><span></span></c:otherwise>
         </c:choose>
-        <pw:form action="/app/modules/${p.moduleKey}/${sec.key}/done">
-          <button type="submit" class="btn btn-primary">
+        <c:choose>
+          <c:when test="${sec.kind == 'check' and empty checkResults}"><span></span></c:when>
+          <c:when test="${sec.kind == 'check'}">
             <c:choose>
-              <c:when test="${empty p.nextKey}">Finish module <pw:icon name="check"/></c:when>
-              <c:otherwise>Got it, continue <pw:icon name="arrow-right"/></c:otherwise>
+              <c:when test="${empty p.nextKey}"><a class="btn btn-primary" href="<c:url value='/app/topics/${p.subjectKey}/${p.topicKey}'/>">Back to topic <pw:icon name="arrow-right"/></a></c:when>
+              <c:otherwise><a class="btn btn-primary" href="<c:url value='/app/modules/${p.moduleKey}/${p.nextKey}'/>">Continue <pw:icon name="arrow-right"/></a></c:otherwise>
             </c:choose>
-          </button>
-        </pw:form>
+          </c:when>
+          <c:otherwise>
+            <pw:form action="/app/modules/${p.moduleKey}/${sec.key}/done">
+              <button type="submit" class="btn btn-primary">
+                <c:choose>
+                  <c:when test="${empty p.nextKey}">Finish module <pw:icon name="check"/></c:when>
+                  <c:otherwise>Got it, continue <pw:icon name="arrow-right"/></c:otherwise>
+                </c:choose>
+              </button>
+            </pw:form>
+          </c:otherwise>
+        </c:choose>
       </div>
     </article>
   </div>

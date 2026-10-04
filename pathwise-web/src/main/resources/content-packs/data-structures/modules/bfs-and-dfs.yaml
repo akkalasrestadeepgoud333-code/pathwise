@@ -83,6 +83,11 @@ sections:
         back: "**O(V + E)** for both."
         skill: dfs
 
+  - kind: check
+    title: Check your understanding
+    markdown: Answer these to see how well it has sunk in. Your answers help Pathwise suggest what to do next.
+    questions: [bfs-order, dfs-structure, visited-why]
+
   - kind: summary
     title: Summary
     markdown: |

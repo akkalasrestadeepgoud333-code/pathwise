@@ -97,6 +97,8 @@ public final class PackValidator {
         }
         Graphs.findCycle(byKey.keySet(), parentEdges).ifPresent(c -> errors.add("topic nesting cycle: " + String.join(" → ", c)));
 
+        Set<String> questionKeys = validateQuestions(pack.questionsOrEmpty(), skillKeys, errors);
+
         Set<String> moduleKeys = new HashSet<>();
         for (ModuleDef m : pack.modules() == null ? List.<ModuleDef>of() : pack.modules()) {
             String where = "module " + m.key();
@@ -138,7 +140,7 @@ public final class PackValidator {
                     errors.add(where + ": duplicate section key " + sectionKey);
                 }
                 text(s.title(), where + " section title", 1, 160, errors);
-                validateSection(where + " / " + sectionKey, kind.get(), s, skillKeys, errors);
+                validateSection(where + " / " + sectionKey, kind.get(), s, skillKeys, questionKeys, errors);
             }
         }
         return errors;
@@ -154,7 +156,90 @@ public final class PackValidator {
         return n == 1 ? kind : kind + "-" + n;
     }
 
-    private static void validateSection(String where, SectionKind kind, SectionDef s, Set<String> skills, List<String> errors) {
+    private static final Set<String> QUESTION_TYPES = Set.of("single_choice", "multi_choice", "numeric", "short_text");
+
+    private static Set<String> validateQuestions(List<ContentPack.QuestionDef> questions, Set<String> skills, List<String> errors) {
+        Set<String> keys = new HashSet<>();
+        for (ContentPack.QuestionDef q : questions) {
+            String where = "question " + q.key();
+            key(q.key(), "question key", errors);
+            if (!keys.add(q.key())) {
+                errors.add("duplicate question key " + q.key());
+            }
+            if (q.type() == null || !QUESTION_TYPES.contains(q.type())) {
+                errors.add(where + ": type must be one of " + QUESTION_TYPES);
+                continue;
+            }
+            text(q.stem(), where + " stem", 3, 4000, errors);
+            if (q.difficulty() == null || q.difficulty() < 1 || q.difficulty() > 5) {
+                errors.add(where + ": difficulty must be 1-5");
+            }
+            if (q.skillsOrEmpty().isEmpty()) {
+                errors.add(where + " must assess at least one skill");
+            }
+            for (String s : q.skillsOrEmpty()) {
+                if (!skills.contains(s)) {
+                    errors.add(where + " assesses unknown skill " + s);
+                }
+            }
+            for (String h : q.hintsOrEmpty()) {
+                text(h, where + " hint", 3, 1000, errors);
+            }
+            if (q.hintsOrEmpty().size() > 5) {
+                errors.add(where + ": at most 5 hints");
+            }
+            switch (q.type()) {
+                case "single_choice", "multi_choice" -> {
+                    List<ContentPack.OptionDef> opts = q.optionsOrEmpty();
+                    long correct = opts.stream().filter(ContentPack.OptionDef::isCorrect).count();
+                    if (opts.size() < 2 || opts.size() > 8) {
+                        errors.add(where + ": needs 2-8 options");
+                    }
+                    if ("single_choice".equals(q.type()) && correct != 1) {
+                        errors.add(where + ": single_choice needs exactly one correct option");
+                    }
+                    if ("multi_choice".equals(q.type()) && correct < 1) {
+                        errors.add(where + ": multi_choice needs at least one correct option");
+                    }
+                    Set<String> labels = new HashSet<>();
+                    for (ContentPack.OptionDef o : opts) {
+                        text(o.text(), where + " option", 1, 1000, errors);
+                        if (o.text() != null && !labels.add(o.text().strip())) {
+                            errors.add(where + ": duplicate option " + o.text());
+                        }
+                    }
+                }
+                case "numeric" -> {
+                    if (q.answer() == null || !Double.isFinite(q.answer())) {
+                        errors.add(where + ": numeric questions need an answer");
+                    }
+                    if (q.tolerance() != null && q.tolerance() < 0) {
+                        errors.add(where + ": tolerance cannot be negative");
+                    }
+                }
+                case "short_text" -> {
+                    if (q.accepted() == null || q.accepted().isEmpty() || q.accepted().stream().anyMatch(a -> a == null || a.isBlank())) {
+                        errors.add(where + ": short_text questions need accepted answers");
+                    }
+                }
+                default -> { }
+            }
+        }
+        return keys;
+    }
+
+    private static void validateSection(String where, SectionKind kind, SectionDef s, Set<String> skills,
+                                        Set<String> questions, List<String> errors) {
+        if (kind == SectionKind.CHECK) {
+            if (s.questionsOrEmpty().isEmpty() || s.questionsOrEmpty().size() > 10) {
+                errors.add(where + ": check sections need 1-10 questions");
+            }
+            for (String q : s.questionsOrEmpty()) {
+                if (!questions.contains(q)) {
+                    errors.add(where + ": unknown question " + q);
+                }
+            }
+        }
         if (kind.isText()) {
             text(s.markdown(), where + " markdown", 1, 20_000, errors);
         }

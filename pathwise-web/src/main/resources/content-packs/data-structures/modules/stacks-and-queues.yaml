@@ -81,6 +81,11 @@ sections:
         back: A **stack**. Push each opener, and pop when its matching closer appears.
         skill: stack-applications
 
+  - kind: check
+    title: Check your understanding
+    markdown: Answer these to see how well it has sunk in. Your answers help Pathwise suggest what to do next.
+    questions: [sq-stack-top, sq-queue-front, sq-undo]
+
   - kind: summary
     title: Summary
     markdown: |

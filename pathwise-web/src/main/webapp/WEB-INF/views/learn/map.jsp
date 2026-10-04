@@ -31,7 +31,7 @@
             <path class="map-edge<c:if test='${not e.required}'> recommended</c:if><c:if test='${e.studied}'> studied</c:if>" d="<c:out value='${e.path}'/>"/>
           </c:forEach>
           <c:forEach var="n" items="${map.nodes}">
-            <a class="map-node <c:out value='${n.coverage}'/><c:if test='${n.current}'> current</c:if><c:if test='${n.optional}'> optional</c:if>"
+            <a class="map-node <c:out value='${n.coverage}'/><c:if test='${not empty n.mastery}'> m-<c:out value='${n.mastery}'/></c:if><c:if test='${n.current}'> current</c:if><c:if test='${n.optional}'> optional</c:if>"
                href="<c:url value='/app/topics/${s.key}/${n.key}'/>"
                transform="<c:out value='translate(${n.x} ${n.y})'/>"
                aria-label="<c:out value='${n.title}'/>: <c:out value='${n.coverageLabel}'/><c:if test='${n.modulesTotal > 0}'>, <c:out value='${n.modulesDone}'/> of <c:out value='${n.modulesTotal}'/> modules</c:if><c:if test='${not empty n.buildsOn}'>, builds on <c:out value='${n.buildsOn[0]}'/></c:if>">
@@ -42,6 +42,7 @@
               <text class="node-meta" x="16" y="60"><c:choose>
                 <c:when test="${n.coverage == 'no-content'}">Coming soon</c:when>
                 <c:when test="${not empty n.buildsOn and n.coverage == 'not-started'}">Builds on <c:out value="${n.buildsOn[0]}"/></c:when>
+                <c:when test="${not empty n.masteryLabel}"><c:out value="${n.modulesDone}"/>/<c:out value="${n.modulesTotal}"/> · <c:out value="${n.masteryLabel}"/></c:when>
                 <c:otherwise><c:out value="${n.modulesDone}"/>/<c:out value="${n.modulesTotal}"/> · <c:out value="${n.coverageLabel}"/></c:otherwise>
               </c:choose></text>
               <g transform="translate(176 36)">
@@ -67,7 +68,7 @@
         <span><i class="legend-swatch"></i>Required first</span>
         <span><i class="legend-swatch recommended"></i>Recommended first</span>
       </div>
-      <p class="legend-note">"Studied" means you finished the learning material. Mastery is measured separately, from practice and assessments, once those are available.</p>
+      <p class="legend-note">"Studied" means you finished the reading. Levels such as Developing or Proficient come from your answers to checks and practice.</p>
     </div>
   </c:if>
 
@@ -92,7 +93,10 @@
                       <c:if test="${n.optional}"> · optional</c:if><c:if test="${n.advanced}"> · advanced</c:if>
                     </div>
                   </div>
-                  <span class="state-chip state-<c:out value='${n.coverage}'/>"><c:out value="${n.coverageLabel}"/></span>
+                  <c:choose>
+                    <c:when test="${not empty n.mastery}"><span class="state-chip state-<c:out value='${n.mastery}'/>"><c:out value="${n.masteryLabel}"/></span></c:when>
+                    <c:otherwise><span class="state-chip state-<c:out value='${n.coverage}'/>"><c:out value="${n.coverageLabel}"/></span></c:otherwise>
+                  </c:choose>
                 </a>
               </li>
             </c:forEach>

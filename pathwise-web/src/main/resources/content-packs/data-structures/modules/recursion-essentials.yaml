@@ -92,6 +92,11 @@ sections:
         back: "**O(d)** stack frames."
         skill: call-stack
 
+  - kind: check
+    title: Check your understanding
+    markdown: Answer these to see how well it has sunk in. Your answers help Pathwise suggest what to do next.
+    questions: [rec-factorial-value, rec-missing-base, rec-call-stack-ds]
+
   - kind: summary
     title: Summary
     markdown: |

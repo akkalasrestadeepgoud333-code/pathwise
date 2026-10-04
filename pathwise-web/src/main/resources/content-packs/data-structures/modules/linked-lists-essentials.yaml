@@ -86,6 +86,11 @@ sections:
         back: The current node's `next` is **null**.
         skill: ll-traversal
 
+  - kind: check
+    title: Check your understanding
+    markdown: Answer these to see how well it has sunk in. Your answers help Pathwise suggest what to do next.
+    questions: [ll-node-contents, ll-insert-front, ll-kth-cost]
+
   - kind: summary
     title: Summary
     markdown: |

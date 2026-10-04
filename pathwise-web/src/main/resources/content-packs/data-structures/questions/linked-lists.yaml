@@ -1,0 +1,134 @@
+questions:
+  - key: ll-node-contents
+    type: single_choice
+    skills: [ll-structure]
+    difficulty: 1
+    stem: "What does a node in a **singly** linked list contain?"
+    options:
+      - text: "A value and a reference to the next node"
+        correct: true
+        why: "That's the whole node: data plus one link forward."
+      - text: "A value and its index in the list"
+        why: "Linked lists don't store indices; position is found by walking."
+      - text: "References to the next and previous nodes only"
+        why: "That describes a doubly linked list, and it still needs a value."
+      - text: "A copy of the whole list"
+        why: "Each node holds only its own value and one link."
+  - key: ll-end-marker
+    type: single_choice
+    skills: [ll-structure, ll-traversal]
+    difficulty: 1
+    stem: "How does a traversal know it has reached the end of a singly linked list?"
+    options:
+      - text: "The current node's next reference is null"
+        correct: true
+        why: "The last node points to null."
+      - text: "It has visited length nodes"
+        why: "A plain linked list doesn't necessarily store its length."
+      - text: "The value is 0"
+        why: "Values can be anything, including 0, in the middle of a list."
+      - text: "It reaches the head again"
+        why: "That only happens in a circular list."
+  - key: ll-traverse-output
+    type: short_text
+    skills: [ll-traversal]
+    difficulty: 2
+    stem: |
+      The list is `head → 4 → 9 → 2 → null`. What does this print (comma-separated)?
+
+      ```java
+      for (Node n = head; n != null; n = n.next.next) {
+          System.out.print(n.value + ",");
+          if (n.next == null) break;
+      }
+      ```
+    accepted: ["4, 2", "4,2,", "4, 2,"]
+    hints:
+      - "The loop jumps two nodes at a time."
+    explanation: "It prints 4, jumps two links to 2, prints 2, then n.next is null so it stops."
+  - key: ll-kth-cost
+    type: single_choice
+    skills: [ll-traversal, ll-vs-array]
+    difficulty: 2
+    stem: "How long does it take to read the k-th element of a singly linked list?"
+    options:
+      - text: "O(k): follow k links from the head"
+        correct: true
+        why: "There's no address formula; you must walk."
+      - text: "O(1)"
+        why: "Only arrays get constant-time indexing."
+      - text: "O(log k)"
+        why: "There's no way to skip ahead in a plain list."
+      - text: "O(n²)"
+        why: "Walking is linear in k."
+  - key: ll-insert-front
+    type: single_choice
+    skills: [ll-insert-delete]
+    difficulty: 2
+    stem: "Which line inserts value 7 at the **front** of the list in O(1)?"
+    options:
+      - text: "head = new Node(7, head);"
+        correct: true
+        why: "The new node points to the old head, then becomes the head."
+      - text: "head.next = new Node(7, null);"
+        why: "This replaces everything after the head with one node: the rest of the list is lost."
+      - text: "new Node(7, head);"
+        why: "The node is created but head still points to the old first node."
+      - text: "head = new Node(7, null);"
+        why: "The rest of the list is lost because the new node points to null."
+  - key: ll-insert-order
+    type: single_choice
+    skills: [ll-insert-delete]
+    difficulty: 3
+    stem: |
+      To insert node `x` after node `p`, a student writes:
+
+      ```java
+      p.next = x;
+      x.next = p.next;
+      ```
+      What goes wrong?
+    options:
+      - text: "x ends up pointing to itself and the rest of the list is lost"
+        correct: true
+        why: "After the first line, p.next is x, so x.next = x. The old successor is unreachable."
+      - text: "Nothing, it's correct"
+        why: "The two lines are in the wrong order."
+      - text: "x is inserted before p instead"
+        why: "p still points to x; the problem is what x points to."
+      - text: "It throws NullPointerException"
+        why: "No null is dereferenced here; it silently corrupts the list."
+    hints:
+      - "Trace the value of p.next after the first line."
+    explanation: "Copy p.next into x.next first, then set p.next = x."
+  - key: ll-delete-after
+    type: single_choice
+    skills: [ll-insert-delete]
+    difficulty: 2
+    stem: "Which statement deletes the node **after** p (assume it exists)?"
+    options:
+      - text: "p.next = p.next.next;"
+        correct: true
+        why: "p skips over its successor, which becomes unreachable."
+      - text: "p = p.next;"
+        why: "This only moves your variable; the list is unchanged."
+      - text: "p.next = null;"
+        why: "This cuts off everything after p, not just one node."
+      - text: "p.next.next = p;"
+        why: "This creates a cycle."
+  - key: ll-vs-array-choose
+    type: multi_choice
+    skills: [ll-vs-array]
+    difficulty: 3
+    stem: "In which situations is a linked list a **better** fit than an array? Select all that apply."
+    options:
+      - text: "Frequent insertions and deletions at the front"
+        correct: true
+        why: "O(1) for a list versus O(n) shifting for an array."
+      - text: "Splicing nodes in where you already hold a reference"
+        correct: true
+        why: "Just a pointer change, no shifting."
+      - text: "Frequent random access by index"
+        why: "Arrays give O(1) indexing; lists need O(n)."
+      - text: "Scanning large amounts of data as fast as possible"
+        why: "Arrays are cache-friendly because elements are contiguous."

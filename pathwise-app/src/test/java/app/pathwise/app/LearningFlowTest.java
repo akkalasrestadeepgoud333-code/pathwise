@@ -109,19 +109,32 @@ class LearningFlowTest {
         Browser b = student();
         HttpResponse<String> first = b.get("/app/modules/tree-traversals");
         assertThat(first.statusCode()).isEqualTo(200);
-        assertThat(first.body()).contains("Why traversal order matters").contains("Section 1 of 9").contains("<table>");
+        assertThat(first.body()).contains("Why traversal order matters").contains("Section 1 of 10").contains("<table>");
 
         String path = "/app/modules/tree-traversals/overview";
         int guard = 0;
         boolean sawVisual = false;
         boolean sawCards = false;
+        boolean sawCheck = false;
         HttpResponse<String> done = null;
         while (guard++ < 20) {
             HttpResponse<String> page = b.get(path);
             assertThat(page.statusCode()).isEqualTo(200);
             sawVisual |= page.body().contains("data-visual data-spec=");
             sawCards |= page.body().contains("class=\"flashcard\"");
-            String section = path.substring(path.lastIndexOf('/') + 1);
+            String section = path.substring(path.lastIndexOf('/') + 1).replaceAll("\\?.*", "");
+            if (page.body().contains("id=\"check-form\"")) {
+                sawCheck = true;
+                // A check cannot be skipped with "done": its answers must be submitted (blank ones count as wrong).
+                assertThat(b.post("/app/modules/tree-traversals/" + section + "/done", Map.of()).statusCode()).isEqualTo(404);
+                done = b.post("/app/modules/tree-traversals/" + section + "/check", Map.of());
+                assertThat(location(done)).contains("?check=");
+                String results = b.get(location(done)).body();
+                assertThat(results).contains("Not quite").contains("Correct answer").contains("0 of 4");
+                // Section is now done; continue from the next section in the outline.
+                path = "/app/modules/tree-traversals/summary";
+                continue;
+            }
             done = b.post("/app/modules/tree-traversals/" + section + "/done", Map.of());
             assertThat(done.statusCode()).isEqualTo(303);
             if (location(done).contains("completed=1")) {
@@ -131,6 +144,7 @@ class LearningFlowTest {
         }
         assertThat(sawVisual).as("interactive traversal visual rendered").isTrue();
         assertThat(sawCards).as("flashcards rendered").isTrue();
+        assertThat(sawCheck).as("check section rendered").isTrue();
         assertThat(location(done)).contains("?completed=1");
 
         HttpResponse<String> finished = b.get(location(done));
@@ -163,11 +177,12 @@ class LearningFlowTest {
     void todaySuggestsAStartingPointWithAReasonThenOffersToContinue() {
         Browser b = student();
         HttpResponse<String> today = b.get("/app/today");
-        assertThat(today.body()).contains("Suggested next step").contains("Why this?")
+        assertThat(today.body()).contains("Your next step").contains("Why this?")
                 .contains("Arrays has no prerequisites, so it&#039;s a natural place to begin.");
         b.get("/app/modules/linked-lists-essentials");
         HttpResponse<String> again = b.get("/app/today");
-        assertThat(again.body()).contains("Continue where you left off").contains("Linked lists: nodes and pointers");
+        assertThat(again.body()).contains("Continue").contains("Linked lists: nodes and pointers")
+                .contains("You&#039;re 0% through it.");
     }
 
     @Test
