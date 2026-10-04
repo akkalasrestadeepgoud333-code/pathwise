@@ -252,7 +252,7 @@ Not verified in a browser for M10: the htmx 4-second refresh and the new admin p
 
 Command: `.\mvnw.cmd -o install` for core, data and web, then `.\mvnw.cmd -o test -pl pathwise-app`.
 
-The app module ran at the test phase only. Two `pathwise-app.jar serve` processes, not started by this work, held its jars, and packaging would have failed on the locked files. No test was skipped because of this.
+The app module ran at the test phase only. Two `pathwise-app.jar serve` processes, not started by this work, held its jars, and packaging would have failed on the locked files. No test was skipped because of this. Once those servers were stopped, a complete `.\mvnw.cmd -o install` (all modules, including packaging) passed with the same 239 tests.
 
 Result: **239 tests, 239 passed, 0 failed, 0 skipped** (core 110, data 14, web 37, app 78).
 
