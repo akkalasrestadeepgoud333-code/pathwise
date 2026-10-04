@@ -14,7 +14,8 @@ public final class PlatformPolicy {
             // Every signed-in person can learn; teachers and admins are learners too.
             case USE_STUDENT_AREA, MANAGE_OWN_ACCOUNT -> true;
             case USE_TEACHER_AREA, CREATE_ROOM -> actor.hasRole(PlatformRole.TEACHER) || actor.hasRole(PlatformRole.ADMIN);
-            case USE_ADMIN_AREA, MANAGE_USERS, GRANT_ROLES, VIEW_AUDIT_LOG, MODERATE_COMMUNITY -> actor.hasRole(PlatformRole.ADMIN);
+            case USE_ADMIN_AREA, MANAGE_USERS, GRANT_ROLES, VIEW_AUDIT_LOG, MODERATE_COMMUNITY, MANAGE_PLATFORM -> actor.hasRole(PlatformRole.ADMIN);
+            case HOST_LIVE_SESSION -> actor.hasRole(PlatformRole.TEACHER) || actor.hasRole(PlatformRole.MENTOR) || actor.hasRole(PlatformRole.ADMIN);
         };
     }
 

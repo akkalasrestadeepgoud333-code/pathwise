@@ -208,4 +208,44 @@ Not verified:
 - a physical phone
 - automated UI tests (none exist)
 
+### 2026-10-04: M10 Admin console and live doubt sessions
+
+Command: `.\mvnw.cmd -o install`, a full build running every suite. Result: **232 tests, 232 passed, 0 failed, 0 skipped** (core 109, data 14, web 33, app 76).
+
+New tests:
+- **LiveSessionRulesTest (core):** 4 tests covering the lifecycle, joining with a lock or after removal, ask limits and queue order.
+- **PlatformPolicyTest:** now covers the new `MANAGE_PLATFORM` and `HOST_LIVE_SESSION` actions.
+- **AdminConsoleAndLiveFlowTest (app):** 2 end-to-end tests.
+  - **Admin console:**
+    - students get 403 on every console page
+    - suspension without password re-entry is refused; a wrong password is refused; an off-site `next` is ignored
+    - a reason is required
+    - suspension ends both the web session and the app's bearer token
+    - reactivation works
+    - granting mentor works; granting "student" is refused
+    - an admin can't remove their own admin role or suspend themselves
+    - Verified Educator can be set; a trust level of 9 is refused
+    - exactly 4 audit entries are written for the account, and the audit filter works
+    - closed sign-ups block registration (web), then reopen
+    - switching Bug Hunt off hides it and returns 404, then it is switched back on
+    - the rooms overview shows no emails, and archiving needs a reason
+  - **Live sessions:**
+    - students can't host
+    - no questions are taken before the start
+    - the host and both participants see only aliases (a name, email and id leak scan)
+    - questions are ordered by votes, and you can't upvote your own
+    - only the host runs the queue, one question is answered at a time, and the 3-waiting cap holds
+    - a participant is removed by alias, can't rejoin, and the removal is audited
+    - locking keeps a newcomer out
+    - ending is final, and an unknown session gives 404
+- **DoubtFlowTest:** now also checks that revealing an alias needs password re-entry.
+
+Defects found and fixed:
+- **An untyped null SQL parameter** in the live queue query caused HTTP 500 on host actions. It is now bound with a type.
+- **ArchitectureTest caught the admin service using identity's DAOs.** Role changes now go through the admin DAO, and ending sessions goes through `IdentityService`.
+- **Disabled game templates** were hidden from the gallery, but a game could still be started by its key. Start and intro now check the template too.
+- **Two test-side mistakes** were also fixed: one test posted without loading the form (CSRF), and one class was missing the content-pack import.
+
+Not verified in a browser for M10: the htmx 4-second refresh and the new admin pages. These were checked only through server-rendered HTML in tests; no screenshot pass was done.
+
 Not yet done: accessibility audit with axe-core, Android UI tests, load tests and the dependency vulnerability scan. All of these are planned (see the blueprint, §35).

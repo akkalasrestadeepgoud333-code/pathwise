@@ -170,11 +170,29 @@ Last updated: **2026-10-04** (end of M2, Evidence → learner model → engine).
 | Notification permission (Android 13+): asked once, after an in-app explanation; "Not now" and "Don't allow" are respected and never asked again by the app | `MainActivity` | emulator: rationale → Android's own dialog → Allow |
 | Light and dark themes from the same colour tokens as the web | `res/values`, `res/values-night` | emulator (light) |
 
+## Implemented (M10: admin console and live doubt sessions)
+
+| Feature | Where | Evidence |
+|---|---|---|
+| People: search by name or email; a person's roles, status, trust level, joined and last-seen dates, and the admin history for their account | `/admin/users` | `AdminConsoleAndLiveFlowTest` |
+| Password re-confirmation (valid 15 minutes, rate-limited, safe redirect only) before role changes, suspensions and identity reveals in moderation | `/admin/reauth`, `AdminService`, `ModerationController` | `AdminConsoleAndLiveFlowTest`, `DoubtFlowTest` |
+| Suspend and reactivate with a required reason: suspension ends every web and app session at once, and sign-in is refused; nothing is deleted. Admins can't suspend themselves, and an administrator must lose the admin role before being suspended | `/admin/users/<id>` | `AdminConsoleAndLiveFlowTest` |
+| Grant and remove the teacher, mentor and admin roles; an admin can't remove their own admin role, and the last administrator can't be removed; Verified Educator and trust level (0–4) | `/admin/users/<id>` | `AdminConsoleAndLiveFlowTest` |
+| Sign-ups open or closed (web and API registration both respect it; `create-admin` still works) | `/admin/settings` | `AdminConsoleAndLiveFlowTest` |
+| Game template registry: switching a template off hides its games and refuses new plays; finished games are kept | `/admin/games` | `AdminConsoleAndLiveFlowTest` |
+| Rooms overview: names, codes, owner, head counts only (no people or work); archive and restore with a logged reason | `/admin/rooms` | `AdminConsoleAndLiveFlowTest` |
+| Audit log viewer with an action-prefix filter and paging; every admin change above is recorded | `/admin/audit` | `AdminConsoleAndLiveFlowTest` |
+| Live doubt sessions: teachers, mentors and admins host; anyone signed in can join as "Participant N" (no names for anyone, including the host); a queue ordered by "being answered", then upvotes, then age; "me too" upvotes (not your own); raise or lower your hand; at most 3 waiting questions per person | `/app/live` | `LiveSessionRulesTest`, `AdminConsoleAndLiveFlowTest` |
+| Host controls: start, end (final), lock to new people, answer now (one at a time), mark answered, dismiss and restore, remove a participant by alias (they can't rejoin; logged) | `/app/live/<id>` | `AdminConsoleAndLiveFlowTest` |
+| The queue refreshes every 4 seconds through the bundled htmx (the question box sits outside the refreshed part, so typing isn't lost); without JavaScript a "Refresh now" link works | `live/session.jsp`, `live/queue.jsp` | `AdminConsoleAndLiveFlowTest` (fragment) |
+
 ## Partially implemented
 
 | Feature | Works | Missing |
 |---|---|---|
 | Android app (rest of the blueprint) | see the M9 table | the Learning Map trail, modules, flashcards, daily challenge, assessments, the tutor, assignments, achievements and settings (use the website for these); offline cache and queued offline game submissions; background push (Pathwise checks only when the app opens, so no FCM, no background service); teaching tools (web only); Photo Picker for doubts; automated UI tests (verified by hand on an emulator only); a signed release build |
+| Admin console (rest of the blueprint) | see the M10 table | catalogue tree editor, badge definitions with a criteria builder and dry run, platform analytics beyond the overview counts, a reports section separate from moderation, SMTP settings (Pathwise sends no email), changing the AI provider from the UI (it's in the config file, shown read-only) |
+| Live doubt sessions (rest of the blueprint) | see the M10 table | scheduling a future start time, pinned host messages, reporting a session question, publishing answered questions as KB drafts, Verified Educators (without a teacher or mentor role) and trust-level-3 students as hosts, live sessions in the Android app |
 | Learner profile | stored per user; the theme preference is used | timezone editing, goals and modalities UI (M2) |
 | "Ask" recommendation slot | not generated | the tutor and doubts exist; the recommender doesn't suggest them yet |
 | Rooms (rest of the blueprint) | see the M5 table | QR codes for join links; item gates (soft/hard prerequisites); duplicating a room; transferring ownership; the "3+ failed attempts on one item" attention rule; teachers writing their own questions and modules (room assessments use the bank) |
@@ -185,14 +203,14 @@ Last updated: **2026-10-04** (end of M2, Evidence → learner model → engine).
 | Community (rest of the blueprint) | see the M6 table | room discussion (L2), live doubt sessions, attaching a question attempt to a doubt, KB links in modules' Common doubts, image uploads, a separate moderator role (moderation is an admin power for now) |
 | Gamification (rest of the blueprint) | see the M7 table | Web Push / email / Android push, notification preferences and quiet hours (only in-app notifications exist, and Pathwise sends no reminders), learner time zones (days use Asia/Kolkata), room leaderboards (opt-in, P2), room custom badges, challenge-pass and doubt-to-practice XP, Root Fixer / Curious Mind / Course Milestone / Team Player badges |
 | Tutor (rest of the blueprint) | see the M8 table | streaming replies, Practice Mode (AI-generated questions), Study Coach, General Assistant, room i_mode, the Android app's tutor screen; the AI path was tested against a stub server, not a real model, because Ollama isn't installed on the build machine |
-| Game administration | templates can be disabled in the database (`game_templates.enabled`) | an admin screen for it (M10); the teachers' "Practice and play" panel (M5) |
+| Game administration | templates switched on and off from `/admin/games` (M10) | default configs per template; the teachers' "Practice and play" panel (M5) |
 | Offline game submissions | the attempt id makes online finishing idempotent | queued offline logs on Android (the app needs a connection to play) |
 | SQL-query questions | — | deferred until a DBMS pack exists; the grader has no SQL type yet |
 | Security tooling | headers, CSRF, rate limits, audit | OWASP Dependency-Check run (planned for M11) |
 
 ## Proposed (designed in the blueprint, not built)
 
-more games: Sequence Sort, True/False Sprint, Query Quest (P1) · rooms, assignments and teacher analytics (M5) · projects, live doubt sessions and full admin console (M10).
+more games: Sequence Sort, True/False Sprint, Query Quest (P1) · rooms, assignments and teacher analytics (M5) · group projects with teams and contribution logs, room custom badges, and the Android offline queue (all M10 P2 items, deferred: designed in the blueprint, not built).
 
 ## Future (out of scope for v1)
 
@@ -217,6 +235,8 @@ Knowledge tracing / ML models · embeddings-based retrieval · server-side code 
   - **Game configs** are typed Java records checked by `PackValidator`, the same approach as the other pack payloads, instead of JSON Schema files.
   - **Scores never depend on speed**, so there are no lives or combos. Relaxed mode hides the clock and score. The daily cap is a rolling 24 hours.
   - **The activities table** holds only games for now. Practice sets are still generated attempts.
+- **Live sessions use polling, not WebSocket (recorded 2026-10-04, M10).** A session page fetches its queue fragment every 4 seconds. That is simpler to secure (the same session, CSRF and CSP rules as every other page) and to test, and it is fast enough for a text queue. WebSocket remains possible later.
+- **M10 scope (recorded 2026-10-04):** the admin console and live doubt sessions were built. Group projects, room custom badges and the Android offline queue (P2 in the blueprint) were deferred to keep M11 hardening on schedule.
 - **Android (recorded 2026-10-04, M9):** built in **Java + XML layouts** with framework classes only, not Kotlin + Compose, because the project uses Java, JSP and JS throughout (the user's request). The WebView serves assets through `shouldInterceptRequest` instead of androidx `WebViewAssetLoader`. Cleartext http is allowed so the app can reach a server on the student's own computer or LAN; the sign-in screen warns when a non-local server isn't https.
 - **Rooms (recorded 2026-10-04, M5):**
   - **Platform admins have no special access to a room's people or data.** Rooms are private to their members; admin oversight of rooms arrives with moderation (M6/M10).

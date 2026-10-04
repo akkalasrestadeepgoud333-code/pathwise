@@ -235,6 +235,10 @@ class DoubtFlowTest {
         // Revealing the person behind the alias needs a reason and is logged.
         String alias = one("select alias from anonymous_aliases where thread_id = ?::uuid", thread);
         mod.b().get("/admin/moderation");
+        // Revealing is sensitive: without a fresh password confirmation it is refused.
+        assertThat(location(mod.b().post("/admin/moderation", Map.of("action", "reveal", "threadId", thread, "alias", alias,
+                "reason", "Repeated cheating requests in the network")))).startsWith("/admin/reauth");
+        assertThat(location(mod.b().post("/admin/reauth", Map.of("password", PASSWORD, "next", "/admin/moderation")))).isEqualTo("/admin/moderation");
         mod.b().post("/admin/moderation", Map.of("action", "reveal", "threadId", thread, "alias", alias, "reason", "short"));
         assertThat(mod.b().get("/admin/moderation").body()).doesNotContain(asker.email());
         mod.b().post("/admin/moderation", Map.of("action", "reveal", "threadId", thread, "alias", alias, "reason", "Repeated cheating requests in the network"));

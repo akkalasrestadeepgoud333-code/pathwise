@@ -67,6 +67,11 @@ public class ModerationController extends PageServlet {
                     flash(req, "success", "Done. The action and your reason are in the moderation log.");
                 }
                 case "reveal" -> {
+                    if (!app().admin().reauthenticated(actor)) { // a sensitive action: password within 15 minutes
+                        flash(req, "info", "Please confirm your password, then repeat the reveal.");
+                        redirect(req, res, "/admin/reauth?next=%2Fadmin%2Fmoderation");
+                        return;
+                    }
                     UUID thread = Ids.parseOrNull(req.getParameter("threadId"));
                     int alias = Integer.parseInt(param(req, "alias").strip());
                     if (thread == null) {

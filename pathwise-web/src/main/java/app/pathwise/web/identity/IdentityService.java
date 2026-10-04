@@ -14,6 +14,7 @@ import app.pathwise.data.identity.SessionDao;
 import app.pathwise.data.identity.SessionRecord;
 import app.pathwise.data.identity.UserDao;
 import app.pathwise.data.identity.UserRecord;
+import app.pathwise.data.platform.AdminDao;
 import app.pathwise.data.platform.AuditDao;
 import app.pathwise.web.platform.Json;
 import app.pathwise.web.platform.RequestMeta;
@@ -46,6 +47,7 @@ public final class IdentityService {
     private final SessionDao sessions = new SessionDao();
     private final LearnerProfileDao profiles = new LearnerProfileDao();
     private final AuditDao audit = new AuditDao();
+    private final AdminDao settings = new AdminDao();
     /** Verified against when the email is unknown, so response time does not reveal which emails exist. */
     private final String dummyHash;
 
@@ -87,6 +89,14 @@ public final class IdentityService {
 
     /** Creates a student (and optionally teacher) account. Returns the new user id. */
     public UUID register(Registration r, RequestMeta meta) {
+        return register(r, meta, true);
+    }
+
+    /** {@code respectClosedSignups} is false only for the administrator CLI. */
+    private UUID register(Registration r, RequestMeta meta, boolean respectClosedSignups) {
+        if (respectClosedSignups && "false".equals(tx.read(c -> settings.setting(c, "registration.open")).orElse("true").strip())) {
+            throw new RegistrationException("email", "New sign-ups are closed on this Pathwise right now. Ask your administrator for an account.");
+        }
         String email = normaliseEmail(r.email());
         String name = r.displayName().trim().replaceAll("\\s+", " ");
         PasswordPolicy.check(r.password(), email).ifPresent(msg -> {
@@ -234,6 +244,35 @@ public final class IdentityService {
         });
     }
 
+    /** Confirms the password of a signed-in person for sensitive actions. Returns false if it was wrong. */
+    public boolean reauthenticate(Actor actor, String password, RequestMeta meta) {
+        requireUser(actor);
+        UserRecord u = tx.read(c -> users.findById(c, actor.userId())).orElseThrow(() -> new AccessDeniedException("account"));
+        boolean ok = hasher.verify(password == null ? new char[0] : password.toCharArray(), u.passwordHash());
+        tx.run(c -> {
+            if (ok && actor.sessionId() != null) {
+                sessions.markReauth(c, actor.sessionId(), actor.userId(), clock.instant());
+            }
+            audit.record(c, actor.userId(), ok ? "identity.reauth" : "identity.reauth_failed", "session",
+                    String.valueOf(actor.sessionId()), null, meta.ipHash());
+        });
+        return ok;
+    }
+
+    /** Ends every session of an account (after a suspension). Returns how many were open. */
+    public int endAllSessions(UUID userId) {
+        return tx.call(c -> sessions.revokeAll(c, userId, clock.instant()));
+    }
+
+    /** True if this session re-entered its password within {@code window}. */
+    public boolean recentlyReauthenticated(Actor actor, Duration window) {
+        if (actor == null || actor.sessionId() == null) {
+            return false;
+        }
+        Instant cutoff = clock.instant().minus(window);
+        return tx.read(c -> sessions.reauthAt(c, actor.sessionId())).filter(t -> t.isAfter(cutoff)).isPresent();
+    }
+
     public Optional<UserRecord> findUser(UUID id) {
         return tx.read(c -> users.findById(c, id));
     }
@@ -266,7 +305,7 @@ public final class IdentityService {
             });
             return id;
         }
-        UUID id = register(new Registration(normalised, password, displayName, false), RequestMeta.system());
+        UUID id = register(new Registration(normalised, password, displayName, false), RequestMeta.system(), false);
         tx.run(c -> {
             users.addRole(c, id, PlatformRole.ADMIN, null);
             audit.record(c, null, "identity.admin_granted", "user", id.toString(), Json.write(Map.of("via", "cli")), null);

@@ -619,3 +619,13 @@ fieldset.field { border: 0; padding: 0; margin: 0; display: grid; gap: var(--s-2
 .msg-bubble p:last-child { margin-bottom: 0; }
 .msg .meta { font-size: var(--text-xs); color: var(--text-subtle); }
 .chat-form { position: sticky; bottom: var(--s-4); }
+/* ---------- Admin console (M10) ---------- */
+.stat-value.stat-small { font-size: var(--text-md); line-height: 1.3; }
+.plain-list { list-style: none; padding: 0; margin: 0; display: grid; gap: var(--s-2); font-size: var(--text-sm); }
+.plain-list .mono { overflow-wrap: anywhere; }
+.audit-details { max-width: 32ch; overflow-wrap: anywhere; font-size: var(--text-xs); color: var(--text-subtle); }
+.live-queue { gap: var(--s-3); }
+.live-q { padding: var(--s-3); border: 1px solid var(--border); border-radius: var(--r-md); }
+.live-q p { margin: 0 0 var(--s-2); overflow-wrap: anywhere; }
+.live-q-answering { border-color: var(--accent, var(--border)); box-shadow: var(--e1); }
+.live-q-answered, .live-q-dismissed { opacity: 0.75; }

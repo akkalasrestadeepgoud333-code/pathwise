@@ -4,6 +4,7 @@ import app.pathwise.core.identity.PasswordHasher;
 import app.pathwise.core.security.RateLimiter;
 import app.pathwise.data.Database;
 import app.pathwise.web.admin.AdminService;
+import app.pathwise.web.community.LiveSessionService;
 import app.pathwise.web.assessment.AssessmentService;
 import app.pathwise.web.community.DoubtService;
 import app.pathwise.web.rewards.RewardsService;
@@ -44,6 +45,7 @@ public final class AppContext {
     private final OutboxWorker outboxWorker;
     private final IdentityService identity;
     private final AdminService admin;
+    private final LiveSessionService live;
     private final CatalogService catalog;
     private final ContentService content;
     private final ContentPackService contentPacks;
@@ -74,7 +76,7 @@ public final class AppContext {
                 ? new PasswordHasher(1024, 1, 1)
                 : new PasswordHasher();
         this.identity = new IdentityService(database.tx(), hasher, events, clock, config.webSessionTtl(), config.bearerSessionTtl());
-        this.admin = new AdminService(database.tx());
+        this.admin = new AdminService(database.tx(), identity, clock);
         this.catalog = new CatalogService(database.tx());
         this.content = new ContentService(database.tx(), events, clock);
         this.contentPacks = new ContentPackService(database.tx(), new ContentPackLoader(AppContext.class.getClassLoader()), events, clock);
@@ -90,6 +92,7 @@ public final class AppContext {
         this.roomInsights = new RoomInsightService(database.tx(), rooms, clock);
         this.assignments = new AssignmentService(database.tx(), rooms, catalog, learner, events, clock);
         this.doubts = new DoubtService(database.tx(), catalog, events, clock);
+        this.live = new LiveSessionService(database.tx(), clock);
         this.rewards = new RewardsService(database.tx(), clock);
         this.rewards.register(events);
         this.tutor = new TutorService(database.tx(), AiProvider.from(config.ai()), questions, clock);
@@ -127,6 +130,7 @@ public final class AppContext {
     public RoomInsightService roomInsights() { return roomInsights; }
     public AssignmentService assignments() { return assignments; }
     public DoubtService doubts() { return doubts; }
+    public LiveSessionService live() { return live; }
     public RewardsService rewards() { return rewards; }
     public TutorService tutor() { return tutor; }
     public RateLimiter loginLimiter() { return loginLimiter; }

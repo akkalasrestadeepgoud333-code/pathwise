@@ -116,7 +116,7 @@ public final class GameService {
         Map<UUID, CatalogDao.TopicRow> topics = topics();
         return tx.read(c -> {
             Optional<GameRow> g = dao.findByKey(c, key).filter(x -> "published".equals(x.status()));
-            if (g.isEmpty()) {
+            if (g.isEmpty() || !dao.templateEnabled(c, g.get().template())) {
                 return Optional.<Intro>empty();
             }
             GameDao.Stats stats = dao.stats(c, actor.userId()).get(g.get().id());
@@ -151,6 +151,9 @@ public final class GameService {
         Instant now = clock.instant();
         return tx.call(c -> {
             GameRow g = dao.findByKey(c, key).filter(x -> "published".equals(x.status())).orElseThrow(NotFoundException::new);
+            if (!dao.templateEnabled(c, g.template())) { // switched off by an admin
+                throw new NotFoundException();
+            }
             Game<?, ?> game = GameCatalog.find(g.template()).orElseThrow(NotFoundException::new).game();
             long seed = random.nextLong();
             Object puzzle = generate(g, seed);

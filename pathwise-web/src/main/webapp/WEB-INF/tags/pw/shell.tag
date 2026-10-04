@@ -20,6 +20,7 @@
       <a href="<c:url value='/app/achievements'/>"<c:if test="${nav == 'achievements'}"> aria-current="page"</c:if>><pw:icon name="trophy"/>Achievements</a>
       <a href="<c:url value='/app/rooms'/>"<c:if test="${nav == 'rooms'}"> aria-current="page"</c:if>><pw:icon name="users"/>Rooms</a>
       <a href="<c:url value='/app/doubts'/>"<c:if test="${nav == 'doubts'}"> aria-current="page"</c:if>><pw:icon name="circle-help"/>Doubts</a>
+      <a href="<c:url value='/app/live'/>"<c:if test="${nav == 'live'}"> aria-current="page"</c:if>><pw:icon name="users"/>Live sessions</a>
       <a href="<c:url value='/app/tutor'/>"<c:if test="${nav == 'tutor'}"> aria-current="page"</c:if>><pw:icon name="sparkles"/>Tutor</a>
       <c:if test="${user.teacher or user.admin}">
         <div class="nav-section">Teach</div>
@@ -31,6 +32,11 @@
         <a href="<c:url value='/admin/content'/>"<c:if test="${nav == 'admin-content'}"> aria-current="page"</c:if>><pw:icon name="book-open"/>Content</a>
         <a href="<c:url value='/admin/assessments'/>"<c:if test="${nav == 'admin-assessments'}"> aria-current="page"</c:if>><pw:icon name="chart-column"/>Item analysis</a>
         <a href="<c:url value='/admin/moderation'/>"<c:if test="${nav == 'admin-moderation'}"> aria-current="page"</c:if>><pw:icon name="shield"/>Moderation</a>
+        <a href="<c:url value='/admin/users'/>"<c:if test="${nav == 'admin-users'}"> aria-current="page"</c:if>><pw:icon name="users"/>People</a>
+        <a href="<c:url value='/admin/rooms'/>"<c:if test="${nav == 'admin-rooms'}"> aria-current="page"</c:if>><pw:icon name="school"/>Rooms</a>
+        <a href="<c:url value='/admin/games'/>"<c:if test="${nav == 'admin-games'}"> aria-current="page"</c:if>><pw:icon name="gamepad-2"/>Games</a>
+        <a href="<c:url value='/admin/audit'/>"<c:if test="${nav == 'admin-audit'}"> aria-current="page"</c:if>><pw:icon name="file-text"/>Audit log</a>
+        <a href="<c:url value='/admin/settings'/>"<c:if test="${nav == 'admin-settings'}"> aria-current="page"</c:if>><pw:icon name="settings"/>Settings</a>
       </c:if>
       <div class="nav-section">You</div>
       <a href="<c:url value='/app/settings'/>"<c:if test="${nav == 'settings'}"> aria-current="page"</c:if>><pw:icon name="settings"/>Settings</a>
