@@ -74,7 +74,7 @@ public final class IdentityService {
     public record SessionView(UUID id, String client, String userAgent, Instant createdAt, Instant lastUsedAt, boolean current) {}
 
     /** A rejected registration, with the field it concerns. */
-    public static final class RegistrationException extends RuntimeException {
+    public static class RegistrationException extends RuntimeException {
         private final String field;
 
         public RegistrationException(String field, String message) {
@@ -87,6 +87,13 @@ public final class IdentityService {
         }
     }
 
+    /** Sign-ups are switched off by an administrator (shown on the form's email field). */
+    public static final class RegistrationClosedException extends RegistrationException {
+        public RegistrationClosedException() {
+            super("email", "New sign-ups are closed on this Pathwise right now. Ask your administrator for an account.");
+        }
+    }
+
     /** Creates a student (and optionally teacher) account. Returns the new user id. */
     public UUID register(Registration r, RequestMeta meta) {
         return register(r, meta, true);
@@ -95,7 +102,7 @@ public final class IdentityService {
     /** {@code respectClosedSignups} is false only for the administrator CLI. */
     private UUID register(Registration r, RequestMeta meta, boolean respectClosedSignups) {
         if (respectClosedSignups && "false".equals(tx.read(c -> settings.setting(c, "registration.open")).orElse("true").strip())) {
-            throw new RegistrationException("email", "New sign-ups are closed on this Pathwise right now. Ask your administrator for an account.");
+            throw new RegistrationClosedException();
         }
         String email = normaliseEmail(r.email());
         String name = r.displayName().trim().replaceAll("\\s+", " ");

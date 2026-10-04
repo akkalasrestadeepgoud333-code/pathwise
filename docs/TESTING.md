@@ -248,4 +248,46 @@ Defects found and fixed:
 
 Not verified in a browser for M10: the htmx 4-second refresh and the new admin pages. These were checked only through server-rendered HTML in tests; no screenshot pass was done.
 
+### 2026-10-04: M11 Hardening and release
+
+Command: `.\mvnw.cmd -o install` for core, data and web, then `.\mvnw.cmd -o test -pl pathwise-app`.
+
+The app module ran at the test phase only. Two `pathwise-app.jar serve` processes, not started by this work, held its jars, and packaging would have failed on the locked files. No test was skipped because of this.
+
+Result: **239 tests, 239 passed, 0 failed, 0 skipped** (core 110, data 14, web 37, app 78).
+
+New tests:
+- **DemoFlowTest:** the blueprint's 21-step demonstration over HTTP. The transcript is in [DEMO.md](DEMO.md).
+- **RecommenderTest:** a "diagnostic only" persona.
+- **AccessibilityLintTest:** 4 static checks.
+- **PerformanceSmokeTest:** timings, see below.
+- **AdminConsoleAndLiveFlowTest:** now also checks that API registration returns 403 `REGISTRATION_CLOSED`.
+
+Defects found and fixed:
+- **Right after the diagnostic, the engine suggested nothing at all.** The diagnostic touched every topic, so the Explore slot treated each one as already started, and one answer per skill can't make a prerequisite "ready". Untouched modules are now offered.
+- **With sign-ups closed, the API returned 409 `EMAIL_TAKEN`.** It now returns 403 `REGISTRATION_CLOSED`. The mismatch was found while checking API.md against the code.
+- **The docs had claimed an administrator could reset passwords.** No reset of any kind exists, and LIMITATIONS now says so.
+
+Two test-side mistakes were also fixed:
+- One test navigated to a non-page URL, and the error page's empty CSRF meta tag was copied into the test browser.
+- One test class was missing the content-pack import.
+
+Single-user timing (`PerformanceSmokeTest`): 20 sequential warm requests per page, on Windows 11 with 16 cores and JDK 25. The client, server and embedded PostgreSQL were all on one machine.
+
+| Page | Median | p95 |
+|---|---|---|
+| Today | 69 ms | 161 ms |
+| Learning Map | 43 ms | 118 ms |
+| Module page | 33 ms | 63 ms |
+| Next steps | 34 ms | 38 ms |
+| The 8 other pages | 8–23 ms | 15–32 ms |
+
+This is not a load test: concurrency and server limits were not measured.
+
+Not done in M11:
+- an axe-core run on rendered pages, and a screen-reader pass
+- a browser check of the M10 pages, including htmx polling under the CSP (it would have needed a third server against the same embedded database)
+- OWASP Dependency-Check
+- a public deployment
+
 Not yet done: accessibility audit with axe-core, Android UI tests, load tests and the dependency vulnerability scan. All of these are planned (see the blueprint, §35).

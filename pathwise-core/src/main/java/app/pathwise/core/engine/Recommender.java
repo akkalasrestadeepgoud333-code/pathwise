@@ -308,7 +308,13 @@ public final class Recommender {
         List<Recommendation> exploreSlot() {
             List<Recommendation> out = new ArrayList<>();
             for (Topic t : s.topics()) {
-                if (topicStarted(t.id()) || modulesComplete(t.id())) {
+                // Answers alone (say, from the starting-point check) don't make a topic "studied": until its module
+                // is opened or the topic is shown Proficient, it stays a candidate. Otherwise a student who has just
+                // taken the diagnostic would get no suggestions at all.
+                boolean moduleStarted = modulesByTopic.getOrDefault(t.id(), List.of()).stream().anyMatch(ModuleInfo::started);
+                List<Skill> core = skillsByTopic.getOrDefault(t.id(), List.of()).stream().filter(Skill::core).toList();
+                boolean demonstrated = !core.isEmpty() && core.stream().allMatch(k -> k.state().atLeast(MasteryState.PROFICIENT));
+                if (moduleStarted || demonstrated || modulesComplete(t.id())) {
                     continue;
                 }
                 List<Topic> required = requiredPrereqs(t.id());
@@ -319,7 +325,9 @@ public final class Recommender {
                 if (first == null) {
                     continue;
                 }
-                String reason = required.isEmpty()
+                String reason = hasEvidence(t.id())
+                        ? "You've answered a few questions on " + t.title() + "; its module covers it properly."
+                        : required.isEmpty()
                         ? t.title() + " has no prerequisites, so it's a natural place to begin."
                         : "You've studied " + titles(required) + ", which " + t.title() + " builds on.";
                 List<Factor> f = factors(t.id(), 1, "You haven't started " + t.title() + " yet.", "module");

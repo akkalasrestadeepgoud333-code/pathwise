@@ -83,6 +83,8 @@ public class AuthApiServlet extends ApiServlet {
         try {
             app().identity().register(new IdentityService.Registration(
                     form.getEmail(), form.getPassword(), form.getDisplayName(), form.isTeacher()), meta);
+        } catch (IdentityService.RegistrationClosedException e) {
+            throw new ApiException(403, "REGISTRATION_CLOSED", e.getMessage());
         } catch (IdentityService.RegistrationException e) {
             int status = "email".equals(e.field()) ? 409 : 400;
             throw new ApiException(status, status == 409 ? "EMAIL_TAKEN" : "VALIDATION_FAILED", e.getMessage(),

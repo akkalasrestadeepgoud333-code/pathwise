@@ -88,6 +88,23 @@ class RecommenderTest {
         assertThat(recs).allMatch(r -> r.reasonCode().equals("START_HERE") && r.reasonText().contains("no prerequisites"));
     }
 
+    /** Found by the demonstration test: one diagnostic answer per skill used to leave every slot empty. */
+    @Test
+    void aStudentWhoOnlyTookTheDiagnosticStillGetsSomewhereToStart() {
+        List<Skill> skills = new ArrayList<>(List.of(
+                skill("indexing", "arrays", DEVELOPING, 0.6, 1, 1, 0),
+                skill("pointers", "lists", DEVELOPING, 0.6, 1, 1, 0),
+                skill("base-case", "recursion", EXPLORING, 0.45, 1, 1, 1),
+                skill("tree-terms", "trees", DEVELOPING, 0.6, 1, 1, 0),
+                skill("preorder", "traversals", EXPLORING, 0.45, 1, 1, 1)));
+        List<Recommendation> recs = Recommender.recommend(snapshot(skills, modules(), List.of(), List.of()));
+        assertThat(recs).isNotEmpty();
+        assertThat(recs).filteredOn(r -> r.slot() == Slot.EXPLORE).extracting(Recommendation::topicId)
+                .containsExactlyInAnyOrder("arrays", "recursion");
+        assertThat(recs).filteredOn(r -> r.slot() == Slot.EXPLORE)
+                .allMatch(r -> r.reasonText().contains("You've answered a few questions on"));
+    }
+
     @Test
     void strugglingWithTraversalsBecauseOfWeakRecursionPointsToTheRootCause() {
         List<Skill> skills = freshSkills();

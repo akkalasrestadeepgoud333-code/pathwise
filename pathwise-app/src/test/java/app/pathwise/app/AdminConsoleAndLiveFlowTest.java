@@ -147,6 +147,11 @@ class AdminConsoleAndLiveFlowTest {
             assertThat(new Browser(TestServer.baseUrl()).register("Late Comer", blocked, PASSWORD, "student").body())
                     .contains("sign-ups are closed");
             assertThat(one("select count(*) from users where email = ?", blocked)).isEqualTo("0");
+            HttpResponse<String> apiReg = new Browser(TestServer.baseUrl()).send(HttpRequest.newBuilder(URI.create(TestServer.baseUrl() + "/api/v1/auth/register"))
+                    .header("Content-Type", "application/json")
+                    .POST(HttpRequest.BodyPublishers.ofString("{\"displayName\":\"Late Comer\",\"email\":\"" + blocked + "\",\"password\":\"" + PASSWORD + "\"}")));
+            assertThat(apiReg.statusCode()).isEqualTo(403);
+            assertThat(apiReg.body()).contains("REGISTRATION_CLOSED");
         } finally {
             admin.b().post("/admin/settings", Map.of("registrationOpen", "on"));
         }

@@ -6,7 +6,7 @@ Statuses follow blueprint §44:
 - **PROPOSED:** designed, not built.
 - **FUTURE:** intentionally out of scope for v1.
 
-Last updated: **2026-10-04** (end of M2, Evidence → learner model → engine).
+Last updated: **2026-10-04** (end of M11, hardening and release; milestones M0–M11 done).
 
 ## Implemented (M0)
 
@@ -186,6 +186,18 @@ Last updated: **2026-10-04** (end of M2, Evidence → learner model → engine).
 | Host controls: start, end (final), lock to new people, answer now (one at a time), mark answered, dismiss and restore, remove a participant by alias (they can't rejoin; logged) | `/app/live/<id>` | `AdminConsoleAndLiveFlowTest` |
 | The queue refreshes every 4 seconds through the bundled htmx (the question box sits outside the refreshed part, so typing isn't lost); without JavaScript a "Refresh now" link works | `live/session.jsp`, `live/queue.jsp` | `AdminConsoleAndLiveFlowTest` (fragment) |
 
+## Implemented (M11: hardening and release)
+
+| Item | Where | Evidence |
+|---|---|---|
+| The 21-step demonstration runs end to end over HTTP and writes a narrated transcript | `DemoFlowTest`, [DEMO.md](DEMO.md) | `DemoFlowTest` |
+| Fix: right after the diagnostic, the engine suggested nothing. Untouched modules are now offered, with a reason | `Recommender` (Explore slot) | `RecommenderTest` (new persona), `DemoFlowTest` |
+| Fix: the API answered "email taken" (409) when sign-ups were closed. It now answers 403 `REGISTRATION_CLOSED` | `AuthApiServlet` | `AdminConsoleAndLiveFlowTest` |
+| Security review: SQL construction, encoding, headers, sessions, admin guards, all written up | [SECURITY.md](SECURITY.md) | see the review section there |
+| Single-user timing check of 12 main pages (median and p95), with a gross-regression guard | `PerformanceSmokeTest` → `target/perf.txt` | `PerformanceSmokeTest` |
+| Static accessibility checks on every build: labelled form fields, image alt text, named buttons, page language | `AccessibilityLintTest` | `AccessibilityLintTest` |
+| Documentation: README, SETUP, ARCHITECTURE, DATABASE, API, SECURITY, DEMO, DEPLOYMENT, LIMITATIONS | `README.md`, `docs/` | — |
+
 ## Partially implemented
 
 | Feature | Works | Missing |
@@ -206,7 +218,10 @@ Last updated: **2026-10-04** (end of M2, Evidence → learner model → engine).
 | Game administration | templates switched on and off from `/admin/games` (M10) | default configs per template; the teachers' "Practice and play" panel (M5) |
 | Offline game submissions | the attempt id makes online finishing idempotent | queued offline logs on Android (the app needs a connection to play) |
 | SQL-query questions | — | deferred until a DBMS pack exists; the grader has no SQL type yet |
-| Security tooling | headers, CSRF, rate limits, audit | OWASP Dependency-Check run (planned for M11) |
+| Security tooling | headers, CSRF, rate limits, audit, the M11 code review | OWASP Dependency-Check (it needs an NVD download that wasn't possible here), an external penetration test, load testing |
+| Accessibility | semantic pages, labels, focus styles, static checks on every build | an axe-core run on rendered pages and a screen-reader pass |
+| Release | docs complete; the demo passes | a public deployment: the tunnel guide is written but not carried out, because exposing a machine to the internet is the owner's decision; an `openapi.yaml` (API.md is the reference) |
+| Password reset | — | neither self-service nor by an administrator (see LIMITATIONS) |
 
 ## Proposed (designed in the blueprint, not built)
 
