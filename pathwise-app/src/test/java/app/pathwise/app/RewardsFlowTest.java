@@ -164,6 +164,42 @@ class RewardsFlowTest {
         assertThat(s.b().get("/app/today").body()).doesNotContain("bell-count");
     }
 
+    /** What the Android app reads when it opens: summary, notifications, read-all; bearer only, own data only. */
+    @Test
+    void mobileApiShowsRewardsAndNotifications() throws Exception {
+        Person s = student("Mobile Mira");
+        playPerfect(s, "match-structures");
+        eventually(() -> xp(s) == 30);
+        db.tx().run(c -> {
+            try (PreparedStatement ps = c.prepareStatement(
+                    "insert into notifications (id, user_id, type, title, link) values (gen_random_uuid(), ?::uuid, 'badge', 'A test badge', '/app/achievements')")) {
+                ps.setString(1, s.id());
+                ps.executeUpdate();
+            }
+        });
+
+        Browser http = new Browser(TestServer.baseUrl());
+        HttpResponse<String> login = http.send(HttpRequest.newBuilder(URI.create(TestServer.baseUrl() + "/api/v1/auth/login"))
+                .header("Content-Type", "application/json")
+                .POST(HttpRequest.BodyPublishers.ofString("{\"email\":\"" + s.email() + "\",\"password\":\"" + PASSWORD + "\"}")));
+        String token = JSON.readTree(login.body()).get("token").asText();
+        java.util.function.BiFunction<String, String, HttpResponse<String>> api = (method, path) -> http.send(
+                HttpRequest.newBuilder(URI.create(TestServer.baseUrl() + path)).header("Authorization", "Bearer " + token)
+                        .method(method, HttpRequest.BodyPublishers.noBody()));
+
+        JsonNode summary = JSON.readTree(api.apply("GET", "/api/v1/me/rewards").body()).get("summary");
+        assertThat(summary.get("xp").asInt()).isEqualTo(30);
+        assertThat(summary.get("level").asInt()).isEqualTo(1);
+        assertThat(summary.get("streak").asInt()).isEqualTo(1);
+        JsonNode inbox = JSON.readTree(api.apply("GET", "/api/v1/me/notifications").body());
+        assertThat(inbox.get("unread").asInt()).isEqualTo(1);
+        assertThat(inbox.get("items").get(0).get("title").asText()).isEqualTo("A test badge");
+        assertThat(api.apply("POST", "/api/v1/me/notifications/read-all").statusCode()).isEqualTo(200);
+        assertThat(JSON.readTree(api.apply("GET", "/api/v1/me/notifications").body()).get("unread").asInt()).isZero();
+        assertThat(api.apply("POST", "/api/v1/me/notifications/other").statusCode()).isEqualTo(404);
+        assertThat(new Browser(TestServer.baseUrl()).get("/api/v1/me/rewards").statusCode()).isEqualTo(401);
+    }
+
     @Test
     void assessmentsGiveXpOnceAndRedeliveredEventsChangeNothing() {
         Person s = student("Exam Esha");

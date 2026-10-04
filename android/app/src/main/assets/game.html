@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; connect-src 'none'">
+  <title>Game</title>
+  <link rel="stylesheet" href="css/tokens.css">
+  <link rel="stylesheet" href="css/base.css">
+  <link rel="stylesheet" href="css/components.css">
+  <link rel="stylesheet" href="css/learn.css">
+  <link rel="stylesheet" href="android.css">
+</head>
+<body>
+  <main class="game" id="game">
+    <header class="game-hud">
+      <span class="game-progress" data-progress></span>
+      <span class="game-stat"><strong data-score>0</strong> pts</span>
+    </header>
+    <div class="game-stage" data-stage><p class="muted">Loading the game…</p></div>
+    <p class="game-feedback" role="status" aria-live="polite" data-feedback></p>
+  </main>
+  <script src="android-shell.js" type="module"></script>
+</body>
+</html>

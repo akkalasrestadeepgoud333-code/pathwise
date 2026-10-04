@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Pathwise is self-hosted: a server on the same computer or Wi-Fi often has no TLS certificate, so plain
+     HTTP is allowed. The sign-in screen warns when a non-local address is used without HTTPS. -->
+<network-security-config>
+    <base-config cleartextTrafficPermitted="true">
+        <trust-anchors>
+            <certificates src="system" />
+        </trust-anchors>
+    </base-config>
+</network-security-config>

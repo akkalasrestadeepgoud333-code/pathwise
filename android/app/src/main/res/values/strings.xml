@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Pathwise</string>
+    <string name="practice">Practice</string>
+    <string name="rooms">Rooms</string>
+    <string name="doubts">Doubts</string>
+    <string name="games">Games</string>
+    <string name="notifications">Notifications</string>
+    <string name="tagline">Every student deserves a different path to understanding.</string>
+    <string name="server_hint">Server address, e.g. http://10.0.2.2:8080</string>
+</resources>

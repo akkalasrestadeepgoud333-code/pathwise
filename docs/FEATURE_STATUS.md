@@ -155,10 +155,26 @@ Last updated: **2026-10-04** (end of M2, Evidence → learner model → engine).
 | Conversations are private to the student (404 for others, teachers can't read them) and deletable (messages are removed) | `ai_conversations` | `TutorFlowTest` |
 | Model failures (down, error, timeout) fall back to Guided Help instead of erroring; 20 messages per 10 minutes | `AiProvider`, `TutorService` | `AiProviderTest` |
 
+## Implemented (M9: Android app)
+
+| Feature | Where | Evidence |
+|---|---|---|
+| Native Android app in Java with XML layouts (framework classes only, minSdk 26, target 34), built free with `scripts\build-apk.ps1`; talks to the same server through `/api/v1` with a bearer token | `android/` | built and run on the `Callora_Test` emulator (API 34) |
+| Sign in and create an account; the server address is editable, with a warning when a non-local server uses plain http; a 401 clears the token and returns to sign-in | `LoginActivity`, `Api`, `ServerUrl` | `ServerUrlTest` (2), emulator |
+| Today: level, XP and streak, then up to 4 suggestions with their reasons, then the way into each area | `MainActivity`, `GET /api/v1/me/rewards` | `RewardsFlowTest`, emulator |
+| Quick practice: 5 questions (single choice, multiple choice, typed), checked by the server, with feedback | `PracticeActivity` | emulator |
+| Games: the website's own game JavaScript is bundled into the APK at build time and runs in a WebView that loads only the app's assets (no file, content or remote access; navigation blocked). The finished action log goes to the server, which replays and verifies it exactly as on the web | `GamesActivity`, `GameActivity`, `assets/` | emulator: Match Pairs played to 60/60, verified, 30 XP and a streak day on Today |
+| Rooms: list, join by code, view a room | `RoomsActivity`, `RoomActivity` | emulator |
+| Doubts: list, ask (anonymous unless the student chooses to show their name), read a thread, answer | `DoubtsActivity`, `DoubtActivity` | emulator |
+| Notifications: list and mark all read; on open, one summary system notification for new unread items, only if the student allowed notifications | `NotificationsActivity`, `GET/POST /api/v1/me/notifications` | `RewardsFlowTest`, emulator |
+| Notification permission (Android 13+): asked once, after an in-app explanation; "Not now" and "Don't allow" are respected and never asked again by the app | `MainActivity` | emulator: rationale → Android's own dialog → Allow |
+| Light and dark themes from the same colour tokens as the web | `res/values`, `res/values-night` | emulator (light) |
+
 ## Partially implemented
 
 | Feature | Works | Missing |
 |---|---|---|
+| Android app (rest of the blueprint) | see the M9 table | the Learning Map trail, modules, flashcards, daily challenge, assessments, the tutor, assignments, achievements and settings (use the website for these); offline cache and queued offline game submissions; background push (Pathwise checks only when the app opens, so no FCM, no background service); teaching tools (web only); Photo Picker for doubts; automated UI tests (verified by hand on an emulator only); a signed release build |
 | Learner profile | stored per user; the theme preference is used | timezone editing, goals and modalities UI (M2) |
 | "Ask" recommendation slot | not generated | the tutor and doubts exist; the recommender doesn't suggest them yet |
 | Rooms (rest of the blueprint) | see the M5 table | QR codes for join links; item gates (soft/hard prerequisites); duplicating a room; transferring ownership; the "3+ failed attempts on one item" attention rule; teachers writing their own questions and modules (room assessments use the bank) |
@@ -170,13 +186,13 @@ Last updated: **2026-10-04** (end of M2, Evidence → learner model → engine).
 | Gamification (rest of the blueprint) | see the M7 table | Web Push / email / Android push, notification preferences and quiet hours (only in-app notifications exist, and Pathwise sends no reminders), learner time zones (days use Asia/Kolkata), room leaderboards (opt-in, P2), room custom badges, challenge-pass and doubt-to-practice XP, Root Fixer / Curious Mind / Course Milestone / Team Player badges |
 | Tutor (rest of the blueprint) | see the M8 table | streaming replies, Practice Mode (AI-generated questions), Study Coach, General Assistant, room i_mode, the Android app's tutor screen; the AI path was tested against a stub server, not a real model, because Ollama isn't installed on the build machine |
 | Game administration | templates can be disabled in the database (`game_templates.enabled`) | an admin screen for it (M10); the teachers' "Practice and play" panel (M5) |
-| Offline game submissions | the attempt id makes online finishing idempotent | idempotency keys for queued offline logs (M9, Android) |
+| Offline game submissions | the attempt id makes online finishing idempotent | queued offline logs on Android (the app needs a connection to play) |
 | SQL-query questions | — | deferred until a DBMS pack exists; the grader has no SQL type yet |
 | Security tooling | headers, CSRF, rate limits, audit | OWASP Dependency-Check run (planned for M11) |
 
 ## Proposed (designed in the blueprint, not built)
 
-more games: Sequence Sort, True/False Sprint, Query Quest (P1) · rooms, assignments and teacher analytics (M5) · Android app (M9) · projects, live doubt sessions and full admin console (M10).
+more games: Sequence Sort, True/False Sprint, Query Quest (P1) · rooms, assignments and teacher analytics (M5) · projects, live doubt sessions and full admin console (M10).
 
 ## Future (out of scope for v1)
 
@@ -201,6 +217,7 @@ Knowledge tracing / ML models · embeddings-based retrieval · server-side code 
   - **Game configs** are typed Java records checked by `PackValidator`, the same approach as the other pack payloads, instead of JSON Schema files.
   - **Scores never depend on speed**, so there are no lives or combos. Relaxed mode hides the clock and score. The daily cap is a rolling 24 hours.
   - **The activities table** holds only games for now. Practice sets are still generated attempts.
+- **Android (recorded 2026-10-04, M9):** built in **Java + XML layouts** with framework classes only, not Kotlin + Compose, because the project uses Java, JSP and JS throughout (the user's request). The WebView serves assets through `shouldInterceptRequest` instead of androidx `WebViewAssetLoader`. Cleartext http is allowed so the app can reach a server on the student's own computer or LAN; the sign-in screen warns when a non-local server isn't https.
 - **Rooms (recorded 2026-10-04, M5):**
   - **Platform admins have no special access to a room's people or data.** Rooms are private to their members; admin oversight of rooms arrives with moderation (M6/M10).
   - **Room assessment keys** start with `rm-`, a prefix packs may not use, so one lookup by key serves both kinds.

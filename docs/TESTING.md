@@ -174,4 +174,38 @@ Defect found and fixed: the tutor read the wrong practice question. Pages number
 
 Not verified: a real model. Ollama isn't installed on this machine, so the AI path has only been exercised against stubs.
 
-Not yet done: accessibility audit with axe-core, Android tests, load tests and the dependency vulnerability scan. All of these are planned (see the blueprint, §35).
+### 2026-10-04: M9 Android app
+
+Commands: `.\scripts\build-apk.ps1 -Install` (Gradle 8.7 on Android Studio's bundled JDK: `assembleDebug testDebugUnitTest`) and `.\mvnw.cmd -o test -pl pathwise-app -Dtest=RewardsFlowTest`.
+
+Results:
+- **ServerUrlTest (Android JVM unit tests):** 2 tests, both passed. They cover address normalisation and the plain-http warning rule.
+- **RewardsFlowTest:** 4 tests, all passed, including the new `mobileApiShowsRewardsAndNotifications`. It checks the summary, the notifications list, read-all, an unknown path returning 404, and 401 without a token.
+- **Debug APK:** about 77 KB.
+
+The full Maven suite was not re-run for this milestone. Only `RewardsApiServlet` changed on the server, and RewardsFlowTest covers it.
+
+Manual checks on the `Callora_Test` emulator (API 34, 1080×2400), against a local server reached at `10.0.2.2:8080`:
+- sign-in
+- Today with suggestions and reasons
+- the notification rationale, then Android's own permission dialog, then Allow
+- Match Pairs played in the WebView: 6/6, then the server verified it at 60/60, and Today showed 30 XP and a 1-day streak
+- Practice question 1 of 5
+- Rooms (empty, with join by code)
+- Doubts (ask form, anonymous by default)
+- Notifications ("Nothing new")
+
+The screens were driven with adb taps and checked by screenshot.
+
+Defects found and fixed:
+- `ServerUrl` treated `"http://"` as a host.
+- `setAccessibilityHeading` crashed below API 28; it is now guarded.
+- The progress card landed above or below the suggestions depending on which request finished first. The requests are now chained.
+- A stale server jar returned 404 for the new endpoint. Rebuilding fixed it; it was not a code fault.
+
+Not verified:
+- dark mode on the device
+- a physical phone
+- automated UI tests (none exist)
+
+Not yet done: accessibility audit with axe-core, Android UI tests, load tests and the dependency vulnerability scan. All of these are planned (see the blueprint, §35).
