@@ -7,6 +7,9 @@
     </div>
   </div>
 
+  <pw:roomnext rooms="${roomNext}"/>
+  <c:if test="${not empty roomNext}"><h2 class="section-gap">Your own path</h2></c:if>
+
   <c:choose>
     <c:when test="${empty top}">
       <pw:empty title="No suggestions right now" icon="compass"

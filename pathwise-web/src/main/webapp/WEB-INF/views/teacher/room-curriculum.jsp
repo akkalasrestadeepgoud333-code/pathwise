@@ -26,7 +26,7 @@
           <ol class="list unit-items">
             <c:forEach var="it" items="${u.items}">
               <li class="list-item">
-                <span class="list-icon"><pw:icon name="${it.kind == 'module' ? 'book-open' : (it.kind == 'assessment' ? 'clipboard-check' : 'gamepad-2')}"/></span>
+                <span class="list-icon"><pw:icon name="${it.kind == 'module' ? 'book-open' : (it.kind == 'assessment' ? 'clipboard-check' : (it.kind == 'assignment' ? 'file-text' : 'gamepad-2'))}"/></span>
                 <div class="grow">
                   <div class="title"><a href="<c:url value='${it.href}'/>"><c:out value="${it.title}"/></a></div>
                   <div class="meta"><c:out value="${it.kindLabel}"/><c:if test="${not it.required}"> · optional</c:if><c:if test="${not empty it.publishLabel}"> · <c:out value="${it.publishLabel}"/></c:if></div>

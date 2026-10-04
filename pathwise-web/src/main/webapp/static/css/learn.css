@@ -556,3 +556,11 @@ fieldset.field { border: 0; padding: 0; margin: 0; display: grid; gap: var(--s-2
   .unit-items .list-item .grow { flex-basis: calc(100% - 56px); }
   .unit-items .list-item .inline-form { margin-left: 52px; }
 }
+/* Assignments */
+.submission-body { white-space: pre-wrap; padding: var(--s-4); border-radius: var(--r-md); background: var(--surface-2); font-size: var(--text-sm); max-height: 420px; overflow: auto; }
+.grade-form { margin-top: var(--s-4); padding-top: var(--s-4); border-top: 1px dashed var(--border); }
+.to-grade { margin-bottom: var(--s-2); border-color: var(--primary); }
+.skill-picks { max-height: 320px; overflow: auto; margin-top: var(--s-3); }
+.room-next .card-title { margin: 4px 0; }
+.room-next .meta { margin: 0; font-size: var(--text-sm); color: var(--text-muted); }
+.due-list { margin-top: var(--s-3); }

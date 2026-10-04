@@ -215,10 +215,10 @@ class PersonalisationFlowTest {
         assertThat(intruder.get(attemptUrl).statusCode()).isEqualTo(404);
 
         int official = db.tx().read(c -> {
-            // Students who took an assessment (other tests share this server) legitimately have official evidence.
+            // Only assessments and teacher-graded assignments may be official (other tests on this server create those).
             try (ResultSet rs = c.createStatement().executeQuery("""
                     select count(*) from learning_evidence
-                    where is_official and user_id not in (select user_id from assessment_attempts)
+                    where is_official and source_kind not in ('assessment', 'assignment')
                     """)) {
                 rs.next();
                 return rs.getInt(1);

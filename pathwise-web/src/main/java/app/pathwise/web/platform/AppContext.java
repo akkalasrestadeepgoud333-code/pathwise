@@ -6,6 +6,7 @@ import app.pathwise.data.Database;
 import app.pathwise.web.admin.AdminService;
 import app.pathwise.web.assessment.AssessmentService;
 import app.pathwise.web.games.GameService;
+import app.pathwise.web.rooms.AssignmentService;
 import app.pathwise.web.rooms.RoomAssessmentService;
 import app.pathwise.web.rooms.RoomInsightService;
 import app.pathwise.web.rooms.RoomService;
@@ -52,6 +53,7 @@ public final class AppContext {
     private final RoomService rooms;
     private final RoomAssessmentService roomAssessments;
     private final RoomInsightService roomInsights;
+    private final AssignmentService assignments;
     private final RateLimiter loginLimiter;
     private final RateLimiter registerLimiter;
 
@@ -79,6 +81,7 @@ public final class AppContext {
         this.rooms = new RoomService(database.tx(), catalog, events, clock);
         this.roomAssessments = new RoomAssessmentService(database.tx(), rooms, catalog, assessments, clock);
         this.roomInsights = new RoomInsightService(database.tx(), rooms, clock);
+        this.assignments = new AssignmentService(database.tx(), rooms, catalog, learner, events, clock);
         this.loginLimiter = new RateLimiter(config.loginAttemptsPerMinute(), 60_000, clock);      // per IP + email
         this.registerLimiter = new RateLimiter(config.registrationsPerHour(), 3_600_000, clock);  // per IP
     }
@@ -111,6 +114,7 @@ public final class AppContext {
     public RoomService rooms() { return rooms; }
     public RoomAssessmentService roomAssessments() { return roomAssessments; }
     public RoomInsightService roomInsights() { return roomInsights; }
+    public AssignmentService assignments() { return assignments; }
     public RateLimiter loginLimiter() { return loginLimiter; }
     public RateLimiter registerLimiter() { return registerLimiter; }
 }

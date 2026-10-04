@@ -40,12 +40,18 @@ public class RoomController extends PageServlet {
             render(req, res, "rooms/index");
             return;
         }
-        UUID id = p.length == 1 ? Ids.parseOrNull(p[0]) : null;
-        if (id == null) {
+        UUID id = p.length >= 1 ? Ids.parseOrNull(p[0]) : null;
+        UUID assignment = p.length == 3 && "assignments".equals(p[1]) ? Ids.parseOrNull(p[2]) : null;
+        if (id == null || (p.length != 1 && assignment == null)) {
             res.sendError(HttpServletResponse.SC_NOT_FOUND);
             return;
         }
         try {
+            if (assignment != null) {
+                req.setAttribute("a", ViewModels.of(app().assignments().studentView(actor, id, assignment)));
+                render(req, res, "rooms/assignment");
+                return;
+            }
             req.setAttribute("room", ViewModels.of(svc.studentView(actor, id)));
             render(req, res, "rooms/room");
         } catch (RoomService.RoomNotFoundException e) {
@@ -65,6 +71,22 @@ public class RoomController extends PageServlet {
                 return;
             }
             String[] p = parts(req);
+            UUID room = p.length == 3 && "assignments".equals(p[1]) ? Ids.parseOrNull(p[0]) : null;
+            UUID assignment = room == null ? null : Ids.parseOrNull(p[2]);
+            if (assignment != null) {
+                boolean handIn = "hand-in".equals(req.getParameter("action"));
+                try {
+                    app().assignments().save(actor, room, assignment, req.getParameter("body"), handIn);
+                    flash(req, "success", handIn ? "Handed in. Your teacher will grade it." : "Draft saved.");
+                } catch (RoomService.RoomNotFoundException e) {
+                    res.sendError(HttpServletResponse.SC_NOT_FOUND);
+                    return;
+                } catch (RoomService.RoomRuleException e) {
+                    flash(req, "error", e.getMessage());
+                }
+                redirect(req, res, "/app/rooms/" + room + "/assignments/" + assignment);
+                return;
+            }
             if (p.length == 1 && "join".equals(p[0])) {
                 RoomService.JoinOutcome out = svc.joinByCode(actor, req.getParameter("code"));
                 if ("pending".equals(out.status())) {

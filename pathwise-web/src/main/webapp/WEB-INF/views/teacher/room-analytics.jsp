@@ -71,6 +71,31 @@
     </c:choose>
   </section>
 
+  <c:if test="${not empty an.assignmentStats}">
+    <section class="card section-gap" aria-labelledby="asg-title">
+      <h2 id="asg-title" class="card-title">Assignments</h2>
+      <div class="table-wrap">
+        <table class="table">
+          <caption class="visually-hidden">Assignment status</caption>
+          <thead><tr><th scope="col">Assignment</th><th scope="col" class="num">Handed in</th><th scope="col" class="num">Late</th><th scope="col" class="num">Missing</th><th scope="col" class="num">Graded</th><th scope="col" class="num">Average grade</th></tr></thead>
+          <tbody>
+            <c:forEach var="a" items="${an.assignmentStats}">
+              <tr>
+                <th scope="row"><a href="<c:url value='/teach/rooms/${h.id}/assignments/${a.id}'/>"><c:out value="${a.title}"/></a></th>
+                <td class="num"><c:out value="${a.handedIn}"/>/<c:out value="${a.students}"/></td>
+                <td class="num"><c:out value="${a.late}"/></td>
+                <td class="num"><c:out value="${a.missing}"/></td>
+                <td class="num"><c:out value="${a.graded}"/></td>
+                <td class="num"><c:out value="${empty a.averagePercent ? '—' : a.averagePercent.toString().concat('%')}"/></td>
+              </tr>
+            </c:forEach>
+          </tbody>
+        </table>
+      </div>
+      <p class="legend-note">"Missing" counts only after the due date has passed.</p>
+    </section>
+  </c:if>
+
   <section class="card section-gap" aria-labelledby="st-title">
     <div class="card-header">
       <h2 id="st-title" class="card-title">Students</h2>

@@ -110,6 +110,10 @@ Last updated: **2026-10-04** (end of M2, Evidence → learner model → engine).
 | Room cockpit: join requests, students who may need attention (missed deadline, inactive with a deadline near, 2+ room skills needing practice), deadlines with submission counts, announcements | `/teach/rooms/<id>` | `RoomFlowTest`, screenshots |
 | Teacher analytics v1: class totals, room-skill distribution, assessment results (best attempt, score bands), per-student table and CSV export (individual data needs the analytics permission), practice and play shown apart from grades | `/teach/rooms/<id>/analytics` | `RoomFlowTest` |
 | Rooms API for students (list, join by code, room view) | `/api/v1/rooms*` | `RoomFlowTest` |
+| Individual assignments: drafts, publishing, due dates, late work allowed or refused, Markdown instructions, linked skills; students save drafts and hand in (locked until sent back); teachers grade or send back with comments; each hand-in bumps a version | `/teach/rooms/<id>/assignments`, `/app/rooms/<id>/assignments/<aid>` | `AssignmentFlowTest` |
+| A grade is official evidence (weight 0.9, outcome = grade fraction) for the linked skills, enforced by the schema (official ⇔ assessment or assignment) | `AssignmentService.grade` | `AssignmentFlowTest` |
+| To-grade count on the cockpit; missed and upcoming assignment deadlines in the attention list; assignment status (handed in, late, missing, graded, average) in analytics | cockpit, analytics | `AssignmentFlowTest` |
+| Room context in the student's next steps: per room, the next unfinished required item and what's due within a week (on Next steps and Today). This uses curriculum order and deadlines only; it doesn't change the rule-based recommender's scoring | `RoomService.roomNextSteps` | `AssignmentFlowTest` |
 
 ## Partially implemented
 
@@ -118,7 +122,7 @@ Last updated: **2026-10-04** (end of M2, Evidence → learner model → engine).
 | Learner profile | stored per user; the theme preference is used | timezone editing, goals and modalities UI (M2) |
 | "Ask" recommendation slot | not generated | needs the AI tutor (M8) and doubts (M6) |
 | Rooms (rest of the blueprint) | see the M5 table | QR codes for join links; item gates (soft/hard prerequisites); duplicating a room; transferring ownership; the "3+ failed attempts on one item" attention rule; teachers writing their own questions and modules (room assessments use the bank) |
-| Room-aware next steps and assignments | — | M5 part 2: the recommendation engine in room context, individual assignments with grading |
+| Room context in the recommender | rooms add their own section to Next steps and Today | the recommender doesn't yet use room curriculum order as a factor or rank only room items in a room context; group projects (P2) |
 | Assessment AI policy | stored and shown to students | enforced when the AI tutor exists (M8). Pathwise cannot control outside tools, and says so |
 | Assessment feedback policies | `immediate` and `manual_release` (score only until released) | the teacher release button and `after_due` (needs due dates from rooms, M5) |
 | Games in recommendations | games appear in the gallery, on Practice, and in Progress through their evidence | the engine does not yet suggest a game in the Explore slot |

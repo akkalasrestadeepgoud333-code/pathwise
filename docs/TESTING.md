@@ -109,4 +109,22 @@ Manual: headless Edge screenshots of the teacher home, cockpit (with requests), 
 - Table row headers were rendered as uppercase column headings.
 - Curriculum titles were truncated on phones.
 
+### 2026-10-04: M5 part 2 Assignments and room context
+
+Command: `.\mvnw.cmd install`. Result: **198 tests, 198 passed, 0 failed, 0 skipped**.
+
+New: **AssignmentFlowTest** (two end-to-end tests):
+- a draft hidden from students, then published and shown in the curriculum and in Next steps and Today
+- save a draft, hand in, and edits locked after hand-in
+- a grade out of range refused, and sending back without a comment refused
+- sending back with a comment, a resubmission (version 2), then a grade of 8/10, which gives official evidence (weight 0.9, outcome 0.8) for both linked skills and updates the model
+- re-grading does nothing, and analytics and the student's progress show the grade
+- late work refused when not allowed and flagged as late when allowed
+- the missed deadline in the attention list
+- outsiders get 404, and students on teacher pages get 403
+
+PersonalisationFlowTest's check that practice is never official now names the allowed official sources explicitly, since graded assignments are official too.
+
+Manual: headless Edge screenshots of the assignments list, grading, the student's handed-in and graded views (desktop and mobile), and "From your rooms" on Next steps. No console or CSP errors. Defect fixed: a room's next item was listed twice when it was also due soon.
+
 Not yet done: accessibility audit with axe-core, Android tests, load tests and the dependency vulnerability scan. All of these are planned (see the blueprint, §35).

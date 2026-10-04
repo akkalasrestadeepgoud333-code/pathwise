@@ -61,6 +61,7 @@ public final class RoomService {
     private final ProgressDao progress = new ProgressDao();
     private final AssessmentDao assessments = new AssessmentDao();
     private final GameDao games = new GameDao();
+    private final app.pathwise.data.rooms.AssignmentDao assignmentDao = new app.pathwise.data.rooms.AssignmentDao();
 
     public RoomService(Tx tx, CatalogService catalog, EventBus events, Clock clock) {
         this.tx = tx;
@@ -503,7 +504,7 @@ public final class RoomService {
                 List<ItemView> iv = new ArrayList<>();
                 for (int i = 0; i < items.size(); i++) {
                     ItemRow it = items.get(i);
-                    iv.add(new ItemView(it.id(), it.kind(), kindLabel(it.kind()), it.title(), href(it), publishLabel(it.publishAt(), now),
+                    iv.add(new ItemView(it.id(), it.kind(), kindLabel(it.kind()), it.title(), href(it, roomId), publishLabel(it.publishAt(), now),
                             it.required(), i == 0, i == items.size() - 1));
                 }
                 out.add(new UnitView(unit.id(), unit.title(), publishLabel(unit.publishAt(), now),
@@ -535,6 +536,9 @@ public final class RoomService {
         }
         for (AssessmentDao.AssessmentRow a : assessments.ofRoom(c, room.id())) {
             out.add(new Choice("assessment:" + a.id(), a.title() + ("draft".equals(a.status()) ? " (draft)" : ""), "This room's assessments"));
+        }
+        for (app.pathwise.data.rooms.AssignmentDao.AssignmentRow a : assignmentDao.ofRoom(c, room.id())) {
+            out.add(new Choice("assignment:" + a.id(), a.title() + ("draft".equals(a.status()) ? " (draft)" : ""), "This room's assignments"));
         }
         return out;
     }
@@ -680,7 +684,7 @@ public final class RoomService {
                         continue;
                     }
                     String st = itemStatus(c, it, actor.userId(), status);
-                    StudentItem si = new StudentItem(it.kind(), kindLabel(it.kind()), it.title(), href(it), st, statusLabel(it.kind(), st), it.required());
+                    StudentItem si = new StudentItem(it.kind(), kindLabel(it.kind()), it.title(), href(it, roomId), st, statusLabel(it.kind(), st), it.required());
                     items.add(si);
                     if (it.required()) {
                         total++;
@@ -700,6 +704,61 @@ public final class RoomService {
             Integer classAverage = ctx.can(Action.VIEW_CLASS_AGGREGATES) ? classAverage(c, roomId, now) : null;
             return new StudentRoom(roomId, ctx.room().name(), ctx.room().description(), teachers, ctx.room().archivedAt() != null,
                     ctx.can(Action.USE_TEACHER_VIEW), announcements(c, roomId, 10), out, next, done, total, classAverage);
+        });
+    }
+
+    public record DueSoon(String title, String kindLabel, String href, String dueLabel, long daysLeft, String inLabel) {}
+
+    /** {@code nextDue}: when the next item is itself due within a week, its \"In 2 days\" label (it isn't repeated in {@code dueSoon}). */
+    public record RoomNext(UUID roomId, String roomName, StudentItem next, String nextDue, List<DueSoon> dueSoon) {}
+
+    /**
+     * Room context for the student's own next steps: in each room, the next unfinished required item and
+     * anything due within a week that isn't done. Plain curriculum order and deadlines, nothing inferred.
+     */
+    public List<RoomNext> roomNextSteps(Actor actor) {
+        requireUser(actor);
+        Instant now = clock.instant();
+        return tx.read(c -> {
+            List<RoomNext> out = new ArrayList<>();
+            Map<UUID, Boolean> modules = statusOf(c, actor.userId());
+            for (RoomDao.MyRoom r : dao.roomsOf(c, actor.userId())) {
+                if (!"student".equals(r.role()) || !"active".equals(r.status()) || r.archivedAt() != null) {
+                    continue;
+                }
+                StudentItem next = null;
+                String nextDue = null;
+                List<DueSoon> due = new ArrayList<>();
+                for (ItemRow it : requiredVisibleItems(c, r.id(), now)) {
+                    String st = itemStatus(c, it, actor.userId(), modules);
+                    if ("done".equals(st)) {
+                        continue;
+                    }
+                    StudentItem si = new StudentItem(it.kind(), kindLabel(it.kind()), it.title(), href(it, r.id()), st, statusLabel(it.kind(), st), true);
+                    if (next == null) {
+                        next = si;
+                    }
+                    Instant dueAt = switch (it.kind()) {
+                        case "assessment" -> assessments.findById(c, it.refId()).map(AssessmentDao.AssessmentRow::dueAt).orElse(null);
+                        case "assignment" -> assignmentDao.find(c, it.refId()).map(app.pathwise.data.rooms.AssignmentDao.AssignmentRow::dueAt).orElse(null);
+                        default -> null;
+                    };
+                    if (dueAt != null && dueAt.isAfter(now) && dueAt.isBefore(now.plus(Duration.ofDays(7)))) {
+                        long days = Duration.between(now, dueAt).toDays();
+                        String in = days == 0 ? "Due today" : days == 1 ? "Due tomorrow" : "In " + days + " days";
+                        if (si == next) {
+                            nextDue = in;
+                        } else {
+                            due.add(new DueSoon(it.title(), kindLabel(it.kind()), si.href(),
+                                    TimeLabels.dateTime(dueAt, TimeLabels.DEFAULT_ZONE), days, in));
+                        }
+                    }
+                }
+                if (next != null || !due.isEmpty()) {
+                    out.add(new RoomNext(r.id(), r.name(), next, nextDue, due));
+                }
+            }
+            return out;
         });
     }
 
@@ -746,6 +805,9 @@ public final class RoomService {
         if ("assessment".equals(it.kind())) {
             return assessments.findById(c, it.refId()).map(a -> "published".equals(a.status())).orElse(false);
         }
+        if ("assignment".equals(it.kind())) {
+            return assignmentDao.find(c, it.refId()).map(a -> "published".equals(a.status())).orElse(false);
+        }
         return true;
     }
 
@@ -765,6 +827,14 @@ public final class RoomService {
                 yield attempts.stream().anyMatch(t -> "graded".equals(t.status())) ? "done"
                         : attempts.isEmpty() ? "todo" : "started";
             }
+            case "assignment" -> {
+                String st = assignmentDao.submission(c, it.refId(), userId).map(app.pathwise.data.rooms.AssignmentDao.SubmissionRow::status).orElse("none");
+                yield switch (st) {
+                    case "submitted", "graded" -> "done";
+                    case "draft", "returned" -> "started";
+                    default -> "todo";
+                };
+            }
             default -> {
                 var s = games.stats(c, userId).get(it.refId());
                 yield s != null && s.plays() > 0 ? "done" : "todo";
@@ -779,6 +849,7 @@ public final class RoomService {
             case "done" -> switch (kind) {
                 case "module" -> "Studied";
                 case "assessment" -> "Submitted";
+                case "assignment" -> "Handed in";
                 default -> "Played";
             };
             case "started" -> "In progress";
@@ -790,14 +861,16 @@ public final class RoomService {
         return switch (kind) {
             case "module" -> "Module";
             case "assessment" -> "Assessment";
+            case "assignment" -> "Assignment";
             default -> "Game";
         };
     }
 
-    static String href(ItemRow it) {
+    static String href(ItemRow it, UUID roomId) {
         return switch (it.kind()) {
             case "module" -> "/app/modules/" + it.refKey();
             case "assessment" -> "/app/assessments/" + it.refKey();
+            case "assignment" -> "/app/rooms/" + roomId + "/assignments/" + it.refId();
             default -> "/app/games/" + it.refKey();
         };
     }

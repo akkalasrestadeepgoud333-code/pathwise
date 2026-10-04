@@ -56,6 +56,18 @@ public class TeachRoomController extends PageServlet {
                     render(req, res, "teacher/room-people");
                 }
                 case "assess" -> assess(req, res, actor, roomId, p);
+                case "assignments" -> {
+                    UUID aid = p.length == 3 ? Ids.parseOrNull(p[2]) : null;
+                    if (p.length == 2) {
+                        req.setAttribute("page", ViewModels.of(app().assignments().page(actor, roomId)));
+                        render(req, res, "teacher/room-assignments");
+                    } else if (aid != null) {
+                        req.setAttribute("grading", ViewModels.of(app().assignments().grading(actor, roomId, aid)));
+                        render(req, res, "teacher/room-grading");
+                    } else {
+                        res.sendError(HttpServletResponse.SC_NOT_FOUND);
+                    }
+                }
                 case "analytics" -> {
                     req.setAttribute("analytics", ViewModels.of(app().roomInsights().analytics(actor, roomId)));
                     render(req, res, "teacher/room-analytics");
@@ -120,7 +132,8 @@ public class TeachRoomController extends PageServlet {
             return;
         }
         String section = p.length >= 2 ? p[1] : "";
-        String back = "/teach/rooms/" + roomId + (section.isEmpty() ? "" : "/" + section);
+        String back = "/teach/rooms/" + roomId + (section.isEmpty() ? "" : "/" + section)
+                + (p.length >= 3 && Ids.parseOrNull(p[2]) != null ? "/" + p[2] : "");
         String action = param(req, "action");
         RoomService rooms = app().rooms();
         try {
@@ -192,6 +205,33 @@ public class TeachRoomController extends PageServlet {
                     flash(req, "success", "Results released. Students can now see which answers were right.");
                 }
                 case "archive-assessment" -> app().roomAssessments().archive(actor, roomId, id(req, "assessmentId"));
+                case "create-assignment" -> {
+                    List<UUID> skills = new ArrayList<>();
+                    String[] picked = req.getParameterValues("skill");
+                    if (picked != null) {
+                        for (String v : picked) {
+                            UUID k = Ids.parseOrNull(v);
+                            if (k != null) {
+                                skills.add(k);
+                            }
+                        }
+                    }
+                    app().assignments().create(actor, roomId, new AssignmentService.Draft(req.getParameter("title"),
+                            req.getParameter("instructions"), intParam(req, "maxPoints", 10), date(req, "dueOn"),
+                            !"0".equals(req.getParameter("allowLate")), skills));
+                    flash(req, "success", "Draft saved. Publish it, then add it to the curriculum so students see it.");
+                }
+                case "publish-assignment" -> {
+                    app().assignments().publish(actor, roomId, id(req, "assignmentId"));
+                    flash(req, "success", "Published.");
+                }
+                case "archive-assignment" -> app().assignments().archive(actor, roomId, id(req, "assignmentId"));
+                case "grade" -> {
+                    boolean sendBack = "1".equals(req.getParameter("sendBack"));
+                    app().assignments().grade(actor, roomId, id(req, "assignmentId"), id(req, "userId"), req.getParameter("grade"),
+                            req.getParameter("feedback"), sendBack);
+                    flash(req, "success", sendBack ? "Sent back with your comments." : "Graded.");
+                }
                 case "save-settings" -> {
                     rooms.updateSettings(actor, roomId, req.getParameter("name"), req.getParameter("description"),
                             req.getParameter("subject"), req.getParameter("joinPolicy"), on(req, "classStats"));

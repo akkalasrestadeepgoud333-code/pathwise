@@ -53,6 +53,7 @@ public class NextController extends PageServlet {
                     topics.add(Map.of("value", s.key() + "/" + t.key(), "label", s.title() + " · " + t.title()))));
         }
         req.setAttribute("topicOptions", topics);
+        req.setAttribute("roomNext", app.pathwise.web.platform.view.ViewModels.list(app().rooms().roomNextSteps(actor)));
         req.setAttribute("nav", "next");
         render(req, res, "next/index");
     }

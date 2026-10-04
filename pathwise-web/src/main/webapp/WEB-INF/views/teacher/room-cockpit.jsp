@@ -14,6 +14,15 @@
     </section>
   </c:if>
 
+  <c:if test="${k.toGrade > 0}">
+    <a class="card card-interactive room-card to-grade" href="<c:url value='/teach/rooms/${h.id}/assignments'/>">
+      <span class="game-card-icon" aria-hidden="true"><pw:icon name="file-text"/></span>
+      <div class="grow"><h2 class="card-title"><c:out value="${k.toGrade}"/> submission<c:if test="${k.toGrade != 1}">s</c:if> to grade</h2>
+        <p class="meta">Handed-in assignments waiting for you</p></div>
+      <pw:icon name="arrow-right"/>
+    </a>
+  </c:if>
+
   <div class="grid grid-2 section-gap">
     <section class="card" aria-labelledby="pending-title">
       <h2 id="pending-title" class="card-title">Waiting to join</h2>

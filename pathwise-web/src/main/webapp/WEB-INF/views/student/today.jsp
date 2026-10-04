@@ -50,6 +50,8 @@
     </section>
   </div>
 
+  <pw:roomnext rooms="${roomNext}"/>
+
   <c:if test="${not empty more}">
     <div class="section-head section-gap">
       <h2>More next steps</h2>

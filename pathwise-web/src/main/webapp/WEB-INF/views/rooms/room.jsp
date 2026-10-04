@@ -47,7 +47,7 @@
                 <ol class="list unit-items">
                   <c:forEach var="it" items="${u.items}">
                     <li class="list-item">
-                      <span class="list-icon item-<c:out value='${it.status}'/>"><pw:icon name="${it.status == 'done' ? 'circle-check' : (it.kind == 'module' ? 'book-open' : (it.kind == 'assessment' ? 'clipboard-check' : 'gamepad-2'))}"/></span>
+                      <span class="list-icon item-<c:out value='${it.status}'/>"><pw:icon name="${it.status == 'done' ? 'circle-check' : (it.kind == 'module' ? 'book-open' : (it.kind == 'assessment' ? 'clipboard-check' : (it.kind == 'assignment' ? 'file-text' : 'gamepad-2')))}"/></span>
                       <div class="grow"><div class="title"><a href="<c:url value='${it.href}'/>"><c:out value="${it.title}"/></a></div>
                         <div class="meta"><c:out value="${it.kindLabel}"/><c:if test="${not it.required}"> · optional</c:if></div></div>
                       <span class="state-chip item-chip-<c:out value='${it.status}'/>"><c:out value="${it.statusLabel}"/></span>

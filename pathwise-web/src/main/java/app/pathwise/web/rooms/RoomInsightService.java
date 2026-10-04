@@ -11,6 +11,7 @@ import app.pathwise.data.content.ContentDao;
 import app.pathwise.data.learner.EvidenceDao;
 import app.pathwise.data.learner.EvidenceDao.MasteryRow;
 import app.pathwise.data.questions.QuestionDao;
+import app.pathwise.data.rooms.AssignmentDao;
 import app.pathwise.data.rooms.RoomDao;
 import app.pathwise.data.rooms.RoomDao.ItemRow;
 import app.pathwise.data.rooms.RoomDao.MemberView;
@@ -48,6 +49,7 @@ public final class RoomInsightService {
     private final QuestionDao questions = new QuestionDao();
     private final EvidenceDao evidence = new EvidenceDao();
     private final CatalogDao catalog = new CatalogDao();
+    private final AssignmentDao assignmentDao = new AssignmentDao();
 
     public RoomInsightService(Tx tx, RoomService rooms, Clock clock) {
         this.tx = tx;
@@ -60,7 +62,8 @@ public final class RoomInsightService {
     public record Deadline(UUID assessmentId, String title, String dueLabel, boolean overdue, int submitted, int students) {}
 
     public record Cockpit(RoomService.Header header, List<RoomService.Member> pending, List<Attention> attention,
-                          List<Deadline> deadlines, List<RoomService.Announcement> announcements, boolean hasCurriculum) {}
+                          List<Deadline> deadlines, List<RoomService.Announcement> announcements, boolean hasCurriculum,
+                          int toGrade) {}
 
     public Cockpit cockpit(Actor actor, UUID roomId) {
         Instant now = clock.instant();
@@ -73,11 +76,11 @@ public final class RoomInsightService {
             Data d = data(c, roomId, members, now);
             List<Deadline> deadlines = d.deadlines.stream()
                     .filter(x -> x.due().isAfter(now.minus(Duration.ofDays(3))) && x.due().isBefore(now.plus(Duration.ofDays(14))))
-                    .map(x -> new Deadline(x.a().id(), x.a().title(), TimeLabels.dateTime(x.due(), TimeLabels.DEFAULT_ZONE),
-                            x.due().isBefore(now), d.submitted.getOrDefault(x.a().id(), Set.of()).size(), d.students.size())).toList();
+                    .map(x -> new Deadline(x.id(), x.title(), TimeLabels.dateTime(x.due(), TimeLabels.DEFAULT_ZONE),
+                            x.due().isBefore(now), d.submitted.getOrDefault(x.id(), Set.of()).size(), d.students.size())).toList();
             List<Attention> attention = ctx.can(Action.VIEW_INDIVIDUAL_ANALYTICS) ? d.attention : List.of();
             return new Cockpit(rooms.header(c, ctx), pending, attention, deadlines, rooms.announcements(c, roomId, 5),
-                    !dao.items(c, roomId).isEmpty());
+                    !dao.items(c, roomId).isEmpty(), assignmentDao.toGrade(c, roomId));
         });
     }
 
@@ -92,8 +95,11 @@ public final class RoomInsightService {
     public record AssessmentStat(String title, int submitted, int students, Integer averagePercent, int[] buckets, UUID id,
                                  boolean ownedByRoom) {}
 
+    public record AssignmentStat(UUID id, String title, int handedIn, int late, int missing, int graded, int students,
+                                 Integer averagePercent) {}
+
     public record Analytics(RoomService.Header header, int students, int active7d, Integer averageCompletion, List<SkillHeat> skills,
-                            List<StudentRow> rows, boolean individual, List<AssessmentStat> assessments, List<Attention> attention) {}
+                            List<StudentRow> rows, boolean individual, List<AssessmentStat> assessments, List<Attention> attention, List<AssignmentStat> assignmentStats) {}
 
     public Analytics analytics(Actor actor, UUID roomId) {
         Instant now = clock.instant();
@@ -160,9 +166,34 @@ public final class RoomInsightService {
                         best.isEmpty() ? null : (int) Math.round(best.stream().mapToDouble(x -> x).average().orElse(0)), buckets, a.id(),
                         roomId.equals(a.ownerRoomId())));
             }
+            List<AssignmentStat> assignmentStats = new ArrayList<>();
+            for (AssignmentDao.AssignmentRow a : d.assignments) {
+                Map<UUID, AssignmentDao.SubmissionRow> subs = d.submissionStatus.getOrDefault(a.id(), Map.of());
+                int handedIn = 0;
+                int late = 0;
+                int graded = 0;
+                List<Double> pcts = new ArrayList<>();
+                for (MemberView s : d.students) {
+                    AssignmentDao.SubmissionRow sub = subs.get(s.userId());
+                    if (sub == null || "draft".equals(sub.status())) {
+                        continue;
+                    }
+                    handedIn++;
+                    if (sub.late()) {
+                        late++;
+                    }
+                    if (sub.grade() != null) {
+                        graded++;
+                        pcts.add(100.0 * sub.grade() / a.maxPoints());
+                    }
+                }
+                boolean pastDue = a.dueAt() != null && a.dueAt().isBefore(now);
+                assignmentStats.add(new AssignmentStat(a.id(), a.title(), handedIn, late, pastDue ? d.students.size() - handedIn : 0, graded,
+                        d.students.size(), pcts.isEmpty() ? null : (int) Math.round(pcts.stream().mapToDouble(x -> x).average().orElse(0))));
+            }
             Integer avg = d.students.isEmpty() ? null : (int) Math.round(completionSum / d.students.size());
             return new Analytics(rooms.header(c, ctx), d.students.size(), active, avg, heat, individual ? rows : List.of(), individual,
-                    stats, individual ? d.attention : List.of());
+                    stats, individual ? d.attention : List.of(), assignmentStats);
         });
     }
 
@@ -191,7 +222,8 @@ public final class RoomInsightService {
 
     // ------------------------------------------------------------------ shared data
 
-    private record DueItem(AssessmentRow a, Instant due) {}
+    /** Something with a deadline: a room assessment or an assignment. */
+    private record DueItem(UUID id, String title, Instant due) {}
 
     private static final class Data {
         List<MemberView> students;
@@ -203,6 +235,8 @@ public final class RoomInsightService {
         Map<UUID, Set<UUID>> submitted = new HashMap<>();
         List<AssessmentRow> roomAssessments = new ArrayList<>();
         List<DueItem> deadlines = new ArrayList<>();
+        List<AssignmentDao.AssignmentRow> assignments = new ArrayList<>();
+        Map<UUID, Map<UUID, AssignmentDao.SubmissionRow>> submissionStatus = new HashMap<>();
         List<Attention> attention = new ArrayList<>();
     }
 
@@ -235,7 +269,22 @@ public final class RoomInsightService {
         d.roomAssessments.removeIf(a -> !"published".equals(a.status()));
         for (AssessmentRow a : d.roomAssessments) {
             if (a.dueAt() != null) {
-                d.deadlines.add(new DueItem(a, a.dueAt()));
+                d.deadlines.add(new DueItem(a.id(), a.title(), a.dueAt()));
+            }
+        }
+        for (AssignmentDao.AssignmentRow a : assignmentDao.ofRoom(c, roomId)) {
+            if (!"published".equals(a.status())) {
+                continue;
+            }
+            d.assignments.add(a);
+            if (a.dueAt() != null) {
+                d.deadlines.add(new DueItem(a.id(), a.title(), a.dueAt()));
+            }
+            for (AssignmentDao.SubmissionView sv : assignmentDao.submissionsOf(c, a.id())) {
+                if (!"draft".equals(sv.s().status())) {
+                    d.submitted.computeIfAbsent(a.id(), k -> new java.util.HashSet<>()).add(sv.s().userId());
+                }
+                d.submissionStatus.computeIfAbsent(a.id(), k -> new HashMap<>()).put(sv.s().userId(), sv.s());
             }
         }
         d.deadlines.sort(Comparator.comparing(DueItem::due));
@@ -268,14 +317,14 @@ public final class RoomInsightService {
             }
             boolean inactive = s.lastEvidenceAt() == null || s.lastEvidenceAt().isBefore(now.minus(Duration.ofDays(7)));
             for (DueItem due : d.deadlines) {
-                boolean submitted = d.submitted.getOrDefault(due.a().id(), Set.of()).contains(s.userId());
+                boolean submitted = d.submitted.getOrDefault(due.id(), Set.of()).contains(s.userId());
                 if (submitted) {
                     continue;
                 }
                 if (due.due().isBefore(now)) {
-                    reasons.add("Missed the deadline for " + due.a().title());
+                    reasons.add("Missed the deadline for " + due.title());
                 } else if (inactive && due.due().isBefore(now.plus(Duration.ofDays(5)))) {
-                    reasons.add("Inactive for a week, with " + due.a().title() + " due soon");
+                    reasons.add("Inactive for a week, with " + due.title() + " due soon");
                 }
             }
             if (!reasons.isEmpty()) {
