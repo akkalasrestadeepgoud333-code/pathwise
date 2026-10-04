@@ -33,6 +33,7 @@
         <a href="<c:url value='/admin/assessments'/>"<c:if test="${nav == 'admin-assessments'}"> aria-current="page"</c:if>><pw:icon name="chart-column"/>Item analysis</a>
         <a href="<c:url value='/admin/moderation'/>"<c:if test="${nav == 'admin-moderation'}"> aria-current="page"</c:if>><pw:icon name="shield"/>Moderation</a>
         <a href="<c:url value='/admin/users'/>"<c:if test="${nav == 'admin-users'}"> aria-current="page"</c:if>><pw:icon name="users"/>People</a>
+        <a href="<c:url value='/admin/messages'/>"<c:if test="${nav == 'admin-messages'}"> aria-current="page"</c:if>><pw:icon name="mail"/>Messages</a>
         <a href="<c:url value='/admin/rooms'/>"<c:if test="${nav == 'admin-rooms'}"> aria-current="page"</c:if>><pw:icon name="school"/>Rooms</a>
         <a href="<c:url value='/admin/games'/>"<c:if test="${nav == 'admin-games'}"> aria-current="page"</c:if>><pw:icon name="gamepad-2"/>Games</a>
         <a href="<c:url value='/admin/audit'/>"<c:if test="${nav == 'admin-audit'}"> aria-current="page"</c:if>><pw:icon name="file-text"/>Audit log</a>

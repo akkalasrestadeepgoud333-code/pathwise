@@ -198,6 +198,16 @@ Last updated: **2026-10-04** (end of M11, hardening and release; milestones M0â€
 | Static accessibility checks on every build: labelled form fields, image alt text, named buttons, page language | `AccessibilityLintTest` | `AccessibilityLintTest` |
 | Documentation: README, SETUP, ARCHITECTURE, DATABASE, API, SECURITY, DEMO, DEPLOYMENT, LIMITATIONS | `README.md`, `docs/` | â€” |
 
+## Implemented (after M11: room materials and more admin powers, 2026-10-05)
+
+| Feature | Where | Evidence |
+|---|---|---|
+| Teachers share their own **notes** (Markdown, passed through the HTML sanitiser) and **PDFs** (up to 10 MB) with a room, from a new Materials tab. Students see them on the room page. Only room members can open them. | `/teach/rooms/<id>/materials`, `/materials/<room>/<id>`, `MaterialService` | `MaterialsAndAdminPowersFlowTest` |
+| PDFs are checked by their content (`%PDF-`), not their name. They are stored outside the web root under a server-generated name, and served with `Content-Security-Policy: sandbox`. Outsiders get 404 and students get 403 when adding; removing deletes the file. Adding and removing need the room's author permission (owner, or a co-teacher allowed to author), and both are audited. | `MaterialService`, `MaterialController` | `MaterialsAndAdminPowersFlowTest` |
+| Admins **send messages** to one person (from People) or to everyone, students, teachers or admins (new Messages page). Messages arrive under the bell and in the Android app, signed with the admin's name and audited. | `/admin/users/<id>`, `/admin/messages` | `MaterialsAndAdminPowersFlowTest` |
+| Admins **remove accounts**, with password re-entry and a required reason. The account is signed out everywhere and can't sign in; its name and email are wiped (the email can be used again) and its non-student roles removed. You can't remove yourself or an administrator, or a teacher who still owns active rooms (archive them first). Audited. | `/admin/users/<id>` | `MaterialsAndAdminPowersFlowTest` |
+| Sign out reachable everywhere: the sidebar list scrolls, so Sign out stays visible for admins, and Settings has "Sign out of this device" for phones | `layout.css`, `settings/index.jsp` | `WebAuthFlowTest` |
+
 ## Partially implemented
 
 | Feature | Works | Missing |
@@ -205,6 +215,8 @@ Last updated: **2026-10-04** (end of M11, hardening and release; milestones M0â€
 | Android app (rest of the blueprint) | see the M9 table | the Learning Map trail, modules, flashcards, daily challenge, assessments, the tutor, assignments, achievements and settings (use the website for these); offline cache and queued offline game submissions; background push (Pathwise checks only when the app opens, so no FCM, no background service); teaching tools (web only); Photo Picker for doubts; automated UI tests (verified by hand on an emulator only); a signed release build |
 | Admin console (rest of the blueprint) | see the M10 table | catalogue tree editor, badge definitions with a criteria builder and dry run, platform analytics beyond the overview counts, a reports section separate from moderation, SMTP settings (Pathwise sends no email), changing the AI provider from the UI (it's in the config file, shown read-only) |
 | Live doubt sessions (rest of the blueprint) | see the M10 table | scheduling a future start time, pinned host messages, reporting a session question, publishing answered questions as KB drafts, Verified Educators (without a teacher or mentor role) and trust-level-3 students as hosts, live sessions in the Android app |
+| Room materials (rest) | notes and PDFs (see above) | other file types (slides, images), placing materials inside curriculum units, notifying students when something is shared, materials in the Android app, a storage quota per room |
+| Admin messages (rest) | in-app messages (see above) | e-mail delivery (Pathwise sends no e-mail), replies, messaging one room's members from the admin console |
 | Learner profile | stored per user; the theme preference is used | timezone editing, goals and modalities UI (M2) |
 | "Ask" recommendation slot | not generated | the tutor and doubts exist; the recommender doesn't suggest them yet |
 | Rooms (rest of the blueprint) | see the M5 table | QR codes for join links; item gates (soft/hard prerequisites); duplicating a room; transferring ownership; the "3+ failed attempts on one item" attention rule; teachers writing their own questions and modules (room assessments use the bank) |

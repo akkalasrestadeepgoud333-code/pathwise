@@ -22,6 +22,7 @@
   <a href="<c:url value='/teach/rooms/${h.id}'/>"<c:if test="${section == 'today'}"> aria-current="page"</c:if>>Today</a>
   <a href="<c:url value='/teach/rooms/${h.id}/curriculum'/>"<c:if test="${section == 'curriculum'}"> aria-current="page"</c:if>>Curriculum</a>
   <a href="<c:url value='/teach/rooms/${h.id}/assess'/>"<c:if test="${section == 'assess'}"> aria-current="page"</c:if>>Assessments</a>
+  <a href="<c:url value='/teach/rooms/${h.id}/materials'/>"<c:if test="${section == 'materials'}"> aria-current="page"</c:if>>Materials</a>
   <a href="<c:url value='/teach/rooms/${h.id}/assignments'/>"<c:if test="${section == 'assignments'}"> aria-current="page"</c:if>>Assignments</a>
   <a href="<c:url value='/teach/rooms/${h.id}/doubts'/>"<c:if test="${section == 'doubts'}"> aria-current="page"</c:if>>Doubts</a>
   <a href="<c:url value='/teach/rooms/${h.id}/people'/>"<c:if test="${section == 'people'}"> aria-current="page"</c:if>>People</a>

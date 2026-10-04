@@ -154,6 +154,62 @@ public final class AdminService {
         });
     }
 
+    /**
+     * Removes an account for good: signed out everywhere, can't sign in, name and email wiped. Needs password
+     * re-entry and a reason. Administrators must lose the admin role first; teachers must archive their rooms first.
+     */
+    public void removeUser(Actor actor, UUID userId, String reason) {
+        PlatformPolicy.require(actor, PlatformAction.MANAGE_USERS);
+        requireReauth(actor);
+        String why = reason(reason);
+        if (userId.equals(actor.userId())) {
+            throw new AdminRuleException("You can't remove your own account here.");
+        }
+        tx.run(c -> {
+            AdminDao.UserRow u = dao.user(c, userId).orElseThrow(() -> new AdminRuleException("No such account."));
+            if (u.roles().contains("admin")) {
+                throw new AdminRuleException("Remove the admin role before removing an administrator.");
+            }
+            int rooms = dao.activeOwnedRooms(c, userId);
+            if (rooms > 0) {
+                throw new AdminRuleException("This person owns " + rooms + " active room" + (rooms == 1 ? "" : "s")
+                        + ". Archive them first (Admin → Rooms), so no class is left without a teacher.");
+            }
+            if (!dao.removeUser(c, userId)) {
+                throw new AdminRuleException("That account was already removed.");
+            }
+            audit.record(c, actor.userId(), "admin.user_removed", "user", userId.toString(), Json.write(Map.of("reason", why)), null);
+        });
+        identity.endAllSessions(userId);
+    }
+
+    /**
+     * Sends an in-app message (it appears under the bell). {@code userId} is used only for {@link AdminDao.Audience#USER}.
+     * Returns how many people received it.
+     */
+    public int sendMessage(Actor actor, AdminDao.Audience audience, UUID userId, String title, String body) {
+        PlatformPolicy.require(actor, PlatformAction.MANAGE_USERS);
+        String t = title == null ? "" : title.strip().replaceAll("\\s+", " ");
+        String b = body == null ? "" : body.strip();
+        if (t.length() < 3 || t.length() > 120) {
+            throw new AdminRuleException("Give the message a subject (3 to 120 characters).");
+        }
+        if (b.isEmpty() || b.length() > 450) {
+            throw new AdminRuleException("Write the message (up to 450 characters).");
+        }
+        if (audience == AdminDao.Audience.USER && userId == null) {
+            throw new AdminRuleException("Choose who to send it to.");
+        }
+        String signed = b + "\n— " + actor.displayName() + ", administrator";
+        return tx.call(c -> {
+            int n = dao.sendMessage(c, audience, userId, t, signed);
+            audit.record(c, actor.userId(), "admin.message_sent", audience == AdminDao.Audience.USER ? "user" : "audience",
+                    audience == AdminDao.Audience.USER ? userId.toString() : audience.name().toLowerCase(Locale.ROOT),
+                    Json.write(Map.of("subject", t, "recipients", n)), null);
+            return n;
+        });
+    }
+
     public void setVerifiedEducator(Actor actor, UUID userId, boolean verified) {
         PlatformPolicy.require(actor, PlatformAction.MANAGE_USERS);
         tx.run(c -> {

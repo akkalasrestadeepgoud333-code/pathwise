@@ -53,6 +53,7 @@ public class RoomController extends PageServlet {
                 return;
             }
             req.setAttribute("room", ViewModels.of(svc.studentView(actor, id)));
+            req.setAttribute("materials", ViewModels.of(app().materials().page(actor, id)));
             render(req, res, "rooms/room");
         } catch (RoomService.RoomNotFoundException e) {
             res.sendError(HttpServletResponse.SC_NOT_FOUND);

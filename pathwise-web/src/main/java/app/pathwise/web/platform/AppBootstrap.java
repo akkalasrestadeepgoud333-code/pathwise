@@ -109,14 +109,18 @@ public class AppBootstrap implements ServletContextListener {
         servlet(sc, "apiDoubts", new DoubtApiServlet(), "/api/v1/doubts", "/api/v1/doubts/*");
         servlet(sc, "rewards", new RewardsController(), "/app/achievements", "/app/notifications", "/app/notifications/*");
         servlet(sc, "apiRewards", new RewardsApiServlet(), "/api/v1/me/rewards", "/api/v1/me/notifications", "/api/v1/me/notifications/*");
-        servlet(sc, "live", new app.pathwise.web.community.LiveSessionController(), "/app/live", "/app/live/*");
+        // Uploads: Tomcat accepts up to 50 MB so that MaterialService can refuse anything over 10 MB with a clear message.
+        var materials = sc.addServlet("materials", new app.pathwise.web.rooms.MaterialController());
+        materials.addMapping("/materials/*");
+        materials.setMultipartConfig(new jakarta.servlet.MultipartConfigElement(null, 50L * 1024 * 1024, 51L * 1024 * 1024, 1024 * 1024));
+        servlet(sc, "live",new app.pathwise.web.community.LiveSessionController(), "/app/live", "/app/live/*");
         servlet(sc, "tutor",new TutorController(), "/app/tutor", "/app/tutor/*");
         servlet(sc, "moderation", new ModerationController(), "/admin/moderation", "/admin/moderation/*");
         servlet(sc, "admin", new AdminController(), "/admin");
         servlet(sc, "adminAssessments", new AdminAssessmentController(), "/admin/assessments", "/admin/assessments/*");
         servlet(sc, "adminContent", new AdminContentController(), "/admin/content");
         servlet(sc, "adminConsole", new app.pathwise.web.admin.AdminConsoleController(), "/admin/users", "/admin/users/*",
-                "/admin/rooms", "/admin/games", "/admin/audit", "/admin/settings", "/admin/reauth");
+                "/admin/rooms", "/admin/games", "/admin/audit", "/admin/settings", "/admin/reauth", "/admin/messages");
         servlet(sc, "apiLearn", new LearnApiServlet(), "/api/v1/subjects", "/api/v1/subjects/*", "/api/v1/modules/*");
         servlet(sc, "apiAuth", new AuthApiServlet(), "/api/v1/auth/*");
         servlet(sc, "apiMe", new MeApiServlet(), "/api/v1/me");

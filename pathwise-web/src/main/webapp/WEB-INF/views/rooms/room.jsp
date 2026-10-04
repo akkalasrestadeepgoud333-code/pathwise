@@ -59,6 +59,40 @@
           </c:otherwise>
         </c:choose>
       </section>
+
+      <section class="card" aria-labelledby="mat-title">
+        <div class="card-header">
+          <h2 id="mat-title" class="card-title">Materials from your teacher</h2>
+          <c:if test="${materials.canEdit}"><a class="btn btn-sm" href="<c:url value='/teach/rooms/${r.id}/materials'/>">Add or remove</a></c:if>
+        </div>
+        <c:choose>
+          <c:when test="${empty materials.items}"><p class="muted">Nothing shared yet.</p></c:when>
+          <c:otherwise>
+            <ul class="list">
+              <c:forEach var="m" items="${materials.items}">
+                <li class="list-item">
+                  <span class="list-icon"><pw:icon name="${m.kind == 'pdf' ? 'file-text' : 'book-open'}"/></span>
+                  <div class="grow">
+                    <c:choose>
+                      <c:when test="${m.kind == 'pdf'}">
+                        <div class="title"><a href="<c:url value='/materials/${r.id}/${m.id}'/>" target="_blank" rel="noopener"><c:out value="${m.title}"/></a></div>
+                        <div class="meta">PDF · <c:out value="${m.sizeLabel}"/> · <c:out value="${m.authorName}"/></div>
+                      </c:when>
+                      <c:otherwise>
+                        <details class="material-note">
+                          <summary class="title"><c:out value="${m.title}"/></summary>
+                          <div class="prose"><pw:html value="${m.html}"/></div>
+                        </details>
+                        <div class="meta">Note · <c:out value="${m.authorName}"/></div>
+                      </c:otherwise>
+                    </c:choose>
+                  </div>
+                </li>
+              </c:forEach>
+            </ul>
+          </c:otherwise>
+        </c:choose>
+      </section>
     </div>
 
     <div class="stack">

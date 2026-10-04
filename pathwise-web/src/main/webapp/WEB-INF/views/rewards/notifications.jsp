@@ -10,9 +10,17 @@
       <ul class="list card notif-list">
         <c:forEach var="n" items="${items}">
           <li class="list-item<c:if test='${n.unread}'> is-unread</c:if>">
-            <span class="list-icon"><pw:icon name="${n.type == 'badge_earned' ? 'award' : (n.type == 'milestone' ? 'sparkles' : (n.type == 'announcement' ? 'mail' : 'bell'))}"/></span>
+            <span class="list-icon"><pw:icon name="${n.type == 'badge_earned' ? 'award' : (n.type == 'milestone' ? 'sparkles' : (n.type == 'announcement' or n.type == 'admin_message' ? 'mail' : 'bell'))}"/></span>
             <div class="grow"><div class="title"><a href="<c:url value='/app/notifications/${n.id}'/>"><c:out value="${n.title}"/></a></div>
-              <div class="meta"><c:if test="${not empty n.body}"><c:out value="${n.body}"/> · </c:if><c:out value="${n.when}"/></div></div>
+              <c:choose>
+                <c:when test="${n.type == 'admin_message'}">
+                  <p class="message-body"><c:out value="${n.body}"/></p>
+                  <div class="meta">Message from the administrators · <c:out value="${n.when}"/></div>
+                </c:when>
+                <c:otherwise>
+                  <div class="meta"><c:if test="${not empty n.body}"><c:out value="${n.body}"/> · </c:if><c:out value="${n.when}"/></div>
+                </c:otherwise>
+              </c:choose></div>
             <c:if test="${n.unread}"><span class="chip chip-accent">New</span></c:if>
           </li>
         </c:forEach>

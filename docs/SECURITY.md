@@ -74,6 +74,16 @@ This file describes the security controls in Pathwise as built, and the review d
 - **The game WebView** loads only the APK's own assets from a private https origin. File and content access are off, and navigation away is blocked. The JavaScript bridge exposes four methods: puzzle, template, minimum gap, and finish.
 - **Plain http** is allowed so a student can reach a server on their own computer or LAN. The sign-in screen warns when a non-local server isn't https.
 
+### File uploads (teachers' PDFs)
+- **Who can upload:** only a room's owner, or a co-teacher with the author permission. Any member can download; anyone else gets 404.
+- **What is accepted:** the file must start with `%PDF-`, whatever its name or declared type, and be at most 10 MB. The bytes actually read are counted, so a false size is caught.
+- **Storage:**
+  - Files are written under `pathwise.storage.dir`, outside the web root, as `<uuid>.pdf`.
+  - The uploaded name is only used for display and as the download's suggested name, after path parts and control characters are stripped.
+  - Paths are resolved and checked to stay inside the storage folder.
+- **Serving:** downloads go out as `application/pdf` with `Content-Security-Policy: sandbox` and `nosniff`, so a hostile PDF can't run as part of the site.
+- **Not done:** no antivirus scan and no storage quota per room.
+
 ### Audit
 - `audit_log` is append-only. A database trigger rejects updates and deletes.
 - It records sign-ins and failures, password re-entries, role, status, trust and Verified Educator changes, settings, game templates, room archiving, moderation and live-session removals.

@@ -89,6 +89,11 @@ public class AdminConsoleController extends PageServlet {
                 req.setAttribute("ai", app().config().ai().enabled() ? "Local model through Ollama (" + app().config().ai().model() + ")" : "Off (Guided Help only)");
                 render(req, res, "admin/settings");
             }
+            case "/admin/messages" -> {
+                req.setAttribute("nav", "admin-messages");
+                req.setAttribute("sent", auditViews(admin.audit(actor, "admin.message_sent", null).stream().limit(20).toList()));
+                render(req, res, "admin/messages");
+            }
             case "/admin/reauth" -> {
                 req.setAttribute("nav", "admin");
                 req.setAttribute("next", safeNext(req.getParameter("next"), "/admin"));
@@ -134,12 +139,33 @@ public class AdminConsoleController extends PageServlet {
                         case "verify" -> admin.setVerifiedEducator(actor, id, true);
                         case "unverify" -> admin.setVerifiedEducator(actor, id, false);
                         case "trust" -> admin.setTrustLevel(actor, id, Integer.parseInt(param(req, "level").strip()));
+                        case "message" -> admin.sendMessage(actor, AdminDao.Audience.USER, id, req.getParameter("title"), req.getParameter("body"));
+                        case "remove" -> {
+                            admin.removeUser(actor, id, req.getParameter("reason"));
+                            flash(req, "success", "Account removed. The person has been signed out and can't sign in again.");
+                            redirect(req, res, "/admin/users");
+                            return;
+                        }
                         default -> {
                             res.sendError(HttpServletResponse.SC_NOT_FOUND);
                             return;
                         }
                     }
-                    flash(req, "success", "Saved. The change is in the audit log.");
+                    flash(req, "success", "message".equals(param(req, "action"))
+                            ? "Message sent. It appears under their bell." : "Saved. The change is in the audit log.");
+                }
+                case "/admin/messages" -> {
+                    AdminDao.Audience audience;
+                    try {
+                        audience = AdminDao.Audience.valueOf(param(req, "audience").toUpperCase(java.util.Locale.ROOT));
+                    } catch (IllegalArgumentException e) {
+                        audience = null;
+                    }
+                    if (audience == null || audience == AdminDao.Audience.USER) {
+                        throw new AdminService.AdminRuleException("Choose who to send it to.");
+                    }
+                    int n = admin.sendMessage(actor, audience, null, req.getParameter("title"), req.getParameter("body"));
+                    flash(req, "success", "Sent to " + n + " " + (n == 1 ? "person" : "people") + ". It appears under their bell.");
                 }
                 case "/admin/games" -> {
                     admin.setTemplateEnabled(actor, param(req, "key"), "on".equals(param(req, "enabled")));

@@ -22,7 +22,9 @@ public record AppConfig(
         HashProfile hashProfile,
         int loginAttemptsPerMinute,
         int registrationsPerHour,
-        Ai ai) {
+        Ai ai,
+        /** Where uploaded files (teachers' PDFs) are kept; relative paths are against the working directory. */
+        java.nio.file.Path storageDir) {
 
     /** The optional local AI tutor. {@code provider} is none (Guided Help only) or ollama; nothing leaves this machine. */
     public record Ai(String provider, String model, String url, Duration timeout) {
@@ -73,7 +75,8 @@ public record AppConfig(
                 Integer.parseInt(get(source, "pathwise.ratelimit.register.per.hour", "10")),
                 new Ai(get(source, "pathwise.ai.provider", "none").toLowerCase(Locale.ROOT), get(source, "pathwise.ai.model", "llama3.2:3b"),
                         get(source, "pathwise.ai.url", "http://127.0.0.1:11434"),
-                        Duration.ofSeconds(Long.parseLong(get(source, "pathwise.ai.timeout.seconds", "60")))));
+                        Duration.ofSeconds(Long.parseLong(get(source, "pathwise.ai.timeout.seconds", "60")))),
+                java.nio.file.Path.of(get(source, "pathwise.storage.dir", "storage")).toAbsolutePath().normalize());
     }
 
     private static String lookup(String key) {

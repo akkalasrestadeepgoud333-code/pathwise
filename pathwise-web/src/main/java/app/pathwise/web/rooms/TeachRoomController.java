@@ -69,6 +69,12 @@ public class TeachRoomController extends PageServlet {
                         res.sendError(HttpServletResponse.SC_NOT_FOUND);
                     }
                 }
+                case "materials" -> {
+                    req.setAttribute("materials", ViewModels.of(app().materials().page(actor, roomId)));
+                    req.setAttribute("header", ViewModels.of(app().rooms().header(actor, roomId)));
+                    req.setAttribute("maxMb", MaterialService.MAX_PDF_BYTES / (1024 * 1024));
+                    render(req, res, "teacher/room-materials");
+                }
                 case "doubts" -> {
                     req.setAttribute("doubts", ViewModels.list(app().doubts().roomDoubts(actor, roomId)));
                     req.setAttribute("header", ViewModels.of(app().rooms().header(actor, roomId)));

@@ -290,4 +290,30 @@ Not done in M11:
 - OWASP Dependency-Check
 - a public deployment
 
+### 2026-10-05: Room materials, admin messages and account removal
+
+Command: `.\mvnw.cmd -o install`, a full build. Result: **241 tests, 241 passed, 0 failed, 0 skipped** (core 110, data 14, web 37, app 80).
+
+New: **MaterialsAndAdminPowersFlowTest** (2 end-to-end tests).
+- **Room materials:**
+  - A note is rendered from Markdown with its script stripped.
+  - A PDF is uploaded as real multipart. Its name is cleaned, it downloads for a member as `application/pdf` with a sandbox CSP, and an outsider gets 404.
+  - A student trying to upload or remove gets 403.
+  - An HTML file named `.pdf` is refused.
+  - Removing deletes the file from disk.
+  - Exactly 3 audit entries are written.
+- **Admin powers:**
+  - A message to one person shows signed under their bell.
+  - A group message to "students" skips teachers.
+  - A student posting to the messages page gets 403.
+  - Removal without password re-entry is refused, and so is a blank reason.
+  - A teacher who owns an active room can't be removed, and neither can the admin themselves.
+  - A removed account is wiped, signed out and can't sign in; its email can be reused; one audit entry is written.
+
+`WebAuthFlowTest` now also checks that Settings offers "Sign out of this device".
+
+A test-side fix: an apostrophe is escaped as `&#039;`, not `&#39;`.
+
+Not verified in a real browser: the upload form and the PDF viewer, which were exercised only through HTTP requests.
+
 Not yet done: accessibility audit with axe-core, Android UI tests, load tests and the dependency vulnerability scan. All of these are planned (see the blueprint, §35).

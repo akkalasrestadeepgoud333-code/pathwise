@@ -29,6 +29,7 @@ PostgreSQL 16. In development and tests this is an embedded PostgreSQL under `da
 | V010 rewards | `xp_events`, `activity_days`, `badge_awards`, `mastery_transitions`, `notifications` | XP (unique key per award, so handlers are idempotent), streak days, badges, in-app notifications |
 | V011 AI | `ai_conversations`, `ai_messages` | tutor conversations, private to their owner; each message records whether it came from the AI or Guided Help |
 | V012 live | `live_sessions`, `session_participants`, `session_questions`, `session_question_votes` | live doubt sessions; participants are known by alias number only |
+| V013 materials | `room_materials` | teachers' notes and PDFs per room. PDF bytes live on disk under `pathwise.storage.dir`; the table holds metadata and a server-generated file name. |
 
 ## Rules the database itself enforces
 
@@ -49,7 +50,7 @@ The embedded server listens only on localhost while Pathwise runs. Its port and 
 
 ## Backups
 
-For the embedded database, stop Pathwise and copy the `data\pg` folder. For an installed PostgreSQL:
+Uploaded PDFs live in the `storage` folder (`pathwise.storage.dir`); back it up at the same time as the database. For the embedded database, stop Pathwise and copy the `data\pg` folder. For an installed PostgreSQL:
 
 ```powershell
 pg_dump -Fc -f pathwise-backup.dump <database>

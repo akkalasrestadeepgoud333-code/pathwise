@@ -46,6 +46,7 @@ public final class AppContext {
     private final IdentityService identity;
     private final AdminService admin;
     private final LiveSessionService live;
+    private final app.pathwise.web.rooms.MaterialService materials;
     private final CatalogService catalog;
     private final ContentService content;
     private final ContentPackService contentPacks;
@@ -93,6 +94,7 @@ public final class AppContext {
         this.assignments = new AssignmentService(database.tx(), rooms, catalog, learner, events, clock);
         this.doubts = new DoubtService(database.tx(), catalog, events, clock);
         this.live = new LiveSessionService(database.tx(), clock);
+        this.materials = new app.pathwise.web.rooms.MaterialService(database.tx(), rooms, config.storageDir(), clock);
         this.rewards = new RewardsService(database.tx(), clock);
         this.rewards.register(events);
         this.tutor = new TutorService(database.tx(), AiProvider.from(config.ai()), questions, clock);
@@ -131,6 +133,7 @@ public final class AppContext {
     public AssignmentService assignments() { return assignments; }
     public DoubtService doubts() { return doubts; }
     public LiveSessionService live() { return live; }
+    public app.pathwise.web.rooms.MaterialService materials() { return materials; }
     public RewardsService rewards() { return rewards; }
     public TutorService tutor() { return tutor; }
     public RateLimiter loginLimiter() { return loginLimiter; }

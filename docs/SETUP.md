@@ -69,6 +69,7 @@ It asks for the password twice. For scripted use, set `PATHWISE_ADMIN_PASSWORD` 
 | `pathwise.session.bearer.days` | `30` | App token lifetime |
 | `pathwise.ratelimit.login.per.minute` | `5` | Sign-in attempts per IP and email |
 | `pathwise.ratelimit.register.per.hour` | `10` | Sign-ups per IP |
+| `pathwise.storage.dir` | `storage` | Where uploaded PDFs are kept (git-ignored). Back it up together with the database. |
 | `pathwise.ai.provider` | `none` | `none` (Guided Help only) or `ollama` |
 | `pathwise.ai.model` | `llama3.2:3b` | Ollama model name |
 | `pathwise.ai.url` | `http://127.0.0.1:11434` | Ollama address |

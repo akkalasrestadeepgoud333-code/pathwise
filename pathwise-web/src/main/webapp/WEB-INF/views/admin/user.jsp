@@ -62,6 +62,23 @@
     </div>
   </section>
 
+  <section class="card section-gap" aria-labelledby="msg-title">
+    <h2 id="msg-title" class="card-title">Send a message</h2>
+    <p class="muted">It appears under their bell (and in the app's notifications), signed with your name.</p>
+    <pw:form action="/admin/users/${person.id}">
+      <input type="hidden" name="action" value="message">
+      <div class="field">
+        <label class="field-label" for="m-title">Subject</label>
+        <input class="input" id="m-title" name="title" required minlength="3" maxlength="120">
+      </div>
+      <div class="field">
+        <label class="field-label" for="m-body">Message</label>
+        <textarea class="input" id="m-body" name="body" rows="4" required maxlength="450"></textarea>
+      </div>
+      <button type="submit" class="btn btn-sm btn-primary"><pw:icon name="mail"/>Send</button>
+    </pw:form>
+  </section>
+
   <c:if test="${not self}">
     <section class="card section-gap" aria-labelledby="status-title">
       <h2 id="status-title" class="card-title">Account status</h2>
@@ -83,6 +100,18 @@
           </pw:form>
         </c:otherwise>
       </c:choose>
+    </section>
+
+    <section class="card section-gap" aria-labelledby="remove-title">
+      <h2 id="remove-title" class="card-title">Remove account</h2>
+      <p class="muted">Permanent. The person is signed out everywhere and can never sign in again; their name and email are wiped
+        and they show everywhere as "Removed user". Their learning records stay attached to that nameless account, so room statistics don't change. If you might want them back, suspend instead.
+        Administrators must lose the admin role first, and teachers must have their rooms archived first.</p>
+      <pw:form action="/admin/users/${person.id}" cssClass="form-row">
+        <input type="hidden" name="action" value="remove">
+        <input class="input grow" name="reason" required minlength="5" maxlength="300" placeholder="Reason (required, logged)" aria-label="Reason for removing">
+        <button type="submit" class="btn btn-sm btn-danger">Remove account</button>
+      </pw:form>
     </section>
   </c:if>
 

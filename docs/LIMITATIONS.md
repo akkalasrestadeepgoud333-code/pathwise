@@ -15,7 +15,7 @@ These are the things Pathwise v1 does not do, or does only partly. The item-by-i
 ## Content
 
 6. **There is one subject.** Data Structures, with 13 topics, 13 modules, about 126 questions, 4 games and 3 assessments, is bundled. Other subjects need authoring in the content-pack format.
-7. **Teachers can't write their own questions or modules yet.** Room assessments draw on the existing bank.
+7. **Teachers can share their own notes and PDFs with a room, but can't yet write their own questions or interactive modules.** Room assessments draw on the existing bank. Uploads are PDF only, up to 10 MB, with no virus scan or per-room quota.
 
 ## AI
 
