@@ -58,6 +58,7 @@ public final class ContentPackService {
     private final ContentDao content = new ContentDao();
     private final QuestionDao questions = new QuestionDao();
     private final AssessmentDao assessments = new AssessmentDao();
+    private final app.pathwise.data.games.GameDao games = new app.pathwise.data.games.GameDao();
     private final AuditDao audit = new AuditDao();
 
     public ContentPackService(Tx tx, ContentPackLoader loader, EventBus events, Clock clock) {
@@ -220,6 +221,13 @@ public final class ContentPackService {
                 }
             }
             assessments.archiveNotIn(c, subject, pack.assessmentsOrEmpty().stream().map(ContentPack.AssessmentDef::key).toList());
+            // Games keep their config as JSON; attempts snapshot the generated puzzle, so edits never alter past plays.
+            for (ContentPack.GameDef g : pack.gamesOrEmpty()) {
+                games.upsertPlatform(c, g.key(), g.template(), subject, g.topic() == null ? null : topicIds.get(g.topic()),
+                        g.title().strip(), g.description() == null ? null : g.description().strip(), Json.write(g.config()),
+                        g.difficulty() == null ? 2 : g.difficulty(), g.estMinutes());
+            }
+            games.archiveNotIn(c, subject, pack.gamesOrEmpty().stream().map(ContentPack.GameDef::key).toList());
             content.recordPack(c, pack.key(), pack.version(), loaded.checksum(), importedBy);
             audit.record(c, importedBy, "content.pack_imported", "content_pack", pack.key(),
                     Json.write(Map.of("version", pack.version(), "modules", pack.modules().size())), null);

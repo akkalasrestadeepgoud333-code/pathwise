@@ -18,6 +18,15 @@
     <pw:trail cssClass="hero-trail" onInk="true"/>
   </section>
 
+  <a class="card card-interactive game-card section-gap" href="<c:url value='/app/games'/>">
+    <span class="game-card-icon" aria-hidden="true"><pw:icon name="gamepad-2"/></span>
+    <div class="grow">
+      <h2 class="card-title">Games</h2>
+      <p class="muted">Traversal Race, Match Pairs and Bug Hunt. Short, untimed, and they count as light practice.</p>
+    </div>
+    <pw:icon name="arrow-right"/>
+  </a>
+
   <div class="grid grid-2 section-gap">
     <section class="card" aria-labelledby="focus-title">
       <h2 id="focus-title" class="card-title">Worth strengthening</h2>

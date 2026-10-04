@@ -1,7 +1,7 @@
 # Data Structures content pack.
 # Keys are stable identifiers: renaming a key creates a new topic/skill/module. Change titles freely.
 key: data-structures
-version: 3
+version: 4
 title: Data Structures
 
 catalog:
@@ -197,6 +197,13 @@ questions:
   - heaps-avl.yaml
   - graphs-hashing.yaml
   - assessment-items.yaml
+
+# Games: informal practice. Results are verified by replay and never count toward assessments.
+games:
+  - traversal-race.yaml
+  - match-structures.yaml
+  - match-tree-words.yaml
+  - bug-hunt.yaml
 
 # Official assessments. Results are kept separate from practice; graded answers count as official evidence.
 assessments:

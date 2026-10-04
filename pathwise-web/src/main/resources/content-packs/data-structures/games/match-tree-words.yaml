@@ -1,0 +1,17 @@
+key: match-tree-words
+template: match_pairs
+title: "Match Pairs: tree words"
+description: Match each tree term with its meaning.
+topic: trees
+difficulty: 1
+estMinutes: 3
+matchPairs:
+  perGame: 6
+  pairs:
+    - { left: Root, right: The only node with no parent, skill: tree-terms }
+    - { left: Leaf, right: A node with no children, skill: tree-terms }
+    - { left: Subtree, right: A node together with all of its descendants, skill: tree-terms }
+    - { left: Height of a tree, right: Edges on the longest path from the root down to a leaf, skill: tree-measures }
+    - { left: Depth of a node, right: Edges from the root down to that node, skill: tree-measures }
+    - { left: Perfect binary tree, right: Every level is completely full, skill: binary-tree-kinds }
+    - { left: Complete binary tree, right: "Every level full except perhaps the last, which fills from the left", skill: binary-tree-kinds }

@@ -1,0 +1,31 @@
+{
+  "game": "match_pairs",
+  "puzzle": {
+    "items": [
+      { "id": "p1", "left": "Stack", "right": "Last in, first out", "skill": "lifo-fifo" },
+      { "id": "p2", "left": "Queue", "right": "First in, first out", "skill": "lifo-fifo" },
+      { "id": "p3", "left": "Hash table", "right": "Average O(1) lookup", "skill": "hash-function" }
+    ],
+    "rightOrder": ["p3", "p1", "p2"]
+  },
+  "cases": [
+    {
+      "name": "all matched first time",
+      "actions": [["p1", "p1"], ["p2", "p2"], ["p3", "p3"]],
+      "expect": { "score": 30, "maxScore": 30, "accuracy": 1.0,
+        "events": [ {"skillKey": "lifo-fifo", "correct": true, "partial": 1.0},
+                    {"skillKey": "lifo-fifo", "correct": true, "partial": 1.0},
+                    {"skillKey": "hash-function", "correct": true, "partial": 1.0} ] }
+    },
+    {
+      "name": "one miss, two misses, clean",
+      "actions": [["p1", "p2"], ["p1", "p1"], ["p2", "p3"], ["p2", "p3"], ["p2", "p2"], ["p3", "p3"]],
+      "expect": { "score": 15, "maxScore": 30, "accuracy": 0.3333333333333333,
+        "events": [ {"skillKey": "lifo-fifo", "correct": false, "partial": 0.5},
+                    {"skillKey": "lifo-fifo", "correct": false, "partial": 0.0},
+                    {"skillKey": "hash-function", "correct": true, "partial": 1.0} ] }
+    },
+    { "name": "matching an item twice", "actions": [["p1", "p1"], ["p1", "p1"]], "invalid": true },
+    { "name": "an unknown item", "actions": [["p9", "p1"]], "invalid": true }
+  ]
+}

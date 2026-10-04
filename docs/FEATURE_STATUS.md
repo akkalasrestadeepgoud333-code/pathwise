@@ -83,6 +83,20 @@ Last updated: **2026-10-04** (end of M2, Evidence → learner model → engine).
 | Assessment API (same rules) | `/api/v1/assessments*` | `AssessmentFlowTest` |
 | Today points new students to the diagnostic, or to resume an attempt in progress | `/app/today` | `AssessmentFlowTest` |
 
+## Implemented (M4)
+
+| Feature | Where | Evidence |
+|---|---|---|
+| Game framework: rule cores in Java (authoritative), deterministic puzzle generation (SplitMix64, pinned outputs), server replay with timing checks (minimum time between actions, no more time than has passed since the start, 30-minute limit) | `pathwise-core/games` | `GamesTest` |
+| Java/JS parity: the browser's rules and the server's rules run the same shared vectors; the build fails if they disagree (runs `node --test`; reported as skipped, never as passed, if Node is missing) | `game-vectors/*.json`, `static/js/games/*/rules.js` | `GamesTest`, `GameParityTest` |
+| Three games: Traversal Race (generated BSTs; pre/in/post/level order), Match Pairs (two sets), Bug Hunt (10 Java snippets, 6 bug classes) | content pack `games/*.yaml` | `GameFlowTest`, real-browser play-through |
+| GameShell: progress, score, clock, pause, relaxed mode (hides clock and score), keyboard-operable boards, ignores double taps that would fail the replay | `shell.js`, `*/view.js` | screenshots |
+| Only verified games create evidence; rejected logs are kept with a reason and produce nothing; finishing twice counts once | `GameService.finish` | `GameFlowTest` |
+| Game evidence is informal: weight 0.3, never official, at most 12 rows per skill in any 24 hours | `GameService` | `GameFlowTest` (13 plays → 12 rows) |
+| Results: verified score, what the game showed per skill, current levels with "Practise this", a look back at each round/pair/snippet with explanations | `/app/games/result/*` | `GameFlowTest`, screenshots |
+| Games gallery and intros, linked from Practice | `/app/games*` | `GameFlowTest` |
+| Games API (start, puzzle, finish, result) for the Android WebView | `/api/v1/games*` | `GameFlowTest` |
+
 ## Partially implemented
 
 | Feature | Works | Missing |
@@ -92,12 +106,15 @@ Last updated: **2026-10-04** (end of M2, Evidence → learner model → engine).
 | Teacher area | access control, empty state | rooms (M5) |
 | Assessment AI policy | stored and shown to students | enforced when the AI tutor exists (M8). Pathwise cannot control outside tools, and says so |
 | Assessment feedback policies | `immediate` and `manual_release` (score only until released) | the teacher release button and `after_due` (needs due dates from rooms, M5) |
+| Games in recommendations | games appear in the gallery, on Practice, and in Progress through their evidence | the engine does not yet suggest a game in the Explore slot |
+| Game administration | templates can be disabled in the database (`game_templates.enabled`) | an admin screen for it (M10); the teachers' "Practice and play" panel (M5) |
+| Offline game submissions | the attempt id makes online finishing idempotent | idempotency keys for queued offline logs (M9, Android) |
 | SQL-query questions | — | deferred until a DBMS pack exists; the grader has no SQL type yet |
 | Security tooling | headers, CSRF, rate limits, audit | OWASP Dependency-Check run (planned for M11) |
 
 ## Proposed (designed in the blueprint, not built)
 
-Teacher-made assessments (M5) · games framework and games (M4) · rooms, assignments and teacher analytics (M5) · doubts, community, moderation and knowledge base (M6) · XP, streaks, badges and notifications (M7) · AI tutor with Guided Help fallback (M8) · Android app (M9) · projects, live doubt sessions and full admin console (M10).
+Teacher-made assessments (M5) · more games: Sequence Sort, True/False Sprint, Query Quest (P1) · rooms, assignments and teacher analytics (M5) · doubts, community, moderation and knowledge base (M6) · XP, streaks, badges and notifications (M7) · AI tutor with Guided Help fallback (M8) · Android app (M9) · projects, live doubt sessions and full admin console (M10).
 
 ## Future (out of scope for v1)
 
@@ -116,3 +133,9 @@ Knowledge tracing / ML models · embeddings-based retrieval · server-side code 
 - **Recommendations** are regenerated on demand when evidence or progress is newer than the last run (or after 6 hours), not via the outbox. This is simpler and was fast enough at this scale.
 - **Questions** are updated in place on re-import. Instead of immutable question versions, every graded assessment response stores a **snapshot** of the question as graded (stem, options, key, explanation), so later edits never change past results. An assessment's item list is only replaced on re-import while it has no attempts. (Recorded 2026-10-04, M3.)
 - **Admin statistics** use a read-only reporting DAO (`PlatformStatsDao`) that aggregates across modules. Writes still go only through each module's own DAO.
+- **Games (recorded 2026-10-04, M4):**
+  - **Generation is server-only.** The server generates each puzzle and sends it to the browser. The browser's JS mirrors only the *rules and scoring*, so the parity vectors cover play, not generation. The puzzle includes what the browser needs for instant feedback, so a determined student could read answers from the page. Replay verification stops forged scores and impossible or implausibly fast play. Games are informal (weight 0.3, capped), so this trade-off is acceptable.
+  - **Rule sessions** are small mutable objects, replayed from scratch, rather than a pure `apply(state) → state` function. The behaviour is the same, with less code.
+  - **Game configs** are typed Java records checked by `PackValidator`, the same approach as the other pack payloads, instead of JSON Schema files.
+  - **Scores never depend on speed**, so there are no lives or combos. Relaxed mode hides the clock and score. The daily cap is a rolling 24 hours.
+  - **The activities table** holds only games for now. Practice sets are still generated attempts.

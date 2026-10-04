@@ -14,15 +14,45 @@ public record ContentPack(
         List<TopicDef> topics,
         List<ModuleDef> modules,
         List<QuestionDef> questions,
-        List<AssessmentDef> assessments) {
+        List<AssessmentDef> assessments,
+        List<GameDef> games) {
 
     public ContentPack(String key, int version, Catalog catalog, List<TopicDef> topics, List<ModuleDef> modules) {
-        this(key, version, catalog, topics, modules, List.of(), List.of());
+        this(key, version, catalog, topics, modules, List.of(), List.of(), List.of());
     }
 
     public ContentPack(String key, int version, Catalog catalog, List<TopicDef> topics, List<ModuleDef> modules,
                        List<QuestionDef> questions) {
-        this(key, version, catalog, topics, modules, questions, List.of());
+        this(key, version, catalog, topics, modules, questions, List.of(), List.of());
+    }
+
+    public ContentPack(String key, int version, Catalog catalog, List<TopicDef> topics, List<ModuleDef> modules,
+                       List<QuestionDef> questions, List<AssessmentDef> assessments) {
+        this(key, version, catalog, topics, modules, questions, assessments, List.of());
+    }
+
+    public List<GameDef> gamesOrEmpty() {
+        return games == null ? List.of() : games;
+    }
+
+    /**
+     * A playable game: one template plus its config. Exactly one config field is set, matching the template.
+     * Game results are informal evidence and never count toward assessments.
+     */
+    public record GameDef(String key, String template, String title, String description, String topic,
+                          Integer difficulty, Integer estMinutes,
+                          app.pathwise.core.games.TraversalRace.Config traversalRace,
+                          app.pathwise.core.games.MatchPairs.Config matchPairs,
+                          app.pathwise.core.games.BugHunt.Config bugHunt) {
+        /** The config for this game's template, or null if missing. */
+        public Object config() {
+            return switch (template == null ? "" : template) {
+                case app.pathwise.core.games.TraversalRace.KEY -> traversalRace;
+                case app.pathwise.core.games.MatchPairs.KEY -> matchPairs;
+                case app.pathwise.core.games.BugHunt.KEY -> bugHunt;
+                default -> null;
+            };
+        }
     }
 
     public List<AssessmentDef> assessmentsOrEmpty() {

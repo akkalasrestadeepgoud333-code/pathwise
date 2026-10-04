@@ -29,7 +29,7 @@ public final class ContentPackLoader {
     /** {@code content-packs/<key>/pack.yaml}: the pack minus its modules, plus the module file list. */
     public record PackFile(String key, int version, String title, ContentPack.Catalog catalog,
                            List<ContentPack.TopicDef> topics, List<String> modules, List<String> questions,
-                           List<ContentPack.AssessmentDef> assessments) {}
+                           List<ContentPack.AssessmentDef> assessments, List<String> games) {}
 
     /** {@code content-packs/<key>/questions/<file>.yaml}. */
     public record QuestionFile(List<ContentPack.QuestionDef> questions) {}
@@ -95,8 +95,20 @@ public final class ContentPackLoader {
                 questions.addAll(qf.questions());
             }
         }
+        List<ContentPack.GameDef> games = new ArrayList<>();
+        for (String gameFile : file.games() == null ? List.<String>of() : file.games()) {
+            if (!gameFile.matches("[a-z0-9][a-z0-9-]{0,80}\\.yaml")) {
+                throw new PackFormatException("Invalid game file name: " + gameFile);
+            }
+            byte[] bytes = read(base + "games/" + gameFile);
+            if (bytes == null) {
+                throw new PackFormatException("Game file missing: " + base + "games/" + gameFile);
+            }
+            digest.update(bytes);
+            games.add(parse(bytes, ContentPack.GameDef.class, base + "games/" + gameFile));
+        }
         ContentPack pack = new ContentPack(file.key(), file.version(), file.catalog(), file.topics(), modules, questions,
-                file.assessments() == null ? List.of() : file.assessments());
+                file.assessments() == null ? List.of() : file.assessments(), games);
         return new Loaded(pack, file.title(), HexFormat.of().formatHex(digest.digest()));
     }
 

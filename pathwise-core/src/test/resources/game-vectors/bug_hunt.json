@@ -1,0 +1,39 @@
+{
+  "game": "bug_hunt",
+  "puzzle": {
+    "rounds": [
+      { "title": "Sum an array", "language": "java", "bugLine": 2, "bugClass": "off_by_one", "skill": "array-indexing",
+        "explanation": "i <= a.length reads one past the end.",
+        "code": "int sum = 0;\nfor (int i = 0; i <= a.length; i++) {\n    sum += a[i];\n}" },
+      { "title": "Factorial", "language": "java", "bugLine": 3, "bugClass": "missing_base_case", "skill": "base-case",
+        "explanation": "There is no base case, so the recursion never stops.",
+        "code": "int fact(int n) {\n    // returns n!\n    return n * fact(n - 1);\n}" }
+    ],
+    "classes": [
+      { "key": "off_by_one", "label": "Off by one" },
+      { "key": "wrong_condition", "label": "Wrong condition" },
+      { "key": "null_reference", "label": "Missing null check" },
+      { "key": "missing_base_case", "label": "Missing or wrong base case" },
+      { "key": "wrong_order", "label": "Steps in the wrong order" },
+      { "key": "wrong_update", "label": "Wrong update or return" }
+    ]
+  },
+  "cases": [
+    {
+      "name": "both snippets perfect",
+      "actions": [["line", "2"], ["class", "off_by_one"], ["line", "3"], ["class", "missing_base_case"]],
+      "expect": { "score": 40, "maxScore": 40, "accuracy": 1.0,
+        "events": [ {"skillKey": "array-indexing", "correct": true, "partial": 1.0},
+                    {"skillKey": "base-case", "correct": true, "partial": 1.0} ] }
+    },
+    {
+      "name": "late line with wrong class, then a revealed line with the right class",
+      "actions": [["line", "1"], ["line", "2"], ["class", "wrong_condition"], ["line", "1"], ["line", "2"], ["class", "missing_base_case"]],
+      "expect": { "score": 15, "maxScore": 40, "accuracy": 0.0,
+        "events": [ {"skillKey": "array-indexing", "correct": false, "partial": 0.25},
+                    {"skillKey": "base-case", "correct": false, "partial": 0.5} ] }
+    },
+    { "name": "naming the class before finding the line", "actions": [["class", "off_by_one"]], "invalid": true },
+    { "name": "a line outside the code", "actions": [["line", "9"]], "invalid": true }
+  ]
+}

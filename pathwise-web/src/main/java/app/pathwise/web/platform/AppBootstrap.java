@@ -7,6 +7,8 @@ import app.pathwise.web.admin.AdminAssessmentController;
 import app.pathwise.web.admin.AdminContentController;
 import app.pathwise.web.assessment.AssessmentApiServlet;
 import app.pathwise.web.assessment.AssessmentController;
+import app.pathwise.web.games.GameApiServlet;
+import app.pathwise.web.games.GameController;
 import app.pathwise.web.admin.AdminController;
 import app.pathwise.web.identity.AuthApiServlet;
 import app.pathwise.web.identity.AuthController;
@@ -89,6 +91,8 @@ public class AppBootstrap implements ServletContextListener {
                 "/api/v1/recommendations/*", "/api/v1/practice", "/api/v1/practice/*");
         servlet(sc, "assessments", new AssessmentController(), "/app/assessments", "/app/assessments/*");
         servlet(sc, "apiAssessments", new AssessmentApiServlet(), "/api/v1/assessments", "/api/v1/assessments/*");
+        servlet(sc, "games", new GameController(), "/app/games", "/app/games/*");
+        servlet(sc, "apiGames", new GameApiServlet(), "/api/v1/games", "/api/v1/games/*");
         servlet(sc, "admin", new AdminController(), "/admin");
         servlet(sc, "adminAssessments", new AdminAssessmentController(), "/admin/assessments", "/admin/assessments/*");
         servlet(sc, "adminContent", new AdminContentController(), "/admin/content");

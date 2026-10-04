@@ -65,4 +65,27 @@ These DB constraints are tested directly: official evidence only from assessment
 
 Manual: pack v3 imported (126 questions, 3 assessments). Headless Edge screenshots of the list, rules, attempt (desktop, mobile, dark), confirmation, result and admin analysis. No console or CSP errors. Defects found and fixed: the sticky timer bar slid under the top bar; the timer didn't align right; the average showed as "3.0%"; analysis flags from very few attempts were presented without caution. One existing test had assumed no official evidence existed anywhere, which would have failed depending on test order, so it was rescoped.
 
+### 2026-10-04: M4 Games
+
+Command: `.\mvnw.cmd install`. Result: **184 tests, 184 passed, 0 failed, 0 skipped**. Node 24 was present, so the JS parity check ran.
+
+New tests:
+- **GamesTest (core):** 12 shared-vector cases across the three games, plus deterministic generation with valid BSTs, a perfect play of a generated puzzle, tamper rejection and config validation. Tamper rejection covers too-fast moves, more time than has passed, unfinished games, moves after the end, timestamps going backwards and an empty log. SplitMix64 outputs are pinned.
+- **GameParityTest (web):** runs `node --test` on the same vectors against the browser's rules (12/12).
+- **GameFlowTest (app):** covers the following:
+  - every game is played, verified and turned into informal evidence
+  - too-fast, unfinished and forged logs are rejected with nothing written
+  - a rejected game can't be re-finished, and finishing twice counts once
+  - intruders get 404s
+  - the daily cap holds (13 plays → 12 rows for preorder)
+  - the API flow works
+
+Manual: pack v4 imported (4 games). All three games were played in headless Edge through the real JS, with real timing and one deliberate mistake each. The server verified each game: Traversal Race scored 224/230, exactly the cost of the one miss. Screenshots: gallery, intro, each board, results (light/dark, desktop/mobile). No console or CSP errors. Defects found and fixed:
+- the root's order badge was clipped
+- wrong-guess highlights stayed on screen
+- "in preorder order" wording, fixed in both Java and JS
+- Bug Hunt focused line 1 on load, which looked like a pre-selection
+- the Node parity runner used the spec reporter, so the check had been looking for the wrong summary line
+- one test was rejected by CSRF before it reached the ownership check, so it now loads a page first
+
 Not yet done: accessibility audit with axe-core, Android tests, load tests and the dependency vulnerability scan. All of these are planned (see the blueprint, §35).

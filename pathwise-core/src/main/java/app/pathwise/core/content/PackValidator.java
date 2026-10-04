@@ -102,6 +102,7 @@ public final class PackValidator {
         pack.questionsOrEmpty().stream().filter(q -> !q.practiceEnabled()).forEach(q -> assessmentOnly.add(q.key()));
 
         validateAssessments(pack, byKey.keySet(), questionKeys, errors);
+        validateGames(pack, byKey.keySet(), skillKeys, errors);
 
         Set<String> moduleKeys = new HashSet<>();
         for (ModuleDef m : pack.modules() == null ? List.<ModuleDef>of() : pack.modules()) {
@@ -163,6 +164,63 @@ public final class PackValidator {
         String kind = SectionKind.parse(s.kind()).map(SectionKind::dbValue).orElse("section").replace('_', '-');
         int n = kindCount.merge(kind, 1, Integer::sum);
         return n == 1 ? kind : kind + "-" + n;
+    }
+
+    private static void validateGames(ContentPack pack, Set<String> topics, Set<String> skills, List<String> errors) {
+        Set<String> keys = new HashSet<>();
+        for (ContentPack.GameDef g : pack.gamesOrEmpty()) {
+            String where = "game " + g.key();
+            key(g.key(), "game key", errors);
+            if (!keys.add(g.key())) {
+                errors.add("duplicate game key " + g.key());
+            }
+            if (Set.of("play", "result", "attempts").contains(g.key())) {
+                errors.add("game key " + g.key() + " is reserved");
+            }
+            text(g.title(), where + " title", 2, 160, errors);
+            if (g.topic() != null && !topics.contains(g.topic())) {
+                errors.add(where + " refers to unknown topic " + g.topic());
+            }
+            if (g.difficulty() != null && (g.difficulty() < 1 || g.difficulty() > 5)) {
+                errors.add(where + ": difficulty must be 1-5");
+            }
+            if (g.estMinutes() != null && (g.estMinutes() < 1 || g.estMinutes() > 30)) {
+                errors.add(where + ": estMinutes must be 1-30");
+            }
+            if (app.pathwise.core.games.GameCatalog.find(g.template()).isEmpty()) {
+                errors.add(where + ": unknown template " + g.template());
+                continue;
+            }
+            int configs = (g.traversalRace() == null ? 0 : 1) + (g.matchPairs() == null ? 0 : 1) + (g.bugHunt() == null ? 0 : 1);
+            if (g.config() == null || configs != 1) {
+                errors.add(where + ": needs exactly one config, matching its template " + g.template());
+                continue;
+            }
+            List<String> used = new ArrayList<>();
+            switch (g.config()) {
+                case app.pathwise.core.games.TraversalRace.Config c -> {
+                    app.pathwise.core.games.TraversalRace.validate(c).forEach(e -> errors.add(where + ": " + e));
+                    if (c.skills() != null) {
+                        used.addAll(c.skills().values());
+                    }
+                }
+                case app.pathwise.core.games.MatchPairs.Config c -> {
+                    app.pathwise.core.games.MatchPairs.validate(c).forEach(e -> errors.add(where + ": " + e));
+                    if (c.pairs() != null) {
+                        c.pairs().forEach(p -> used.add(p.skill()));
+                    }
+                }
+                case app.pathwise.core.games.BugHunt.Config c -> {
+                    app.pathwise.core.games.BugHunt.validate(c).forEach(e -> errors.add(where + ": " + e));
+                    if (c.snippets() != null) {
+                        c.snippets().forEach(s -> used.add(s.skill()));
+                    }
+                }
+                default -> errors.add(where + ": unsupported config");
+            }
+            used.stream().filter(s -> s != null && !skills.contains(s)).distinct()
+                    .forEach(s -> errors.add(where + " uses unknown skill " + s));
+        }
     }
 
     private static final Set<String> ASSESSMENT_KINDS = Set.of("diagnostic", "quiz", "topic_test", "practice_test", "challenge");

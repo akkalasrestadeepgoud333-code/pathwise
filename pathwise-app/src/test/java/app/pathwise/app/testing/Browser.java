@@ -104,6 +104,11 @@ public final class Browser {
         return r;
     }
 
+    /** The CSRF token from the last page, for requests a page's script would send (header {@code X-CSRF-Token}). */
+    public String csrf() {
+        return csrf;
+    }
+
     public String sessionCookie() {
         return cookies.getCookieStore().getCookies().stream()
                 .filter(c -> c.getName().equals("PW_SESSION")).map(HttpCookie::getValue).findFirst().orElse(null);

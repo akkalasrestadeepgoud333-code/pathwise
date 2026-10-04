@@ -1,0 +1,128 @@
+key: bug-hunt
+template: bug_hunt
+title: Bug Hunt
+description: >-
+  Short Java snippets, one bug each. Tap the faulty line, then say what kind of bug it is. A second wrong
+  line reveals it, so you can still name the bug.
+difficulty: 3
+estMinutes: 5
+bugHunt:
+  rounds: 5
+  snippets:
+    - title: Sum an array
+      language: java
+      skill: array-indexing
+      bugLine: 2
+      bugClass: off_by_one
+      explanation: "i <= a.length runs one step too far: the last valid index is a.length - 1, so a[a.length] throws. Use i < a.length."
+      code: |-
+        int sum = 0;
+        for (int i = 0; i <= a.length; i++) {
+            sum += a[i];
+        }
+        return sum;
+    - title: Last element
+      language: java
+      skill: array-indexing
+      bugLine: 2
+      bugClass: off_by_one
+      explanation: "Indices run from 0 to a.length - 1, so the last element is a[a.length - 1]."
+      code: |-
+        int last(int[] a) {
+            return a[a.length];
+        }
+    - title: Find the maximum
+      language: java
+      skill: array-traversal
+      bugLine: 4
+      bugClass: wrong_condition
+      explanation: "a[i] < max keeps the smaller value, so this returns the minimum. The test should be a[i] > max."
+      code: |-
+        int max(int[] a) {
+            int best = a[0];
+            for (int i = 1; i < a.length; i++) {
+                if (a[i] < best) {
+                    best = a[i];
+                }
+            }
+            return best;
+        }
+    - title: Insert after a node
+      language: java
+      skill: ll-insert-delete
+      bugLine: 3
+      bugClass: wrong_update
+      explanation: "p.next must point to the new node x. p.next = x.next just keeps the old successor, so x is never linked in."
+      code: |-
+        Node x = new Node(value);
+        x.next = p.next;
+        p.next = x.next;
+    - title: Delete the next node
+      language: java
+      skill: ll-insert-delete
+      bugLine: 3
+      bugClass: null_reference
+      explanation: "If p is the last node, p.next is null and p.next.next throws. Check p.next != null first."
+      code: |-
+        void deleteAfter(Node p) {
+            if (p == null) return;
+            p.next = p.next.next;
+        }
+    - title: Is the stack empty?
+      language: java
+      skill: stack-ops
+      bugLine: 2
+      bugClass: wrong_condition
+      explanation: "A stack is empty when it holds nothing: size == 0. With size == 1 a one-item stack looks empty."
+      code: |-
+        boolean isEmpty() {
+            return size == 1;
+        }
+    - title: Factorial
+      language: java
+      skill: base-case
+      bugLine: 2
+      bugClass: missing_base_case
+      explanation: "fact(0) skips past n == 1 and recurses forever (until the stack overflows). The base case should be n <= 1."
+      code: |-
+        int fact(int n) {
+            if (n == 1) return 1;
+            return n * fact(n - 1);
+        }
+    - title: Power
+      language: java
+      skill: recursive-case
+      bugLine: 3
+      bugClass: wrong_update
+      explanation: "The recursive call must shrink the problem: power(b, e - 1). Calling power(b, e) never reaches e == 0."
+      code: |-
+        int power(int b, int e) {
+            if (e == 0) return 1;
+            return b * power(b, e);
+        }
+    - title: Search a BST
+      language: java
+      skill: bst-search
+      bugLine: 4
+      bugClass: wrong_condition
+      explanation: "Smaller values live in the left subtree, so the test should be x < n.value. With > the search goes the wrong way."
+      code: |-
+        boolean contains(Node n, int x) {
+            if (n == null) return false;
+            if (x == n.value) return true;
+            if (x > n.value) return contains(n.left, x);
+            return contains(n.right, x);
+        }
+    - title: Inorder traversal
+      language: java
+      skill: inorder
+      bugLine: 3
+      bugClass: wrong_order
+      explanation: "Printing before visiting the left subtree gives preorder. Inorder visits the left subtree first, then prints, then the right."
+      code: |-
+        void inorder(Node n) {
+            if (n == null) return;
+            print(n.value);
+            inorder(n.left);
+            inorder(n.right);
+        }

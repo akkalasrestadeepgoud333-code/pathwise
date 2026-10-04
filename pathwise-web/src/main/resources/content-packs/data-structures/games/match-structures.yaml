@@ -1,0 +1,17 @@
+key: match-structures
+template: match_pairs
+title: "Match Pairs: structures and strengths"
+description: Match each data structure with the thing it does best.
+difficulty: 1
+estMinutes: 3
+matchPairs:
+  perGame: 6
+  pairs:
+    - { left: Stack, right: "Last in, first out", skill: lifo-fifo }
+    - { left: Queue, right: "First in, first out", skill: lifo-fifo }
+    - { left: Array, right: Instant access by index, skill: array-complexity }
+    - { left: Linked list, right: Insert after a node you hold in O(1), skill: ll-vs-array }
+    - { left: Hash table, right: Average O(1) lookup by key, skill: hash-function }
+    - { left: Binary search tree, right: Sorted output from an inorder walk, skill: bst-property }
+    - { left: Min-heap, right: The smallest item is always at the root, skill: heap-property }
+    - { left: Graph, right: Things and the connections between them, skill: graph-terms }

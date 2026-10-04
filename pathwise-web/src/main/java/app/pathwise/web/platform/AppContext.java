@@ -5,6 +5,7 @@ import app.pathwise.core.security.RateLimiter;
 import app.pathwise.data.Database;
 import app.pathwise.web.admin.AdminService;
 import app.pathwise.web.assessment.AssessmentService;
+import app.pathwise.web.games.GameService;
 import app.pathwise.web.catalog.CatalogService;
 import app.pathwise.web.content.ContentPackLoader;
 import app.pathwise.web.content.ContentPackService;
@@ -44,6 +45,7 @@ public final class AppContext {
     private final PracticeService practice;
     private final RecommendationService recommendations;
     private final AssessmentService assessments;
+    private final GameService games;
     private final RateLimiter loginLimiter;
     private final RateLimiter registerLimiter;
 
@@ -67,6 +69,7 @@ public final class AppContext {
         this.practice = new PracticeService(database.tx(), questions, learner, catalog, content, clock);
         this.recommendations = new RecommendationService(database.tx(), catalog, content, learner, questions, practice, clock);
         this.assessments = new AssessmentService(database.tx(), questions, learner, catalog, events, clock);
+        this.games = new GameService(database.tx(), learner, catalog, events, clock);
         this.loginLimiter = new RateLimiter(config.loginAttemptsPerMinute(), 60_000, clock);      // per IP + email
         this.registerLimiter = new RateLimiter(config.registrationsPerHour(), 3_600_000, clock);  // per IP
     }
@@ -95,6 +98,7 @@ public final class AppContext {
     public PracticeService practice() { return practice; }
     public RecommendationService recommendations() { return recommendations; }
     public AssessmentService assessments() { return assessments; }
+    public GameService games() { return games; }
     public RateLimiter loginLimiter() { return loginLimiter; }
     public RateLimiter registerLimiter() { return registerLimiter; }
 }

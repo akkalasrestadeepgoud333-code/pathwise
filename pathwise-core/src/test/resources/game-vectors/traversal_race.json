@@ -1,0 +1,34 @@
+{
+  "game": "traversal_race",
+  "puzzle": {
+    "rounds": [
+      { "order": "preorder", "skill": "preorder", "root": 5,
+        "nodes": [ {"value": 5, "left": 3, "right": 8}, {"value": 3, "left": 1, "right": 4},
+                   {"value": 8, "left": null, "right": null}, {"value": 1, "left": null, "right": null},
+                   {"value": 4, "left": null, "right": null} ],
+        "answer": [5, 3, 1, 4, 8] },
+      { "order": "level", "skill": "level-order", "root": 2,
+        "nodes": [ {"value": 2, "left": 1, "right": 3}, {"value": 1, "left": null, "right": null},
+                   {"value": 3, "left": null, "right": null} ],
+        "answer": [2, 1, 3] }
+    ]
+  },
+  "cases": [
+    {
+      "name": "every node right first time",
+      "actions": ["5", "3", "1", "4", "8", "2", "1", "3"],
+      "expect": { "score": 80, "maxScore": 80, "accuracy": 1.0,
+        "events": [ {"skillKey": "preorder", "correct": true, "partial": 1.0},
+                    {"skillKey": "level-order", "correct": true, "partial": 1.0} ] }
+    },
+    {
+      "name": "misses, a late hit and two reveals",
+      "actions": ["5", "8", "3", "1", "8", "8", "8", "2", "3", "3", "3"],
+      "expect": { "score": 54, "maxScore": 80, "accuracy": 0.625,
+        "events": [ {"skillKey": "preorder", "correct": false, "partial": 0.6},
+                    {"skillKey": "level-order", "correct": false, "partial": 0.6666666666666666} ] }
+    },
+    { "name": "tapping a node that is not in the tree", "actions": ["99"], "invalid": true },
+    { "name": "tapping a node already visited", "actions": ["5", "5"], "invalid": true }
+  ]
+}

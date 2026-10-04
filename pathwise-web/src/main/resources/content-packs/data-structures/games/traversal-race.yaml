@@ -1,0 +1,19 @@
+key: traversal-race
+template: traversal_race
+title: Traversal Race
+description: >-
+  A new binary search tree every round. Tap its nodes in the order asked: preorder, inorder, postorder or
+  level order. A second miss on the same node reveals it.
+topic: tree-traversals
+difficulty: 2
+estMinutes: 4
+traversalRace:
+  orders: [preorder, inorder, postorder, level]
+  rounds: 4
+  minNodes: 5
+  maxNodes: 7
+  skills:
+    preorder: preorder
+    inorder: inorder
+    postorder: postorder
+    level: level-order
