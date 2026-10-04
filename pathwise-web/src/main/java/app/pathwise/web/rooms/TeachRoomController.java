@@ -71,13 +71,13 @@ public class TeachRoomController extends PageServlet {
                 }
                 case "materials" -> {
                     req.setAttribute("materials", ViewModels.of(app().materials().page(actor, roomId)));
-                    req.setAttribute("header", ViewModels.of(app().rooms().header(actor, roomId)));
+                    req.setAttribute("roomHeader", ViewModels.of(app().rooms().header(actor, roomId)));
                     req.setAttribute("maxMb", MaterialService.MAX_PDF_BYTES / (1024 * 1024));
                     render(req, res, "teacher/room-materials");
                 }
                 case "doubts" -> {
                     req.setAttribute("doubts", ViewModels.list(app().doubts().roomDoubts(actor, roomId)));
-                    req.setAttribute("header", ViewModels.of(app().rooms().header(actor, roomId)));
+                    req.setAttribute("roomHeader", ViewModels.of(app().rooms().header(actor, roomId)));
                     render(req, res, "teacher/room-doubts");
                 }
                 case "analytics" -> {
@@ -92,7 +92,7 @@ public class TeachRoomController extends PageServlet {
                 }
                 case "settings" -> {
                     req.setAttribute("settings", ViewModels.of(app().rooms().settings(actor, roomId)));
-                    req.setAttribute("header", ViewModels.of(app().rooms().header(actor, roomId)));
+                    req.setAttribute("roomHeader", ViewModels.of(app().rooms().header(actor, roomId)));
                     render(req, res, "teacher/room-settings");
                 }
                 default -> res.sendError(HttpServletResponse.SC_NOT_FOUND);

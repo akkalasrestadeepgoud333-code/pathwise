@@ -316,4 +316,15 @@ A test-side fix: an apostrophe is escaped as `&#039;`, not `&#39;`.
 
 Not verified in a real browser: the upload form and the PDF viewer, which were exercised only through HTTP requests.
 
+**A defect reported by the user the same day:** uploading a PDF from the Materials page ended on a 404.
+- **Cause:** the controller passed the room header to the view as a request attribute named `header`. EL resolves its implicit `header` object (the request headers) first, so `${header.id}` was empty and the form posted to `/materials/`.
+- **The same mistake had broken two existing pages:** the room header and tabs on the teacher's Doubts and Settings pages, which no test had opened.
+- **Why the tests missed it:** they posted to a URL they built themselves.
+- **Fixes:**
+  - The attribute is renamed to `roomHeader`.
+  - The test now posts wherever the page's real form points, uploads a 2 MB file as well, and checks the Doubts and Settings headers.
+  - `JspSafetyTest` now fails the build on any request attribute named after an EL implicit object.
+- **Verified** by reproducing against the running server with a throwaway account before and after the fix (404, then 303 and a 200 `application/pdf` download). The throwaway data was then removed.
+- **Results:** web 38 and `MaterialsAndAdminPowersFlowTest` 2/2 pass.
+
 Not yet done: accessibility audit with axe-core, Android UI tests, load tests and the dependency vulnerability scan. All of these are planned (see the blueprint, §35).

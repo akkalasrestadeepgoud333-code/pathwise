@@ -93,7 +93,11 @@ class MaterialsAndAdminPowersFlowTest {
                 + "\"\r\nContent-Type: application/pdf\r\n\r\n").getBytes(StandardCharsets.UTF_8));
         body.writeBytes(content);
         body.writeBytes(("\r\n--" + boundary + "--\r\n").getBytes(StandardCharsets.UTF_8));
-        return b.send(HttpRequest.newBuilder(URI.create(TestServer.baseUrl() + "/materials/" + room))
+        // Post where the page's own upload form points, as a browser would (falls back for people who can't see the form).
+        java.util.regex.Matcher form = java.util.regex.Pattern.compile("enctype=\"multipart/form-data\" action=\"([^\"]+)\"")
+                .matcher(b.get("/teach/rooms/" + room + "/materials").body());
+        String action = form.find() ? form.group(1) : "/materials/" + room;
+        return b.send(HttpRequest.newBuilder(URI.create(TestServer.baseUrl() + action))
                 .header("Content-Type", "multipart/form-data; boundary=" + boundary)
                 .POST(HttpRequest.BodyPublishers.ofByteArray(body.toByteArray())));
     }
@@ -109,8 +113,15 @@ class MaterialsAndAdminPowersFlowTest {
         student.b().get("/app/rooms");
         student.b().post("/app/rooms/join", Map.of("code", one("select code from rooms where id = ?::uuid", room)));
 
-        // A note: Markdown rendered, scripts stripped.
-        assertThat(teacher.b().get("/teach/rooms/" + room + "/materials").body()).contains("Write a note").contains("Upload a PDF");
+        // A note: Markdown rendered, scripts stripped. The page's forms point at this room.
+        String materialsPage = teacher.b().get("/teach/rooms/" + room + "/materials").body();
+        assertThat(materialsPage).contains("Write a note").contains("Upload a PDF").contains("Materials Room")
+                .contains("action=\"/materials/" + room + "\"").doesNotContain("action=\"/materials/\"");
+        // The room header (name and tabs) also renders on the other pages that share it.
+        for (String section : new String[] {"doubts", "settings"}) {
+            assertThat(teacher.b().get("/teach/rooms/" + room + "/" + section).body()).as(section)
+                    .contains("Materials Room").contains("/teach/rooms/" + room + "/curriculum");
+        }
         teacher.b().post("/materials/" + room, Map.of("action", "add-note", "title", "Traversal cheat sheet",
                 "body", "**Preorder**: root first.\n\n<script>alert('x')</script>\n\n- Inorder: left, root, right"));
         String studentView = student.b().get("/app/rooms/" + room).body();
@@ -134,6 +145,19 @@ class MaterialsAndAdminPowersFlowTest {
         assertThat(outsider.b().get("/materials/" + room + "/" + material).statusCode()).isEqualTo(404);
         assertThat(student.b().get("/app/rooms/" + room).body()).contains("Week 1 slides");
 
+        // A realistic size (over the 1 MB in-memory threshold, so Tomcat spools it to disk).
+        byte[] big = new byte[2 * 1024 * 1024 + 123];
+        System.arraycopy(pdf, 0, big, 0, pdf.length);
+        teacher.b().get("/teach/rooms/" + room + "/materials");
+        HttpResponse<String> bigUp = upload(teacher.b(), room, "Big handout", "handout.pdf", big);
+        assertThat(bigUp.statusCode()).as(bigUp.body().substring(0, Math.min(600, bigUp.body().length()))).isEqualTo(303);
+        String bigId = one("select id::text from room_materials where room_id = ?::uuid and title = 'Big handout'", room);
+        assertThat(bigId).isNotNull();
+        HttpResponse<String> bigGot = student.b().get("/materials/" + room + "/" + bigId);
+        assertThat(bigGot.statusCode()).isEqualTo(200);
+        assertThat(bigGot.headers().firstValueAsLong("Content-Length").orElse(0)).isEqualTo(big.length);
+        teacher.b().post("/materials/" + room, Map.of("action", "delete", "id", bigId));
+
         // Students can't add or remove; a file that isn't a PDF is refused whatever its name.
         student.b().get("/app/rooms/" + room);
         assertThat(upload(student.b(), room, "Not mine", "x.pdf", pdf).statusCode()).isEqualTo(403);
@@ -141,7 +165,7 @@ class MaterialsAndAdminPowersFlowTest {
         teacher.b().get("/teach/rooms/" + room + "/materials");
         upload(teacher.b(), room, "Sneaky", "evil.pdf", "<html><script>alert(1)</script></html>".getBytes(StandardCharsets.UTF_8));
         assertThat(teacher.b().get("/teach/rooms/" + room + "/materials").body()).contains("isn&#039;t a PDF");
-        assertThat(one("select count(*) from room_materials where room_id = ?::uuid and kind = 'pdf'", room)).isEqualTo("1");
+        assertThat(one("select count(*) from room_materials where room_id = ?::uuid and kind = 'pdf' and deleted_at is null", room)).isEqualTo("1");
 
         // Removing deletes the file and the link stops working.
         Path stored = Path.of("storage", "materials", material + ".pdf").toAbsolutePath();
@@ -149,7 +173,7 @@ class MaterialsAndAdminPowersFlowTest {
         teacher.b().post("/materials/" + room, Map.of("action", "delete", "id", material));
         assertThat(Files.exists(stored)).isFalse();
         assertThat(student.b().get("/materials/" + room + "/" + material).statusCode()).isEqualTo(404);
-        assertThat(one("select count(*) from audit_log where entity_id = ? and action like 'room.material_%'", room)).isEqualTo("3");
+        assertThat(one("select count(*) from audit_log where entity_id = ? and action like 'room.material_%'", room)).isEqualTo("5"); // note, 2 PDFs added, 2 removed
     }
 
     @Test

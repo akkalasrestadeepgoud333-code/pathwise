@@ -1,6 +1,6 @@
 <%@ page contentType="text/html;charset=UTF-8" %>
-<pw:shell title="${header.name}: doubts">
-  <pw:roomhead h="${header}" section="doubts"/>
+<pw:shell title="${roomHeader.name}: doubts">
+  <pw:roomhead h="${roomHeader}" section="doubts"/>
   <p class="muted">Doubts your students asked you privately. Only you, the room's other teachers and the student can see them.</p>
   <c:choose>
     <c:when test="${empty doubts}"><pw:empty icon="circle-help" title="No doubts yet" message="Students can ask you from Doubts → Ask, choosing this room."/></c:when>

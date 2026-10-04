@@ -1,7 +1,7 @@
 <%@ page contentType="text/html;charset=UTF-8" %>
 <c:set var="s" value="${settings}"/>
 <pw:shell title="${s.name}: settings">
-  <pw:roomhead h="${header}" section="settings"/>
+  <pw:roomhead h="${roomHeader}" section="settings"/>
   <div class="grid grid-main-aside">
     <section class="card" aria-labelledby="set-title">
       <h2 id="set-title" class="card-title">Room settings</h2>

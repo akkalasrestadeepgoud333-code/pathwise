@@ -1,13 +1,13 @@
 <%@ page contentType="text/html;charset=UTF-8" %>
-<pw:shell title="${header.name}: materials">
-  <pw:roomhead h="${header}" section="materials"/>
+<pw:shell title="${roomHeader.name}: materials">
+  <pw:roomhead h="${roomHeader}" section="materials"/>
   <p class="muted">Your own notes and PDFs for this room. Everyone in the room can read them; nobody outside it can.</p>
 
   <c:if test="${materials.canEdit}">
     <div class="grid grid-2 section-gap-sm">
       <section class="card" aria-labelledby="note-title">
         <h2 id="note-title" class="card-title">Write a note</h2>
-        <pw:form action="/materials/${header.id}">
+        <pw:form action="/materials/${roomHeader.id}">
           <input type="hidden" name="action" value="add-note">
           <div class="field">
             <label class="field-label" for="n-title">Title</label>
@@ -24,7 +24,7 @@
 
       <section class="card" aria-labelledby="pdf-title">
         <h2 id="pdf-title" class="card-title">Upload a PDF</h2>
-        <form method="post" enctype="multipart/form-data" action="<c:url value='/materials/${header.id}'/>">
+        <form method="post" enctype="multipart/form-data" action="<c:url value='/materials/${roomHeader.id}'/>">
           <input type="hidden" name="_csrf" value="<c:out value='${csrfToken}'/>">
           <input type="hidden" name="action" value="add-pdf">
           <div class="field">
@@ -54,7 +54,7 @@
                 <h3 class="card-title"><c:out value="${m.title}"/></h3>
               </div>
               <c:if test="${materials.canEdit}">
-                <pw:form action="/materials/${header.id}">
+                <pw:form action="/materials/${roomHeader.id}">
                   <input type="hidden" name="action" value="delete"><input type="hidden" name="id" value="<c:out value='${m.id}'/>">
                   <button type="submit" class="btn btn-sm btn-ghost">Remove</button>
                 </pw:form>
@@ -62,7 +62,7 @@
             </div>
             <c:choose>
               <c:when test="${m.kind == 'pdf'}">
-                <p><a href="<c:url value='/materials/${header.id}/${m.id}'/>" target="_blank" rel="noopener"><pw:icon name="file-text"/><c:out value="${m.fileName}"/></a>
+                <p><a href="<c:url value='/materials/${roomHeader.id}/${m.id}'/>" target="_blank" rel="noopener"><pw:icon name="file-text"/><c:out value="${m.fileName}"/></a>
                   <span class="meta">· <c:out value="${m.sizeLabel}"/></span></p>
               </c:when>
               <c:otherwise><div class="prose"><pw:html value="${m.html}"/></div></c:otherwise>

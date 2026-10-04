@@ -36,6 +36,26 @@ class JspSafetyTest {
         }
     }
 
+    /**
+     * EL resolves its implicit objects before request attributes, so an attribute called "header" (or "param", ...)
+     * is silently shadowed in the view. That once left a form posting to "/materials/" with no room id.
+     */
+    @Test
+    void noRequestAttributeIsNamedLikeAnElImplicitObject() throws IOException {
+        Pattern reserved = Pattern.compile("setAttribute\\(\"(pageContext|pageScope|requestScope|sessionScope|applicationScope|param|"
+                + "paramValues|header|headerValues|cookie|initParam)\"");
+        List<String> violations = new ArrayList<>();
+        try (Stream<Path> files = Files.walk(Path.of("src/main/java"))) {
+            for (Path p : files.filter(f -> f.toString().endsWith(".java")).toList()) {
+                Matcher m = reserved.matcher(Files.readString(p, StandardCharsets.UTF_8));
+                while (m.find()) {
+                    violations.add(p.getFileName() + ": " + m.group(1));
+                }
+            }
+        }
+        assertThat(violations).as("request attributes shadowed by EL implicit objects").isEmpty();
+    }
+
     @Test
     void viewsExist() throws IOException {
         assertThat(views()).hasSizeGreaterThan(10);
