@@ -71,7 +71,7 @@ public class SettingsController extends PageServlet {
         if (path.startsWith("/sessions/") && path.endsWith("/revoke")) {
             UUID id = Ids.parseOrNull(path.substring("/sessions/".length(), path.length() - "/revoke".length()));
             if (id != null && id.equals(actor.sessionId())) {
-                flash(req, "info", "To end this session, use Sign out.");
+                flash(req, "info", "To end this session, use \"Sign out of this device\" under Your account.");
             } else if (id != null && app().identity().revokeSession(actor, id, meta(req))) {
                 flash(req, "success", "Session signed out.");
             } else {

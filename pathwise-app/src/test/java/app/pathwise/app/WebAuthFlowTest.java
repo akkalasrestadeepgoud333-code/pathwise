@@ -173,6 +173,8 @@ class WebAuthFlowTest {
         Browser b = browser();
         b.register("Sign Out", email(), PASSWORD, "student");
         assertThat(b.get("/app/today").statusCode()).isEqualTo(200);
+        // Sign out is reachable on every screen size: the sidebar (desktop) and Settings (the phone's "You" tab).
+        assertThat(b.get("/app/settings").body()).contains("action=\"/logout\"").contains("Sign out of this device");
         HttpResponse<String> out = b.post("/logout", Map.of());
         assertThat(location(out)).isEqualTo("/login?signedOut=1");
         assertThat(b.get("/app/today").statusCode()).isEqualTo(303);

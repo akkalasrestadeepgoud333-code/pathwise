@@ -61,6 +61,9 @@
     background: var(--surface);
   }
   .sidebar .brand { padding: 0 var(--s-2); }
+  /* Many links (e.g. for administrators): the list scrolls; the user chip and Sign out stay visible. */
+  .sidebar .nav { flex: 1 1 auto; min-height: 0; overflow-y: auto; margin: 0 calc(-1 * var(--s-2)); padding: 0 var(--s-2); }
+  .sidebar .brand, .sidebar-footer { flex: 0 0 auto; }
   .tabbar { display: none; }
   .topbar .brand { display: none; }
   .topbar { padding: 0 var(--s-8); justify-content: flex-end; }

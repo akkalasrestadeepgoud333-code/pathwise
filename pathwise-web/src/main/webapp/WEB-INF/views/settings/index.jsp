@@ -21,6 +21,9 @@
           <span class="chip"><c:out value="${currentUser.admin ? 'Administrator' : (currentUser.teacher ? 'Teacher' : 'Student')}"/></span>
         </li>
       </ul>
+      <pw:form action="/logout" cssClass="section-gap-sm">
+        <button type="submit" class="btn btn-sm"><pw:icon name="log-out" size="sm"/>Sign out of this device</button>
+      </pw:form>
     </section>
 
     <section class="card" aria-labelledby="appearance-title">
