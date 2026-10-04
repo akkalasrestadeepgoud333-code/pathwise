@@ -142,12 +142,25 @@ Last updated: **2026-10-04** (end of M2, Evidence → learner model → engine).
 | In-app notifications: assessment results, doubt answers/acceptance/verification, badges, mastered skills, assignments graded, announcements, join requests, new work to grade, private doubts; grouped while unread; bell with unread count; opening one marks it read (local links only); purged after 180 days | `/app/notifications` | `RewardsFlowTest` |
 | Today shows level, XP, streak and the closest next badge | `/app/today` | `RewardsFlowTest` |
 
+## Implemented (M8: AI tutor with Guided Help)
+
+| Feature | Where | Evidence |
+|---|---|---|
+| Tutor modes: Pathwise Tutor (about a module or any question), Hint (on a practice question), Explain my mistake (after a wrong answer), Resources | `/app/tutor`, buttons on modules, practice questions and feedback | `TutorFlowTest` |
+| Optional local model through Ollama (free, on this machine; `pathwise.ai.provider=ollama`, model `llama3.2:3b` by default). Off by default: the tutor then answers with **Guided Help**, built from Pathwise's own modules, KB, authored hint ladders and option rationales, and says so | `AiProvider`, `TutorService` | `AiProviderTest`, `TutorFlowTest` |
+| Honest labels on every reply ("AI tutor · may be wrong" or "Guided Help · from Pathwise content"); the page badge names what is answering | tutor pages | `TutorFlowTest` |
+| Prompt safety: Pathwise content is passed inside `<context>` as data and can't close the block; only the last 8 turns are sent | `Prompts` | `AiCoreTest` |
+| Hint answer-leak guard: a hint that contains a correct option, numeric answer or accepted text is regenerated once, then replaced by the authored hint | `AnswerGuard` | `AiCoreTest`, `TutorFlowTest` (stub model) |
+| Assessment AI policy enforced: "blocked" turns the tutor off during a running attempt; "hints only" allows Hint mode only | `TutorService` | `TutorFlowTest` |
+| Conversations are private to the student (404 for others, teachers can't read them) and deletable (messages are removed) | `ai_conversations` | `TutorFlowTest` |
+| Model failures (down, error, timeout) fall back to Guided Help instead of erroring; 20 messages per 10 minutes | `AiProvider`, `TutorService` | `AiProviderTest` |
+
 ## Partially implemented
 
 | Feature | Works | Missing |
 |---|---|---|
 | Learner profile | stored per user; the theme preference is used | timezone editing, goals and modalities UI (M2) |
-| "Ask" recommendation slot | not generated | needs the AI tutor (M8) and doubts (M6) |
+| "Ask" recommendation slot | not generated | the tutor and doubts exist; the recommender doesn't suggest them yet |
 | Rooms (rest of the blueprint) | see the M5 table | QR codes for join links; item gates (soft/hard prerequisites); duplicating a room; transferring ownership; the "3+ failed attempts on one item" attention rule; teachers writing their own questions and modules (room assessments use the bank) |
 | Room context in the recommender | rooms add their own section to Next steps and Today | the recommender doesn't yet use room curriculum order as a factor or rank only room items in a room context; group projects (P2) |
 | Assessment AI policy | stored and shown to students | enforced when the AI tutor exists (M8). Pathwise cannot control outside tools, and says so |
@@ -155,6 +168,7 @@ Last updated: **2026-10-04** (end of M2, Evidence → learner model → engine).
 | Games in recommendations | games appear in the gallery, on Practice, and in Progress through their evidence | the engine does not yet suggest a game in the Explore slot |
 | Community (rest of the blueprint) | see the M6 table | room discussion (L2), live doubt sessions, attaching a question attempt to a doubt, KB links in modules' Common doubts, image uploads, a separate moderator role (moderation is an admin power for now) |
 | Gamification (rest of the blueprint) | see the M7 table | Web Push / email / Android push, notification preferences and quiet hours (only in-app notifications exist, and Pathwise sends no reminders), learner time zones (days use Asia/Kolkata), room leaderboards (opt-in, P2), room custom badges, challenge-pass and doubt-to-practice XP, Root Fixer / Curious Mind / Course Milestone / Team Player badges |
+| Tutor (rest of the blueprint) | see the M8 table | streaming replies, Practice Mode (AI-generated questions), Study Coach, General Assistant, room i_mode, the Android app's tutor screen; the AI path was tested against a stub server, not a real model, because Ollama isn't installed on the build machine |
 | Game administration | templates can be disabled in the database (`game_templates.enabled`) | an admin screen for it (M10); the teachers' "Practice and play" panel (M5) |
 | Offline game submissions | the attempt id makes online finishing idempotent | idempotency keys for queued offline logs (M9, Android) |
 | SQL-query questions | — | deferred until a DBMS pack exists; the grader has no SQL type yet |
@@ -162,7 +176,7 @@ Last updated: **2026-10-04** (end of M2, Evidence → learner model → engine).
 
 ## Proposed (designed in the blueprint, not built)
 
-more games: Sequence Sort, True/False Sprint, Query Quest (P1) · rooms, assignments and teacher analytics (M5) · AI tutor with Guided Help fallback (M8) · Android app (M9) · projects, live doubt sessions and full admin console (M10).
+more games: Sequence Sort, True/False Sprint, Query Quest (P1) · rooms, assignments and teacher analytics (M5) · Android app (M9) · projects, live doubt sessions and full admin console (M10).
 
 ## Future (out of scope for v1)
 

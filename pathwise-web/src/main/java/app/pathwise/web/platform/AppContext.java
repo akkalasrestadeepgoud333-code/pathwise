@@ -7,6 +7,8 @@ import app.pathwise.web.admin.AdminService;
 import app.pathwise.web.assessment.AssessmentService;
 import app.pathwise.web.community.DoubtService;
 import app.pathwise.web.rewards.RewardsService;
+import app.pathwise.web.ai.AiProvider;
+import app.pathwise.web.ai.TutorService;
 import app.pathwise.web.games.GameService;
 import app.pathwise.web.rooms.AssignmentService;
 import app.pathwise.web.rooms.RoomAssessmentService;
@@ -58,6 +60,7 @@ public final class AppContext {
     private final AssignmentService assignments;
     private final DoubtService doubts;
     private final RewardsService rewards;
+    private final TutorService tutor;
     private final RateLimiter loginLimiter;
     private final RateLimiter registerLimiter;
 
@@ -89,6 +92,7 @@ public final class AppContext {
         this.doubts = new DoubtService(database.tx(), catalog, events, clock);
         this.rewards = new RewardsService(database.tx(), clock);
         this.rewards.register(events);
+        this.tutor = new TutorService(database.tx(), AiProvider.from(config.ai()), questions, clock);
         this.loginLimiter = new RateLimiter(config.loginAttemptsPerMinute(), 60_000, clock);      // per IP + email
         this.registerLimiter = new RateLimiter(config.registrationsPerHour(), 3_600_000, clock);  // per IP
     }
@@ -124,6 +128,7 @@ public final class AppContext {
     public AssignmentService assignments() { return assignments; }
     public DoubtService doubts() { return doubts; }
     public RewardsService rewards() { return rewards; }
+    public TutorService tutor() { return tutor; }
     public RateLimiter loginLimiter() { return loginLimiter; }
     public RateLimiter registerLimiter() { return registerLimiter; }
 }

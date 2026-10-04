@@ -609,3 +609,13 @@ fieldset.field { border: 0; padding: 0; margin: 0; display: grid; gap: var(--s-2
 .rewards-strip { display: flex; flex-wrap: wrap; gap: var(--s-3); align-items: center; margin-bottom: var(--s-5); padding: var(--s-3) var(--s-4); }
 .rewards-strip a { text-decoration: none; color: inherit; display: inline-flex; gap: 6px; align-items: center; font-weight: 600; font-size: var(--text-sm); }
 .rewards-strip .meta { font-size: var(--text-xs); color: var(--text-muted); }
+/* Tutor */
+.tutor-badge { display: inline-flex; gap: 6px; align-items: center; }
+.chat { list-style: none; padding: 0; margin: var(--s-4) 0; display: grid; gap: var(--s-4); }
+.msg { display: grid; gap: 4px; max-width: 88%; }
+.msg-user { justify-self: end; justify-items: end; }
+.msg-bubble { padding: var(--s-3) var(--s-4); border-radius: var(--r-lg); border: 1px solid var(--border); background: var(--surface); }
+.msg-user .msg-bubble { background: var(--primary-soft); border-color: color-mix(in srgb, var(--primary) 30%, var(--border)); }
+.msg-bubble p:last-child { margin-bottom: 0; }
+.msg .meta { font-size: var(--text-xs); color: var(--text-subtle); }
+.chat-form { position: sticky; bottom: var(--s-4); }

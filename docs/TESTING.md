@@ -155,4 +155,23 @@ New tests:
 
 The ArchitectureTest caught an anonymous class using DAOs. It became a named `*Service` class.
 
+### 2026-10-04: M8 AI tutor
+
+Command: `.\mvnw.cmd install`, then TutorFlowTest re-run after a fix. Result: core 103, data 14 and web 33 passed; app 73 with TutorFlowTest 5/5 after the fix.
+
+New tests:
+- **AiCoreTest:** context delimiting and injection, history trimming, and the leak guard's near-misses ("17" isn't "7", "1.5" isn't "5").
+- **AiProviderTest:** a stub HTTP server checks the request shape, reply parsing, HTTP 500, an unreachable host, and AI off.
+- **TutorFlowTest:**
+  - Guided Help for a module and for resources, with follow-ups
+  - the hint ladder, then explain refused before answering and working after a wrong answer
+  - no hints on answered questions, and other people's attempts give 404
+  - conversations are private and deletable
+  - a blocked assessment turns the tutor off until submission
+  - a stub local model that leaks the answer twice is replaced by the authored hint, and a safe hint is kept and labelled as AI
+
+Defect found and fixed: the tutor read the wrong practice question. Pages number questions from 1, but stored positions start at 0.
+
+Not verified: a real model. Ollama isn't installed on this machine, so the AI path has only been exercised against stubs.
+
 Not yet done: accessibility audit with axe-core, Android tests, load tests and the dependency vulnerability scan. All of these are planned (see the blueprint, §35).

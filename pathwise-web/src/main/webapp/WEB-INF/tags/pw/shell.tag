@@ -20,6 +20,7 @@
       <a href="<c:url value='/app/achievements'/>"<c:if test="${nav == 'achievements'}"> aria-current="page"</c:if>><pw:icon name="trophy"/>Achievements</a>
       <a href="<c:url value='/app/rooms'/>"<c:if test="${nav == 'rooms'}"> aria-current="page"</c:if>><pw:icon name="users"/>Rooms</a>
       <a href="<c:url value='/app/doubts'/>"<c:if test="${nav == 'doubts'}"> aria-current="page"</c:if>><pw:icon name="circle-help"/>Doubts</a>
+      <a href="<c:url value='/app/tutor'/>"<c:if test="${nav == 'tutor'}"> aria-current="page"</c:if>><pw:icon name="sparkles"/>Tutor</a>
       <c:if test="${user.teacher or user.admin}">
         <div class="nav-section">Teach</div>
         <a href="<c:url value='/teach'/>"<c:if test="${nav == 'teach'}"> aria-current="page"</c:if>><pw:icon name="school"/>Teaching</a>

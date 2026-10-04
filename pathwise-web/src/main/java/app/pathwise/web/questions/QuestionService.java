@@ -126,6 +126,21 @@ public final class QuestionService {
         return Grader.grade(answerKey(q), r.options(), r.text());
     }
 
+    /** Every text that would give the answer away (for the tutor's hint guard): correct options, numeric answer, accepted text. */
+    public static List<String> answerTexts(QuestionRow q) {
+        List<String> out = new java.util.ArrayList<>();
+        q.options().stream().filter(OptionRow::correct).forEach(o -> out.add(o.label()));
+        Grader.AnswerKey key = answerKey(q);
+        if (key.numericAnswer() != null) {
+            double v = key.numericAnswer();
+            out.add(v == Math.rint(v) ? Long.toString((long) v) : Double.toString(v));
+        }
+        if (key.acceptedText() != null) {
+            out.addAll(key.acceptedText());
+        }
+        return out;
+    }
+
     static Grader.AnswerKey answerKey(QuestionRow q) {
         JsonNode spec;
         try {

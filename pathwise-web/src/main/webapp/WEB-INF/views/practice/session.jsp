@@ -32,6 +32,10 @@
               <button type="submit" class="btn btn-primary">Check answer <pw:icon name="arrow-right" size="sm"/></button>
             </div>
           </pw:form>
+          <pw:form action="/app/tutor/start" cssClass="hint-form">
+            <input type="hidden" name="mode" value="hint"><input type="hidden" name="attempt" value="<c:out value='${s.attemptId}'/>"><input type="hidden" name="position" value="<c:out value='${step.position}'/>">
+            <button type="submit" class="btn btn-ghost btn-sm"><pw:icon name="sparkles" size="sm"/>Ask the tutor for a hint</button>
+          </pw:form>
           <c:if test="${step.moreHints}">
             <pw:form action="/app/practice/${s.attemptId}/${step.position}/hint" cssClass="hint-form">
               <button type="submit" class="btn btn-ghost btn-sm"><pw:icon name="circle-help" size="sm"/><c:out value="${empty step.hints ? 'Need a hint?' : 'Another hint'}"/></button>

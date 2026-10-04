@@ -15,6 +15,10 @@
       <span><pw:icon name="book-open" size="sm"/>Section <c:out value="${p.index}"/> of <c:out value="${p.total}"/></span>
       <span><pw:icon name="activity" size="sm"/>≈ <c:out value="${p.estMinutes}"/> min</span>
       <span><c:out value="${p.doneCount}"/> done</span>
+      <pw:form action="/app/tutor/start" cssClass="inline-form">
+        <input type="hidden" name="mode" value="tutor"><input type="hidden" name="module" value="<c:out value='${p.moduleKey}'/>">
+        <button type="submit" class="btn btn-ghost btn-sm"><pw:icon name="sparkles" size="sm"/>Ask the tutor about this</button>
+      </pw:form>
     </div>
     <div class="progress<c:if test='${p.moduleCompleted}'> progress-success</c:if>" role="progressbar" aria-label="Module progress"
          aria-valuemin="0" aria-valuemax="100" aria-valuenow="<c:out value='${p.percent}'/>">
