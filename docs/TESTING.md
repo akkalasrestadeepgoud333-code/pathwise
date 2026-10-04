@@ -48,4 +48,21 @@ New: LearnerCoreTest (grader + golden mastery values), RecommenderTest (9 person
 
 Manual: pack v2 imported (114 questions, 100 sections). Headless Edge screenshots of Today (with "Why this?"), Next steps, a practice question with a hint, feedback, summary, progress, practice hub and topic. No console errors. Defects found and fixed: correct answer always shown first (now shuffled per student); "Getting started → Needs practice" was labelled an improvement (levels are now ranked by meaning); a SQL type error in the suppressions query (caught by the tests).
 
+### 2026-10-04: M3 Official assessments
+
+Command: `.\mvnw.cmd install` (run per module while developing, then in full). Result: **160 tests, 160 passed, 0 failed**.
+New: AssessmentCoreTest (start rules, deadline and grace, late, feedback visibility, item analysis), PackValidatorTest assessment rules and the rule that keeps assessment-only items out of checks, ContentTest (bundled assessments use unseen items), AssessmentFlowTest. AssessmentFlowTest runs end to end and covers:
+- no answers or rationales in the page or API before grading
+- save and prefill, plus confirmation for unanswered questions
+- grading exactly once, official evidence and model update
+- attempt limit and intruder 404s
+- a forced past deadline: late save refused, auto-submit on open and through the background sweep
+- the diagnostic seeding Progress
+- admin item analysis (students get 403)
+- the API flow
+
+These DB constraints are tested directly: official evidence only from assessments, and one open attempt.
+
+Manual: pack v3 imported (126 questions, 3 assessments). Headless Edge screenshots of the list, rules, attempt (desktop, mobile, dark), confirmation, result and admin analysis. No console or CSP errors. Defects found and fixed: the sticky timer bar slid under the top bar; the timer didn't align right; the average showed as "3.0%"; analysis flags from very few attempts were presented without caution. One existing test had assumed no official evidence existed anywhere, which would have failed depending on test order, so it was rescoped.
+
 Not yet done: accessibility audit with axe-core, Android tests, load tests and the dependency vulnerability scan. All of these are planned (see the blueprint, §35).

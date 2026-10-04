@@ -37,6 +37,17 @@ public class StudentController extends PageServlet {
             }
         }
         req.setAttribute("more", more);
+        // An attempt in progress, or a diagnostic not yet taken, is worth surfacing; otherwise just link the list.
+        var cards = app().assessments().list(actor);
+        var prompt = cards.stream().filter(c -> c.openAttemptId() != null).findFirst()
+                .map(c -> java.util.Map.of("title", "Resume " + c.title(), "meta", "Your attempt is in progress",
+                        "href", "/app/assessments/attempt/" + c.openAttemptId()))
+                .or(() -> cards.stream().filter(c -> "diagnostic".equals(c.kind()) && "open".equals(c.state())).findFirst()
+                        .map(c -> java.util.Map.of("title", "Take the " + c.title(), "meta",
+                                c.questions() + " questions · shows Pathwise where to start", "href", "/app/assessments/" + c.key())))
+                .orElse(java.util.Map.of("title", "Assessments", "meta", "Timed checks that count as official evidence",
+                        "href", "/app/assessments"));
+        req.setAttribute("assessmentPrompt", prompt);
         req.setAttribute("nav", "today");
         render(req, res, "student/today");
     }

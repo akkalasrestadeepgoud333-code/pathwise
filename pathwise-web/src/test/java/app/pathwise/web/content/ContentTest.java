@@ -46,6 +46,19 @@ class ContentTest {
     }
 
     @Test
+    void dataStructuresPackShipsADiagnosticAndTestsBuiltFromUnseenItems() {
+        ContentPack pack = loader.load("data-structures").pack();
+        assertThat(pack.assessmentsOrEmpty()).extracting(ContentPack.AssessmentDef::key)
+                .containsExactlyInAnyOrder("ds-diagnostic", "arrays-lists-quiz", "trees-topic-test");
+        Set<String> assessmentOnly = new HashSet<>();
+        pack.questionsOrEmpty().stream().filter(q -> !q.practiceEnabled()).forEach(q -> assessmentOnly.add(q.key()));
+        assertThat(assessmentOnly).hasSize(12).allMatch(k -> k.startsWith("as-"));
+        // Every quiz and test includes items students can't have met in practice or checks.
+        pack.assessmentsOrEmpty().forEach(a ->
+                assertThat(a.questionsOrEmpty()).as(a.key()).anyMatch(assessmentOnly::contains));
+    }
+
+    @Test
     void unknownPacksAndBadKeysAreRejected() {
         assertThatThrownBy(() -> loader.load("no-such-pack")).isInstanceOf(ContentPackLoader.PackFormatException.class);
         assertThatThrownBy(() -> loader.load("../etc")).isInstanceOf(ContentPackLoader.PackFormatException.class);

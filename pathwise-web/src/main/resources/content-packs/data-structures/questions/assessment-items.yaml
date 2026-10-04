@@ -1,0 +1,113 @@
+# Assessment-only items: excluded from practice so students never meet test questions in advance.
+questions:
+  - key: as-arr-shift-count
+    type: numeric
+    practice: false
+    skills: [array-insert-delete, array-complexity]
+    difficulty: 2
+    stem: "An array holds 10 elements in indices 0–9 (with spare capacity). How many elements must move to insert a new value at index 3?"
+    answer: 7
+    explanation: "Elements at indices 3–9 each shift one place right: 7 moves."
+  - key: as-arr-access
+    type: single_choice
+    practice: false
+    skills: [array-indexing, array-complexity]
+    difficulty: 1
+    stem: "Reading the element at index 500 of an array of 1,000 integers takes:"
+    options:
+      - text: "O(1)"
+        correct: true
+        why: "The address is computed directly."
+      - text: "O(500)"
+        why: "No walking is needed in an array."
+      - text: "O(log n)"
+        why: "There's no halving involved."
+  - key: as-ll-middle-insert
+    type: single_choice
+    practice: false
+    skills: [ll-insert-delete, ll-vs-array]
+    difficulty: 2
+    stem: "You already hold a reference p to a node in the middle of a singly linked list. Inserting a new node right after p costs:"
+    options:
+      - text: "O(1)"
+        correct: true
+        why: "Two pointer assignments; nothing shifts."
+      - text: "O(n)"
+        why: "That would be the cost of finding p first, which you already have."
+      - text: "O(log n)"
+        why: "Lists don't support halving."
+  - key: as-ll-length
+    type: numeric
+    practice: false
+    skills: [ll-traversal]
+    difficulty: 1
+    stem: "A traversal of `head → 3 → 1 → 4 → 1 → 5 → null` counts the nodes. What count does it return?"
+    answer: 5
+  - key: as-sq-sequence
+    type: numeric
+    practice: false
+    skills: [stack-ops, queue-ops, lifo-fifo]
+    difficulty: 3
+    stem: "Push 1, 2, 3 onto a stack. Pop two values and enqueue them, in the order popped, into an empty queue. Then dequeue once. What value comes out?"
+    answer: 3
+    explanation: "Pops give 3 then 2; the queue is [3, 2]; dequeue returns 3."
+  - key: as-rec-trace
+    type: numeric
+    practice: false
+    skills: [recursive-case, call-stack]
+    difficulty: 3
+    stem: "`g(n) = 0` if n == 0, else `n + g(n − 2)` for even n. What is `g(6)`?"
+    answer: 12
+    explanation: "6 + 4 + 2 + 0 = 12."
+  - key: as-tree-height
+    type: numeric
+    practice: false
+    skills: [tree-measures]
+    difficulty: 2
+    stem: "A tree's longest root-to-leaf path passes through 5 nodes (including both ends). What is its height in edges?"
+    answer: 4
+  - key: as-bt-perfect-leaves
+    type: numeric
+    practice: false
+    skills: [binary-tree-kinds]
+    difficulty: 3
+    stem: "How many leaves does a perfect binary tree of height 4 (edges) have?"
+    answer: 16
+    explanation: "The last level holds 2⁴ = 16 nodes."
+  - key: as-trav-pre
+    type: short_text
+    practice: false
+    skills: [preorder]
+    difficulty: 3
+    stem: "Give the preorder traversal of the BST built by inserting 6, 2, 9, 1, 4, 7 into an empty tree."
+    accepted: ["6, 2, 1, 4, 9, 7"]
+  - key: as-trav-post
+    type: short_text
+    practice: false
+    skills: [postorder]
+    difficulty: 3
+    stem: "For the same BST (inserted 6, 2, 9, 1, 4, 7), give the postorder traversal."
+    accepted: ["1, 4, 2, 7, 9, 6"]
+  - key: as-trav-level
+    type: short_text
+    practice: false
+    skills: [level-order]
+    difficulty: 3
+    stem: "For the same BST (inserted 6, 2, 9, 1, 4, 7), give the level-order traversal."
+    accepted: ["6, 2, 9, 1, 4, 7"]
+  - key: as-bst-delete-root
+    type: single_choice
+    practice: false
+    skills: [bst-delete, bst-property]
+    difficulty: 4
+    stem: "In the BST built from 6, 2, 9, 1, 4, 7, the root 6 is deleted using the inorder successor. What is the new root?"
+    options:
+      - text: "7"
+        correct: true
+        why: "The successor is the smallest value in 6's right subtree (9 → left → 7)."
+      - text: "9"
+        why: "9 is the right child, but 7 is smaller and still larger than everything on the left."
+      - text: "4"
+        why: "4 is the predecessor: valid only with the other convention."
+      - text: "2"
+        why: "2 is the left child; promoting it would break the BST property for 4."

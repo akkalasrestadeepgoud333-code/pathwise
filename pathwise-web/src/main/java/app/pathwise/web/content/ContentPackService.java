@@ -13,6 +13,7 @@ import app.pathwise.data.Tx;
 import app.pathwise.data.catalog.CatalogDao;
 import app.pathwise.data.content.ContentDao;
 import app.pathwise.data.questions.QuestionDao;
+import app.pathwise.data.assessment.AssessmentDao;
 import app.pathwise.data.platform.AuditDao;
 import app.pathwise.web.platform.Json;
 import app.pathwise.web.platform.events.EventBus;
@@ -56,6 +57,7 @@ public final class ContentPackService {
     private final CatalogDao catalog = new CatalogDao();
     private final ContentDao content = new ContentDao();
     private final QuestionDao questions = new QuestionDao();
+    private final AssessmentDao assessments = new AssessmentDao();
     private final AuditDao audit = new AuditDao();
 
     public ContentPackService(Tx tx, ContentPackLoader loader, EventBus events, Clock clock) {
@@ -153,7 +155,8 @@ public final class ContentPackService {
                     spec.put("accepted", q.accepted());
                 }
                 UUID qid = questions.upsertPlatformQuestion(c, q.key(), q.type(), q.stem().strip(), Json.write(spec),
-                        q.difficulty(), Json.write(q.hintsOrEmpty()), q.explanation() == null ? null : q.explanation().strip());
+                        q.difficulty(), Json.write(q.hintsOrEmpty()), q.explanation() == null ? null : q.explanation().strip(),
+                        q.practiceEnabled());
                 questions.replaceOptions(c, qid, q.optionsOrEmpty().stream()
                         .map(o -> new String[]{o.text().strip(), Boolean.toString(o.isCorrect()), o.why() == null ? null : o.why().strip()})
                         .toList());
@@ -199,6 +202,24 @@ public final class ContentPackService {
                 content.replaceResources(c, moduleId, links);
             }
             content.archiveModulesNotIn(c, topicIds.values(), pack.modules().stream().map(ModuleDef::key).toList());
+
+            Map<String, UUID> questionIds = new HashMap<>();
+            for (var row : questions.byKeys(c, pack.questionsOrEmpty().stream().map(ContentPack.QuestionDef::key).toList())) {
+                questionIds.put(row.key(), row.id());
+            }
+            for (ContentPack.AssessmentDef a : pack.assessmentsOrEmpty()) {
+                UUID id = assessments.upsertPlatform(c, a.key(), subject, a.topic() == null ? null : topicIds.get(a.topic()),
+                        a.kind(), a.title().strip(), a.instructions() == null ? null : a.instructions().strip(),
+                        a.timeLimitMinutes() == null ? null : a.timeLimitMinutes() * 60,
+                        a.maxAttempts() == null ? 1 : a.maxAttempts(), Boolean.TRUE.equals(a.shuffle()),
+                        a.aiPolicy() == null ? "blocked" : a.aiPolicy(), a.feedback() == null ? "immediate" : a.feedback());
+                // Once anyone has attempted it, the item set is frozen so past results stay comparable.
+                if (!assessments.hasAttempts(c, id)) {
+                    List<UUID> ids = a.questionsOrEmpty().stream().map(questionIds::get).toList();
+                    assessments.replaceItems(c, id, ids, ids.stream().map(x -> 1.0).toList());
+                }
+            }
+            assessments.archiveNotIn(c, subject, pack.assessmentsOrEmpty().stream().map(ContentPack.AssessmentDef::key).toList());
             content.recordPack(c, pack.key(), pack.version(), loaded.checksum(), importedBy);
             audit.record(c, importedBy, "content.pack_imported", "content_pack", pack.key(),
                     Json.write(Map.of("version", pack.version(), "modules", pack.modules().size())), null);

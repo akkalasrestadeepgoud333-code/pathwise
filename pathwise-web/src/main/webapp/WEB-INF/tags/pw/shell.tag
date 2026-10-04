@@ -15,6 +15,7 @@
       <a href="<c:url value='/app/next'/>"<c:if test="${nav == 'next'}"> aria-current="page"</c:if>><pw:icon name="route"/>Next steps</a>
       <a href="<c:url value='/app/learn'/>"<c:if test="${nav == 'learn'}"> aria-current="page"</c:if>><pw:icon name="map"/>Learn</a>
       <a href="<c:url value='/app/practice'/>"<c:if test="${nav == 'practice'}"> aria-current="page"</c:if>><pw:icon name="target"/>Practice</a>
+      <a href="<c:url value='/app/assessments'/>"<c:if test="${nav == 'assessments'}"> aria-current="page"</c:if>><pw:icon name="clipboard-check"/>Assessments</a>
       <a href="<c:url value='/app/progress'/>"<c:if test="${nav == 'progress'}"> aria-current="page"</c:if>><pw:icon name="activity"/>Progress</a>
       <c:if test="${user.teacher or user.admin}">
         <div class="nav-section">Teach</div>
@@ -24,6 +25,7 @@
         <div class="nav-section">Platform</div>
         <a href="<c:url value='/admin'/>"<c:if test="${nav == 'admin'}"> aria-current="page"</c:if>><pw:icon name="shield"/>Overview</a>
         <a href="<c:url value='/admin/content'/>"<c:if test="${nav == 'admin-content'}"> aria-current="page"</c:if>><pw:icon name="book-open"/>Content</a>
+        <a href="<c:url value='/admin/assessments'/>"<c:if test="${nav == 'admin-assessments'}"> aria-current="page"</c:if>><pw:icon name="chart-column"/>Item analysis</a>
       </c:if>
       <div class="nav-section">You</div>
       <a href="<c:url value='/app/settings'/>"<c:if test="${nav == 'settings'}"> aria-current="page"</c:if>><pw:icon name="settings"/>Settings</a>

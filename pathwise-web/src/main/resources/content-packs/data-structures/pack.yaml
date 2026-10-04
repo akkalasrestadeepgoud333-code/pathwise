@@ -1,7 +1,7 @@
 # Data Structures content pack.
 # Keys are stable identifiers: renaming a key creates a new topic/skill/module. Change titles freely.
 key: data-structures
-version: 2
+version: 3
 title: Data Structures
 
 catalog:
@@ -196,3 +196,45 @@ questions:
   - bst.yaml
   - heaps-avl.yaml
   - graphs-hashing.yaml
+  - assessment-items.yaml
+
+# Official assessments. Results are kept separate from practice; graded answers count as official evidence.
+assessments:
+  - key: ds-diagnostic
+    kind: diagnostic
+    title: Data Structures starting-point check
+    instructions: >-
+      Twelve questions across the subject. There's no pass or fail: this helps Pathwise find a good
+      starting point for you. Answer what you can and skip what you don't know.
+    timeLimitMinutes: 20
+    maxAttempts: 1
+    aiPolicy: blocked
+    feedback: immediate
+    questions: [as-arr-access, arr-index-value, as-ll-length, ll-node-contents, sq-stack-top, sq-printer,
+                rec-factorial-value, tree-leaf, as-tree-height, bt-full, trav-pre-basic, bst-property]
+  - key: arrays-lists-quiz
+    kind: quiz
+    title: "Quiz: arrays and linked lists"
+    topic: linked-lists
+    instructions: Eight questions on arrays and linked lists. You have two attempts; your best score counts.
+    timeLimitMinutes: 15
+    maxAttempts: 2
+    shuffle: true
+    aiPolicy: blocked
+    feedback: immediate
+    questions: [as-arr-shift-count, arr-out-of-bounds, arr-complexity-match, as-ll-middle-insert, ll-insert-order,
+                ll-delete-after, ll-vs-array-choose, as-sq-sequence]
+  - key: trees-topic-test
+    kind: topic_test
+    title: "Topic test: trees, traversals and BSTs"
+    topic: bst
+    instructions: >-
+      Ten questions, including some harder ones. Work them out on paper first. Traversal answers are
+      comma-separated, like 8, 4, 2.
+    timeLimitMinutes: 25
+    maxAttempts: 2
+    shuffle: true
+    aiPolicy: blocked
+    feedback: immediate
+    questions: [as-bt-perfect-leaves, as-rec-trace, as-trav-pre, as-trav-post, as-trav-level, trav-which-order,
+                bst-search-miss, bst-insert-order, as-bst-delete-root, bst-balanced-speed]

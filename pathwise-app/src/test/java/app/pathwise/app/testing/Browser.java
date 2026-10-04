@@ -11,7 +11,9 @@ import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -59,6 +61,19 @@ public final class Browser {
         body.put("_csrf", csrf);
         body.putAll(form);
         return postRaw(path, body);
+    }
+
+    /** Posts repeated fields (e.g. several {@code item} values) with the current CSRF token. */
+    public HttpResponse<String> postPairs(String path, List<Map.Entry<String, String>> pairs) {
+        List<Map.Entry<String, String>> all = new ArrayList<>();
+        all.add(Map.entry("_csrf", csrf));
+        all.addAll(pairs);
+        String encoded = all.stream()
+                .map(e -> URLEncoder.encode(e.getKey(), StandardCharsets.UTF_8) + "=" + URLEncoder.encode(e.getValue(), StandardCharsets.UTF_8))
+                .collect(Collectors.joining("&"));
+        return send(HttpRequest.newBuilder(URI.create(base + path))
+                .header("Content-Type", "application/x-www-form-urlencoded")
+                .POST(HttpRequest.BodyPublishers.ofString(encoded)));
     }
 
     public HttpResponse<String> postRaw(String path, Map<String, String> form) {

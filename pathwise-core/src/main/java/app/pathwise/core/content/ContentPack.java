@@ -13,10 +13,29 @@ public record ContentPack(
         Catalog catalog,
         List<TopicDef> topics,
         List<ModuleDef> modules,
-        List<QuestionDef> questions) {
+        List<QuestionDef> questions,
+        List<AssessmentDef> assessments) {
 
     public ContentPack(String key, int version, Catalog catalog, List<TopicDef> topics, List<ModuleDef> modules) {
-        this(key, version, catalog, topics, modules, List.of());
+        this(key, version, catalog, topics, modules, List.of(), List.of());
+    }
+
+    public ContentPack(String key, int version, Catalog catalog, List<TopicDef> topics, List<ModuleDef> modules,
+                       List<QuestionDef> questions) {
+        this(key, version, catalog, topics, modules, questions, List.of());
+    }
+
+    public List<AssessmentDef> assessmentsOrEmpty() {
+        return assessments == null ? List.of() : assessments;
+    }
+
+    /** An official assessment built from bank questions. */
+    public record AssessmentDef(String key, String kind, String title, String instructions, String topic,
+                                Integer timeLimitMinutes, Integer maxAttempts, Boolean shuffle, String aiPolicy,
+                                String feedback, List<String> questions) {
+        public List<String> questionsOrEmpty() {
+            return questions == null ? List.of() : questions;
+        }
     }
 
     public List<QuestionDef> questionsOrEmpty() {
@@ -35,7 +54,12 @@ public record ContentPack(
      */
     public record QuestionDef(String key, String type, List<String> skills, Integer difficulty, String stem,
                               List<OptionDef> options, Double answer, Double tolerance, List<String> accepted,
-                              List<String> hints, String explanation) {
+                              List<String> hints, String explanation, Boolean practice) {
+        /** False for assessment-only items, which never appear in practice. */
+        public boolean practiceEnabled() {
+            return practice == null || practice;
+        }
+
         public List<String> skillsOrEmpty() {
             return skills == null ? List.of() : skills;
         }

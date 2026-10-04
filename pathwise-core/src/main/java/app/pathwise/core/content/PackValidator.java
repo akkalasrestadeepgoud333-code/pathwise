@@ -98,6 +98,10 @@ public final class PackValidator {
         Graphs.findCycle(byKey.keySet(), parentEdges).ifPresent(c -> errors.add("topic nesting cycle: " + String.join(" → ", c)));
 
         Set<String> questionKeys = validateQuestions(pack.questionsOrEmpty(), skillKeys, errors);
+        Set<String> assessmentOnly = new HashSet<>();
+        pack.questionsOrEmpty().stream().filter(q -> !q.practiceEnabled()).forEach(q -> assessmentOnly.add(q.key()));
+
+        validateAssessments(pack, byKey.keySet(), questionKeys, errors);
 
         Set<String> moduleKeys = new HashSet<>();
         for (ModuleDef m : pack.modules() == null ? List.<ModuleDef>of() : pack.modules()) {
@@ -141,6 +145,11 @@ public final class PackValidator {
                 }
                 text(s.title(), where + " section title", 1, 160, errors);
                 validateSection(where + " / " + sectionKey, kind.get(), s, skillKeys, questionKeys, errors);
+                if (kind.get() == SectionKind.CHECK) {
+                    // Module checks reveal answers, so they must never use assessment-only items.
+                    s.questionsOrEmpty().stream().filter(assessmentOnly::contains)
+                            .forEach(q -> errors.add(where + " / " + sectionKey + ": " + q + " is assessment-only (practice: false) and can't be used in a module check"));
+                }
             }
         }
         return errors;
@@ -154,6 +163,51 @@ public final class PackValidator {
         String kind = SectionKind.parse(s.kind()).map(SectionKind::dbValue).orElse("section").replace('_', '-');
         int n = kindCount.merge(kind, 1, Integer::sum);
         return n == 1 ? kind : kind + "-" + n;
+    }
+
+    private static final Set<String> ASSESSMENT_KINDS = Set.of("diagnostic", "quiz", "topic_test", "practice_test", "challenge");
+    private static final Set<String> AI_POLICIES = Set.of("blocked", "hints_only", "allowed");
+
+    private static void validateAssessments(ContentPack pack, Set<String> topics, Set<String> questions, List<String> errors) {
+        Set<String> keys = new HashSet<>();
+        for (ContentPack.AssessmentDef a : pack.assessmentsOrEmpty()) {
+            String where = "assessment " + a.key();
+            key(a.key(), "assessment key", errors);
+            if (!keys.add(a.key())) {
+                errors.add("duplicate assessment key " + a.key());
+            }
+            if (a.kind() == null || !ASSESSMENT_KINDS.contains(a.kind())) {
+                errors.add(where + ": kind must be one of " + ASSESSMENT_KINDS);
+            }
+            text(a.title(), where + " title", 2, 160, errors);
+            if (a.topic() != null && !topics.contains(a.topic())) {
+                errors.add(where + " refers to unknown topic " + a.topic());
+            }
+            if (a.timeLimitMinutes() != null && (a.timeLimitMinutes() < 1 || a.timeLimitMinutes() > 240)) {
+                errors.add(where + ": timeLimitMinutes must be 1-240");
+            }
+            if (a.maxAttempts() != null && (a.maxAttempts() < 1 || a.maxAttempts() > 20)) {
+                errors.add(where + ": maxAttempts must be 1-20");
+            }
+            if (a.aiPolicy() != null && !AI_POLICIES.contains(a.aiPolicy())) {
+                errors.add(where + ": aiPolicy must be one of " + AI_POLICIES);
+            }
+            if (a.feedback() != null && !"immediate".equals(a.feedback()) && !"manual_release".equals(a.feedback())) {
+                errors.add(where + ": packs support feedback immediate or manual_release (after_due needs a due date, set by a teacher)");
+            }
+            List<String> qs = a.questionsOrEmpty();
+            if (qs.isEmpty() || qs.size() > 50) {
+                errors.add(where + " needs 1-50 questions");
+            }
+            if (new HashSet<>(qs).size() != qs.size()) {
+                errors.add(where + " lists a question twice");
+            }
+            for (String q : qs) {
+                if (!questions.contains(q)) {
+                    errors.add(where + " uses unknown question " + q);
+                }
+            }
+        }
     }
 
     private static final Set<String> QUESTION_TYPES = Set.of("single_choice", "multi_choice", "numeric", "short_text");

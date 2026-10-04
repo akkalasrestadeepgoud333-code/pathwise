@@ -28,7 +28,8 @@ public final class ContentPackLoader {
 
     /** {@code content-packs/<key>/pack.yaml}: the pack minus its modules, plus the module file list. */
     public record PackFile(String key, int version, String title, ContentPack.Catalog catalog,
-                           List<ContentPack.TopicDef> topics, List<String> modules, List<String> questions) {}
+                           List<ContentPack.TopicDef> topics, List<String> modules, List<String> questions,
+                           List<ContentPack.AssessmentDef> assessments) {}
 
     /** {@code content-packs/<key>/questions/<file>.yaml}. */
     public record QuestionFile(List<ContentPack.QuestionDef> questions) {}
@@ -94,7 +95,8 @@ public final class ContentPackLoader {
                 questions.addAll(qf.questions());
             }
         }
-        ContentPack pack = new ContentPack(file.key(), file.version(), file.catalog(), file.topics(), modules, questions);
+        ContentPack pack = new ContentPack(file.key(), file.version(), file.catalog(), file.topics(), modules, questions,
+                file.assessments() == null ? List.of() : file.assessments());
         return new Loaded(pack, file.title(), HexFormat.of().formatHex(digest.digest()));
     }
 

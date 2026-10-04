@@ -39,6 +39,10 @@
           <div class="grow"><div class="title"><a href="<c:url value='/app/practice'/>">Quick practice</a></div><div class="meta">Five questions at your level</div></div>
         </li>
         <li class="list-item">
+          <span class="list-icon"><pw:icon name="clipboard-check"/></span>
+          <div class="grow"><div class="title"><a href="<c:url value='${assessmentPrompt.href}'/>"><c:out value="${assessmentPrompt.title}"/></a></div><div class="meta"><c:out value="${assessmentPrompt.meta}"/></div></div>
+        </li>
+        <li class="list-item">
           <span class="list-icon"><pw:icon name="activity"/></span>
           <div class="grow"><div class="title"><a href="<c:url value='/app/progress'/>">Your progress</a></div><div class="meta">How each skill is going</div></div>
         </li>

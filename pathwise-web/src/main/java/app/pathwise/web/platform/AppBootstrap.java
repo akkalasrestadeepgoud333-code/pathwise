@@ -3,7 +3,10 @@ package app.pathwise.web.platform;
 import app.pathwise.data.Database;
 import app.pathwise.data.identity.SessionDao;
 import app.pathwise.data.platform.OutboxDao;
+import app.pathwise.web.admin.AdminAssessmentController;
 import app.pathwise.web.admin.AdminContentController;
+import app.pathwise.web.assessment.AssessmentApiServlet;
+import app.pathwise.web.assessment.AssessmentController;
 import app.pathwise.web.admin.AdminController;
 import app.pathwise.web.identity.AuthApiServlet;
 import app.pathwise.web.identity.AuthController;
@@ -84,7 +87,10 @@ public class AppBootstrap implements ServletContextListener {
         servlet(sc, "progress", new ProgressController(), "/app/progress");
         servlet(sc, "apiLearner", new LearnerApiServlet(), "/api/v1/me/recommendations", "/api/v1/me/mastery",
                 "/api/v1/recommendations/*", "/api/v1/practice", "/api/v1/practice/*");
+        servlet(sc, "assessments", new AssessmentController(), "/app/assessments", "/app/assessments/*");
+        servlet(sc, "apiAssessments", new AssessmentApiServlet(), "/api/v1/assessments", "/api/v1/assessments/*");
         servlet(sc, "admin", new AdminController(), "/admin");
+        servlet(sc, "adminAssessments", new AdminAssessmentController(), "/admin/assessments", "/admin/assessments/*");
         servlet(sc, "adminContent", new AdminContentController(), "/admin/content");
         servlet(sc, "apiLearn", new LearnApiServlet(), "/api/v1/subjects", "/api/v1/subjects/*", "/api/v1/modules/*");
         servlet(sc, "apiAuth", new AuthApiServlet(), "/api/v1/auth/*");
@@ -103,6 +109,12 @@ public class AppBootstrap implements ServletContextListener {
             return t;
         });
         scheduler.scheduleWithFixedDelay(guard("outbox", () -> app.outboxWorker().drain()), 1, 1, TimeUnit.SECONDS);
+        scheduler.scheduleWithFixedDelay(guard("assessment-deadlines", () -> {
+            int n = app.assessments().sweepOverdue();
+            if (n > 0) {
+                log.info("Auto-submitted {} assessment attempts whose time ran out", n);
+            }
+        }), 30, 60, TimeUnit.SECONDS);
         scheduler.scheduleWithFixedDelay(guard("housekeeping", () -> {
             Instant cutoff = app.clock().instant().minus(Duration.ofDays(30));
             int sessions = app.database().tx().call(c -> new SessionDao().purge(c, cutoff));

@@ -118,6 +118,41 @@ class PackValidatorTest {
         assertThat(Visuals.validate(Map.of("type", "rocket"))).isNotEmpty();
     }
 
+    private static QuestionDef numeric(String key, String skill, Boolean practice) {
+        return new QuestionDef(key, "numeric", List.of(skill), 2, "How many?", null, 4.0, null, null, null, null, practice);
+    }
+
+    private static AssessmentDef assessment(String key, String kind, String topic, String ai, String feedback, List<String> qs) {
+        return new AssessmentDef(key, kind, "Assessment " + key, null, topic, 20, 1, false, ai, feedback, qs);
+    }
+
+    @Test
+    void validatesAssessmentsAndKeepsAssessmentOnlyItemsOutOfChecks() {
+        List<QuestionDef> questions = List.of(numeric("q-open", "tt-skill", null), numeric("q-secret", "tt-skill", false));
+        SectionDef check = new SectionDef(null, "check", "Check", null, null, null, null, null, null, List.of("q-open", "q-secret"));
+        ContentPack ok = new ContentPack("ds-pack", 1, catalog(), List.of(topic("tt", null)),
+                List.of(module("mm", "tt", text("overview", "x"))), questions,
+                List.of(assessment("good-quiz", "quiz", "tt", "blocked", "immediate", List.of("q-open", "q-secret"))));
+        assertThat(PackValidator.validate(ok)).isEmpty();
+
+        ContentPack bad = new ContentPack("ds-pack", 1, catalog(), List.of(topic("tt", null)),
+                List.of(module("mm", "tt", text("overview", "x"), check)), questions,
+                List.of(assessment("bad-quiz", "exam", "nowhere", "sometimes", "after_due", List.of("q-open", "q-open", "ghost")),
+                        assessment("empty-quiz", "quiz", null, "blocked", "immediate", List.of()),
+                        assessment("good-quiz", "quiz", null, "blocked", "immediate", List.of("q-open")),
+                        assessment("good-quiz", "quiz", null, "blocked", "immediate", List.of("q-open"))));
+        List<String> errors = PackValidator.validate(bad);
+        assertThat(errors).anyMatch(e -> e.contains("q-secret is assessment-only"));
+        assertThat(errors).anyMatch(e -> e.contains("kind must be one of"));
+        assertThat(errors).anyMatch(e -> e.contains("unknown topic nowhere"));
+        assertThat(errors).anyMatch(e -> e.contains("aiPolicy must be one of"));
+        assertThat(errors).anyMatch(e -> e.contains("after_due needs a due date"));
+        assertThat(errors).anyMatch(e -> e.contains("lists a question twice"));
+        assertThat(errors).anyMatch(e -> e.contains("unknown question ghost"));
+        assertThat(errors).anyMatch(e -> e.contains("needs 1-50 questions"));
+        assertThat(errors).anyMatch(e -> e.contains("duplicate assessment key good-quiz"));
+    }
+
     @Test
     void coverageIsNotMastery() {
         assertThat(Coverage.of(0, 0, 0)).isEqualTo(Coverage.NO_CONTENT);

@@ -68,6 +68,21 @@ Last updated: **2026-10-04** (end of M2, Evidence → learner model → engine).
 | Mastery on the Learning Map and topic pages, with per-skill Practise buttons | map, topic | `LearningFlowTest`, screenshots |
 | Learner API: recommendations + actions, practice start/view/answer/hint, mastery | `/api/v1/me/*`, `/api/v1/practice*`, `/api/v1/recommendations/*` | `PersonalisationFlowTest` |
 
+## Implemented (M3)
+
+| Feature | Where | Evidence |
+|---|---|---|
+| Official assessments from content packs: diagnostic, quiz, topic test (kinds practice_test and challenge are also supported); time limit, attempt limit, item shuffling per attempt, AI policy, feedback policy | `assessments`, `assessment_items`, `pack.yaml assessments:` | `PackValidatorTest`, `ContentTest`, `AssessmentFlowTest` |
+| Assessment-only questions (`practice: false`): never served by practice, and module checks cannot use them | `questions.practice_enabled`, `PackValidator` | `AssessmentFlowTest`, `PackValidatorTest` |
+| Rules page, then an attempt page with all questions, autosave every 30 s, a countdown, a leave warning and confirmation for unanswered questions; works without JavaScript (Save and Submit buttons) | `/app/assessments/*`, `attempt.js` | `AssessmentFlowTest`, screenshots |
+| Server-kept time: a deadline is stored at start (the earlier of the time limit and the due date). Saves are refused after deadline + 30 s grace. Overdue attempts are submitted on next open and by a 60-second background sweep | `AssessmentRules`, `AssessmentService.sweepOverdue` | `AssessmentCoreTest`, `AssessmentFlowTest` |
+| Grading exactly once, in a transaction that locks the attempt; each response stores a snapshot of what was graded | `AssessmentService.grade`, `attempt_responses.question_snapshot` | `AssessmentFlowTest` |
+| Official evidence (weight 1.0, `is_official` enforced by a DB check to mean source = assessment); updates the learner model and lets skills reach Mastered; the diagnostic seeds the model | `EvidenceDao.insertForResponse` | `AssessmentFlowTest` |
+| Result page: score, per-skill breakdown with the new level, feedback per question (only when the feedback policy allows), the next suggestion | `/app/assessments/result/*` | `AssessmentFlowTest`, screenshots |
+| Item analysis for admins: facility, upper/lower 27% discrimination (from 4 or more attempts), option counts, plain-language flags, a small-sample caution | `/admin/assessments/*`, `ItemAnalysis` | `AssessmentCoreTest`, `AssessmentFlowTest` |
+| Assessment API (same rules) | `/api/v1/assessments*` | `AssessmentFlowTest` |
+| Today points new students to the diagnostic, or to resume an attempt in progress | `/app/today` | `AssessmentFlowTest` |
+
 ## Partially implemented
 
 | Feature | Works | Missing |
@@ -75,11 +90,14 @@ Last updated: **2026-10-04** (end of M2, Evidence → learner model → engine).
 | Learner profile | stored per user; the theme preference is used | timezone editing, goals and modalities UI (M2) |
 | "Ask" recommendation slot | not generated | needs the AI tutor (M8) and doubts (M6) |
 | Teacher area | access control, empty state | rooms (M5) |
+| Assessment AI policy | stored and shown to students | enforced when the AI tutor exists (M8). Pathwise cannot control outside tools, and says so |
+| Assessment feedback policies | `immediate` and `manual_release` (score only until released) | the teacher release button and `after_due` (needs due dates from rooms, M5) |
+| SQL-query questions | — | deferred until a DBMS pack exists; the grader has no SQL type yet |
 | Security tooling | headers, CSRF, rate limits, audit | OWASP Dependency-Check run (planned for M11) |
 
 ## Proposed (designed in the blueprint, not built)
 
-Assessments (official results, M3) · games framework and games (M4) · rooms, assignments and teacher analytics (M5) · doubts, community, moderation and knowledge base (M6) · XP, streaks, badges and notifications (M7) · AI tutor with Guided Help fallback (M8) · Android app (M9) · projects, live doubt sessions and full admin console (M10).
+Teacher-made assessments (M5) · games framework and games (M4) · rooms, assignments and teacher analytics (M5) · doubts, community, moderation and knowledge base (M6) · XP, streaks, badges and notifications (M7) · AI tutor with Guided Help fallback (M8) · Android app (M9) · projects, live doubt sessions and full admin console (M10).
 
 ## Future (out of scope for v1)
 
@@ -96,5 +114,5 @@ Knowledge tracing / ML models · embeddings-based retrieval · server-side code 
 - **Flashcards** use native `<details>` (accessible, works without JS); self-rating evidence arrives with M2.
 - **Activities table** (blueprint §10.4) is not created yet: practice and checks are generated attempts. The table arrives with games (M4).
 - **Recommendations** are regenerated on demand when evidence or progress is newer than the last run (or after 6 hours), not via the outbox. This is simpler and was fast enough at this scale.
-- **Questions** are updated in place on re-import. Immutable question versioning arrives with official assessments (M3).
+- **Questions** are updated in place on re-import. Instead of immutable question versions, every graded assessment response stores a **snapshot** of the question as graded (stem, options, key, explanation), so later edits never change past results. An assessment's item list is only replaced on re-import while it has no attempts. (Recorded 2026-10-04, M3.)
 - **Admin statistics** use a read-only reporting DAO (`PlatformStatsDao`) that aggregates across modules. Writes still go only through each module's own DAO.
