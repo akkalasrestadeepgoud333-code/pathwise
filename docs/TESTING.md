@@ -88,4 +88,25 @@ Manual: pack v4 imported (4 games). All three games were played in headless Edge
 - the Node parity runner used the spec reporter, so the check had been looking for the wrong summary line
 - one test was rejected by CSRF before it reached the ownership check, so it now loads a page first
 
+### 2026-10-04: M5 part 1 Rooms
+
+Command: `.\mvnw.cmd install`. Result: **196 tests, 196 passed, 0 failed, 0 skipped**.
+
+New tests:
+- **RoomPolicyTest:** the whole permission matrix, including each co-teacher toggle on its own, archived rooms, pending and removed members, and join codes.
+- **AssessmentCoreTest:** manual release.
+- **RoomFlowTest:** six end-to-end tests:
+  - approval, then the curriculum each student sees (dated units hidden), the next step moving after a submission, and analytics and CSV showing it
+  - strangers (404), students on teacher pages (403), and a co-teacher invite: a student can't use it, it's single-use, and it's shown once
+  - co-teacher permissions turned off, and a removed student unable to rejoin by code
+  - invite-only rooms and links that aren't used up by members already in the room
+  - a teacher-made assessment: a draft hidden from students, an outsider blocked, results held then released, item analysis, and archiving and restoring
+  - class statistics hidden until 5 students
+  - the rooms API
+
+Manual: headless Edge screenshots of the teacher home, cockpit (with requests), curriculum (desktop and mobile), people, assessment builder, analytics and the student room (desktop and mobile). No console or CSP errors. Defects found and fixed:
+- **Form posts were decoded as ISO-8859-1**, so non-ASCII text was garbled. A room named "DSA – Section A" showed it. The fix is UTF-8 request and response encoding in `web.xml`, and RoomFlowTest now covers it.
+- Table row headers were rendered as uppercase column headings.
+- Curriculum titles were truncated on phones.
+
 Not yet done: accessibility audit with axe-core, Android tests, load tests and the dependency vulnerability scan. All of these are planned (see the blueprint, §35).

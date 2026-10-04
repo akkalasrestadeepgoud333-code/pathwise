@@ -9,8 +9,13 @@ public final class AssessmentRules {
 
     public enum FeedbackPolicy { IMMEDIATE, AFTER_DUE, MANUAL_RELEASE }
 
+    /** {@code releasedAt}: when a teacher released results (only used by {@link FeedbackPolicy#MANUAL_RELEASE}). */
     public record Settings(Integer timeLimitSec, int maxAttempts, Instant availableFrom, Instant dueAt,
-                           FeedbackPolicy feedback) {}
+                           FeedbackPolicy feedback, Instant releasedAt) {
+        public Settings(Integer timeLimitSec, int maxAttempts, Instant availableFrom, Instant dueAt, FeedbackPolicy feedback) {
+            this(timeLimitSec, maxAttempts, availableFrom, dueAt, feedback, null);
+        }
+    }
 
     public enum StartDecision { OK, NOT_YET_AVAILABLE, CLOSED, NO_ATTEMPTS_LEFT, ALREADY_IN_PROGRESS }
 
@@ -62,7 +67,7 @@ public final class AssessmentRules {
         return switch (s.feedback()) {
             case IMMEDIATE -> true;
             case AFTER_DUE -> s.dueAt() != null && !now.isBefore(s.dueAt());
-            case MANUAL_RELEASE -> false;
+            case MANUAL_RELEASE -> s.releasedAt() != null && !now.isBefore(s.releasedAt());
         };
     }
 }

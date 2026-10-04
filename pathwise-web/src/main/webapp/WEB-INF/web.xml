@@ -6,6 +6,11 @@
 
   <display-name>Pathwise</display-name>
 
+  <!-- Form posts are UTF-8 (pages are served as UTF-8 and forms send in the page's encoding).
+       Without this the container decodes form fields as ISO-8859-1 and non-ASCII text is garbled. -->
+  <request-character-encoding>UTF-8</request-character-encoding>
+  <response-character-encoding>UTF-8</response-character-encoding>
+
   <!-- Servlets and filters are registered explicitly by AppBootstrap (no annotation scanning). -->
   <listener>
     <listener-class>app.pathwise.web.platform.AppBootstrap</listener-class>

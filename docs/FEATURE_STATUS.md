@@ -97,13 +97,28 @@ Last updated: **2026-10-04** (end of M2, Evidence → learner model → engine).
 | Games gallery and intros, linked from Practice | `/app/games*` | `GameFlowTest` |
 | Games API (start, puzzle, finish, result) for the Android WebView | `/api/v1/games*` | `GameFlowTest` |
 
+## Implemented (M5, part 1: rooms)
+
+| Feature | Where | Evidence |
+|---|---|---|
+| Rooms with an owner membership, 8-character join codes (no look-alike characters; typed in any case, with or without a dash), new code on demand | `/teach`, `rooms`, `RoomCodes` | `RoomPolicyTest`, `RoomFlowTest` |
+| Joining: open (straight in), approval (teacher approves or declines), or invite-only; invite links store only a hash, expire, have a use limit, can be turned off, and are shown once | `/app/rooms`, `/join/<token>` | `RoomFlowTest` |
+| Room permission matrix (owner / co-teacher with five toggles / student; archived rooms read-only), tested cell by cell; non-members get 404, students on teacher pages get 403 | `RoomPolicy` | `RoomPolicyTest`, `RoomFlowTest` (cross-room attempts) |
+| Curriculum builder: units with opening dates, items (modules, games, platform assessments, the room's own assessments), required/optional, reorder with buttons (keyboard-friendly), only offered items can be added | `/teach/rooms/<id>/curriculum` | `RoomFlowTest`, screenshots |
+| Student room page: announcements, open units and items with my status, my next step (first unfinished required item), class average only if enabled and 5+ students | `/app/rooms/<id>` | `RoomFlowTest` |
+| Teacher-made assessments from the question bank (test-only items marked), drafts, publishing, due dates, feedback: on submit / after the due date / when released; visible only to the room's active students | `/teach/rooms/<id>/assess` | `RoomFlowTest` |
+| Room cockpit: join requests, students who may need attention (missed deadline, inactive with a deadline near, 2+ room skills needing practice), deadlines with submission counts, announcements | `/teach/rooms/<id>` | `RoomFlowTest`, screenshots |
+| Teacher analytics v1: class totals, room-skill distribution, assessment results (best attempt, score bands), per-student table and CSV export (individual data needs the analytics permission), practice and play shown apart from grades | `/teach/rooms/<id>/analytics` | `RoomFlowTest` |
+| Rooms API for students (list, join by code, room view) | `/api/v1/rooms*` | `RoomFlowTest` |
+
 ## Partially implemented
 
 | Feature | Works | Missing |
 |---|---|---|
 | Learner profile | stored per user; the theme preference is used | timezone editing, goals and modalities UI (M2) |
 | "Ask" recommendation slot | not generated | needs the AI tutor (M8) and doubts (M6) |
-| Teacher area | access control, empty state | rooms (M5) |
+| Rooms (rest of the blueprint) | see the M5 table | QR codes for join links; item gates (soft/hard prerequisites); duplicating a room; transferring ownership; the "3+ failed attempts on one item" attention rule; teachers writing their own questions and modules (room assessments use the bank) |
+| Room-aware next steps and assignments | — | M5 part 2: the recommendation engine in room context, individual assignments with grading |
 | Assessment AI policy | stored and shown to students | enforced when the AI tutor exists (M8). Pathwise cannot control outside tools, and says so |
 | Assessment feedback policies | `immediate` and `manual_release` (score only until released) | the teacher release button and `after_due` (needs due dates from rooms, M5) |
 | Games in recommendations | games appear in the gallery, on Practice, and in Progress through their evidence | the engine does not yet suggest a game in the Explore slot |
@@ -114,7 +129,7 @@ Last updated: **2026-10-04** (end of M2, Evidence → learner model → engine).
 
 ## Proposed (designed in the blueprint, not built)
 
-Teacher-made assessments (M5) · more games: Sequence Sort, True/False Sprint, Query Quest (P1) · rooms, assignments and teacher analytics (M5) · doubts, community, moderation and knowledge base (M6) · XP, streaks, badges and notifications (M7) · AI tutor with Guided Help fallback (M8) · Android app (M9) · projects, live doubt sessions and full admin console (M10).
+more games: Sequence Sort, True/False Sprint, Query Quest (P1) · rooms, assignments and teacher analytics (M5) · doubts, community, moderation and knowledge base (M6) · XP, streaks, badges and notifications (M7) · AI tutor with Guided Help fallback (M8) · Android app (M9) · projects, live doubt sessions and full admin console (M10).
 
 ## Future (out of scope for v1)
 
@@ -139,3 +154,7 @@ Knowledge tracing / ML models · embeddings-based retrieval · server-side code 
   - **Game configs** are typed Java records checked by `PackValidator`, the same approach as the other pack payloads, instead of JSON Schema files.
   - **Scores never depend on speed**, so there are no lives or combos. Relaxed mode hides the clock and score. The daily cap is a rolling 24 hours.
   - **The activities table** holds only games for now. Practice sets are still generated attempts.
+- **Rooms (recorded 2026-10-04, M5):**
+  - **Platform admins have no special access to a room's people or data.** Rooms are private to their members; admin oversight of rooms arrives with moderation (M6/M10).
+  - **Room assessment keys** start with `rm-`, a prefix packs may not use, so one lookup by key serves both kinds.
+  - **Item gates** (`soft_prereq`, `hard_lock`) are not stored yet; units and items open by date only.

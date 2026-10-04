@@ -47,6 +47,8 @@ class AssessmentCoreTest {
         assertThat(AssessmentRules.feedbackVisible(afterDue, NOW)).isFalse();
         assertThat(AssessmentRules.feedbackVisible(afterDue, NOW.plus(Duration.ofDays(2)))).isTrue();
         assertThat(AssessmentRules.feedbackVisible(new Settings(null, 1, null, null, FeedbackPolicy.MANUAL_RELEASE), NOW)).isFalse();
+        assertThat(AssessmentRules.feedbackVisible(new Settings(null, 1, null, null, FeedbackPolicy.MANUAL_RELEASE, NOW.minusSeconds(1)), NOW)).isTrue();
+        assertThat(AssessmentRules.feedbackVisible(new Settings(null, 1, null, null, FeedbackPolicy.MANUAL_RELEASE, NOW.plusSeconds(60)), NOW)).isFalse();
         assertThat(AssessmentRules.isLate(afterDue, NOW.plus(Duration.ofDays(1)).plusSeconds(60))).isTrue();
     }
 

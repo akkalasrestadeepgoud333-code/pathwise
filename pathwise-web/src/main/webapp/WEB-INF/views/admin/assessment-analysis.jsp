@@ -2,7 +2,7 @@
 <c:set var="an" value="${analysis}"/>
 <pw:shell title="${an.title}: analysis">
   <nav class="breadcrumbs" aria-label="Breadcrumb">
-    <a href="<c:url value='/admin/assessments'/>">Assessments</a><pw:icon name="chevron-right"/>
+    <a href="<c:url value='${empty backHref ? "/admin/assessments" : backHref}'/>"><c:out value="${empty backLabel ? 'Assessments' : backLabel}"/></a><pw:icon name="chevron-right"/>
     <span aria-current="page"><c:out value="${an.title}"/></span>
   </nav>
   <div class="page-header">

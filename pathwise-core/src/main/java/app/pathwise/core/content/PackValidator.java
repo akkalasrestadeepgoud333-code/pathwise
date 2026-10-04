@@ -234,6 +234,9 @@ public final class PackValidator {
             if (!keys.add(a.key())) {
                 errors.add("duplicate assessment key " + a.key());
             }
+            if (a.key() != null && a.key().startsWith("rm-")) {
+                errors.add(where + ": keys starting with rm- are reserved for room assessments");
+            }
             if (a.kind() == null || !ASSESSMENT_KINDS.contains(a.kind())) {
                 errors.add(where + ": kind must be one of " + ASSESSMENT_KINDS);
             }

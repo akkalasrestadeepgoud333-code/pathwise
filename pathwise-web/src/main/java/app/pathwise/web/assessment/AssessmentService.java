@@ -13,6 +13,7 @@ import app.pathwise.core.security.PlatformAction;
 import app.pathwise.core.security.PlatformPolicy;
 import app.pathwise.data.Tx;
 import app.pathwise.data.assessment.AssessmentDao;
+import app.pathwise.data.rooms.RoomDao;
 import app.pathwise.data.assessment.AssessmentDao.AssessmentRow;
 import app.pathwise.data.assessment.AssessmentDao.AttemptRow;
 import app.pathwise.data.assessment.AssessmentDao.ItemRow;
@@ -72,6 +73,7 @@ public final class AssessmentService {
     private final EventBus events;
     private final Clock clock;
     private final AssessmentDao dao = new AssessmentDao();
+    private final RoomDao rooms = new RoomDao();
     private final EvidenceDao evidence = new EvidenceDao();
     private final SecureRandom random = new SecureRandom();
 
@@ -136,15 +138,36 @@ public final class AssessmentService {
             for (AssessmentRow a : dao.published(c)) {
                 out.add(card(c, a, actor, subjects.getOrDefault(a.subjectId(), "")));
             }
+            // Teacher-made assessments from the rooms this student is in.
+            for (RoomDao.MyRoom r : rooms.roomsOf(c, actor.userId())) {
+                if ("student".equals(r.role()) && "active".equals(r.status()) && r.archivedAt() == null) {
+                    for (AssessmentRow a : dao.ofRoom(c, r.id())) {
+                        if ("published".equals(a.status())) {
+                            out.add(card(c, a, actor, r.name()));
+                        }
+                    }
+                }
+            }
             return out;
         });
+    }
+
+    /** Room assessments are only for the room's active students, and only while the room is not archived. */
+    private boolean mayTake(java.sql.Connection c, AssessmentRow a, UUID userId) throws java.sql.SQLException {
+        if (a.ownerRoomId() == null) {
+            return true;
+        }
+        Optional<RoomDao.MemberRow> m = rooms.membership(c, a.ownerRoomId(), userId);
+        Optional<RoomDao.RoomRow> room = rooms.find(c, a.ownerRoomId());
+        return m.isPresent() && "student".equals(m.get().role()) && "active".equals(m.get().status())
+                && room.isPresent() && room.get().archivedAt() == null;
     }
 
     public Optional<Rules> rules(Actor actor, String key) {
         requireUser(actor);
         return tx.read(c -> {
             Optional<AssessmentRow> a = dao.findByKey(c, key);
-            if (a.isEmpty()) {
+            if (a.isEmpty() || !mayTake(c, a.get(), actor.userId())) {
                 return Optional.<Rules>empty();
             }
             String subject = catalog.subjects().stream().filter(s -> s.id().equals(a.get().subjectId()))
@@ -196,6 +219,9 @@ public final class AssessmentService {
         return tx.call(c -> {
             AssessmentRow a = dao.findByKey(c, key).filter(x -> "published".equals(x.status()))
                     .orElseThrow(() -> new RuleException("That assessment isn't available."));
+            if (!mayTake(c, a, actor.userId())) {
+                throw new RuleException("That assessment isn't available.");
+            }
             List<AttemptRow> attempts = dao.attempts(c, a.id(), actor.userId());
             Optional<AttemptRow> open = attempts.stream().filter(t -> "in_progress".equals(t.status())).findFirst();
             if (open.isPresent()) {
@@ -416,8 +442,20 @@ public final class AssessmentService {
 
     public Optional<Analysis> analysis(Actor actor, String key) {
         PlatformPolicy.require(actor, PlatformAction.USE_ADMIN_AREA);
+        return analysisOf(c -> dao.findByKey(c, key).filter(a -> a.ownerRoomId() == null));
+    }
+
+    /**
+     * Item analysis of one of a room's assessments. The caller (RoomService) must already have checked the
+     * teacher's room permission; this only checks that the assessment belongs to the room.
+     */
+    public Optional<Analysis> roomAnalysis(UUID roomId, UUID assessmentId) {
+        return analysisOf(c -> dao.findById(c, assessmentId).filter(a -> roomId.equals(a.ownerRoomId())));
+    }
+
+    private Optional<Analysis> analysisOf(app.pathwise.data.Tx.SqlFunction<Optional<AssessmentRow>> find) {
         return tx.read(c -> {
-            Optional<AssessmentRow> a = dao.findByKey(c, key);
+            Optional<AssessmentRow> a = find.apply(c);
             if (a.isEmpty()) {
                 return Optional.<Analysis>empty();
             }
@@ -465,7 +503,7 @@ public final class AssessmentService {
 
     static Settings settings(AssessmentRow a) {
         return new Settings(a.timeLimitSec(), a.maxAttempts(), a.availableFrom(), a.dueAt(),
-                FeedbackPolicy.valueOf(a.feedbackPolicy().toUpperCase(Locale.ROOT)));
+                FeedbackPolicy.valueOf(a.feedbackPolicy().toUpperCase(Locale.ROOT)), a.resultsReleasedAt());
     }
 
     private Map<UUID, QuestionRow> questionsFor(List<ItemRow> items) {

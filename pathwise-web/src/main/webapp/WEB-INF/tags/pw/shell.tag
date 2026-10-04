@@ -17,6 +17,7 @@
       <a href="<c:url value='/app/practice'/>"<c:if test="${nav == 'practice'}"> aria-current="page"</c:if>><pw:icon name="target"/>Practice</a>
       <a href="<c:url value='/app/assessments'/>"<c:if test="${nav == 'assessments'}"> aria-current="page"</c:if>><pw:icon name="clipboard-check"/>Assessments</a>
       <a href="<c:url value='/app/progress'/>"<c:if test="${nav == 'progress'}"> aria-current="page"</c:if>><pw:icon name="activity"/>Progress</a>
+      <a href="<c:url value='/app/rooms'/>"<c:if test="${nav == 'rooms'}"> aria-current="page"</c:if>><pw:icon name="users"/>Rooms</a>
       <c:if test="${user.teacher or user.admin}">
         <div class="nav-section">Teach</div>
         <a href="<c:url value='/teach'/>"<c:if test="${nav == 'teach'}"> aria-current="page"</c:if>><pw:icon name="school"/>Teaching</a>
