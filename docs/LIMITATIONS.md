@@ -21,7 +21,8 @@ These are the things Pathwise v1 does not do, or does only partly. The item-by-i
 
 8. **The AI tutor is optional, local and small.** With Ollama and a ~3B model it can be wrong, and it is labelled as such.
    - Without Ollama, the tutor is Guided Help: Pathwise's own content, not AI.
-   - The AI path was tested only against a stub server, never a real model.
+   - Automated tests use a stub model. A real model (`llama3.2:3b` on this machine's GPU) was checked by hand once, on 2026-10-05. In that check, one of two answers contained a factual error: it got an inorder traversal wrong. That is why every AI reply is labelled "may be wrong, check with your notes".
+   - The first load of the model after a restart can take a couple of minutes. Pathwise loads it in the background when it starts, and keeps it in memory for 30 minutes between questions. Questions asked during the load get Guided Help.
    - The Android app has no tutor screen.
 
 ## Community and live features

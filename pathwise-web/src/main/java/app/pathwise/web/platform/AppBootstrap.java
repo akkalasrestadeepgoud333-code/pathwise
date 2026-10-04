@@ -1,5 +1,6 @@
 package app.pathwise.web.platform;
 
+import app.pathwise.web.ai.AiProvider;
 import app.pathwise.data.Database;
 import app.pathwise.data.identity.SessionDao;
 import app.pathwise.data.platform.OutboxDao;
@@ -132,6 +133,12 @@ public class AppBootstrap implements ServletContextListener {
     }
 
     private void startBackgroundWork(AppContext app) {
+        if (app.config().ai().enabled()) {
+            // Its own thread: the first load of a model can take minutes and must not hold up the outbox.
+            Thread warm = new Thread(() -> AiProvider.from(app.config().ai()).warmUp(), "pathwise-ai-warmup");
+            warm.setDaemon(true);
+            warm.start();
+        }
         scheduler = Executors.newSingleThreadScheduledExecutor(r -> {
             Thread t = new Thread(r, "pathwise-worker");
             t.setDaemon(true);

@@ -327,4 +327,25 @@ Not verified in a real browser: the upload form and the PDF viewer, which were e
 - **Verified** by reproducing against the running server with a throwaway account before and after the fix (404, then 303 and a 200 `application/pdf` download). The throwaway data was then removed.
 - **Results:** web 38 and `MaterialsAndAdminPowersFlowTest` 2/2 pass.
 
+### 2026-10-05: The AI tutor with a real local model
+
+Setup:
+- Installed Ollama 0.35.1 with `winget` and pulled `llama3.2:3b` (2.0 GB).
+- Set `pathwise.ai.provider=ollama` in the local config.
+- Machine: i7-13620H, 16 GB RAM, RTX 4050 Laptop GPU. The model ran 100% on the GPU.
+
+Measurements, direct against Ollama:
+- The very first load took longer than 2 minutes (a one-time GPU warm-up).
+- Once warm, generation ran at about 46 tokens/s, so a two-sentence answer took 1.2–1.5 s.
+
+Code change: Pathwise now loads the model in the background at start-up, on its own thread so the outbox isn't held up. Every request asks Ollama to keep the model loaded for 30 minutes. `ollama ps` after a restart showed the model loaded with 29 minutes left, before any question was asked. Web tests: 38 passed, including `AiProviderTest`.
+
+Live end-to-end check against the running server, with a throwaway student who was removed afterwards:
+- The tutor page showed "AI Tutor · local model (llama3.2:3b)".
+- A resource question and a follow-up got AI replies (stored with `source = ai`) in about 4.7 s and 2.6 s.
+- The first reply was correct and included an example tree.
+- **The follow-up was wrong.** It gave inorder as `2, 1, 3, 4, 6, 5`; the correct order is `1, 2, 3, 4, 6, 5`. Both replies carried the label "may be wrong, check with your notes".
+
+Not checked with the real model: hint mode and the answer-leak guard (covered only by the stub tests), and quality over many questions.
+
 Not yet done: accessibility audit with axe-core, Android UI tests, load tests and the dependency vulnerability scan. All of these are planned (see the blueprint, §35).

@@ -30,6 +30,10 @@ public interface AiProvider {
 
     boolean enabled();
 
+    /** Loads the model ahead of the first question, so no student waits for it. No-op when AI is off. */
+    default void warmUp() {
+    }
+
     static AiProvider from(AppConfig.Ai config) {
         return config.enabled() ? new Ollama(config) : new None();
     }
@@ -70,6 +74,7 @@ public interface AiProvider {
             body.put("stream", false);
             body.put("messages", messages.stream().map(m -> Map.of("role", m.role(), "content", m.content())).toList());
             body.put("options", Map.of("temperature", 0.3, "num_predict", 400));
+            body.put("keep_alive", KEEP_ALIVE);
             try {
                 HttpRequest req = HttpRequest.newBuilder(URI.create(config.url().replaceAll("/+$", "") + "/api/chat"))
                         .timeout(config.timeout()).header("Content-Type", "application/json")
@@ -88,6 +93,27 @@ public interface AiProvider {
                 }
                 log.warn("AI provider unavailable ({}); using Guided Help", e.toString());
                 return Optional.empty();
+            }
+        }
+
+        /** Keep the model in memory between questions (Ollama's default is 5 minutes; the first load can take minutes). */
+        static final String KEEP_ALIVE = "30m";
+
+        /** Ollama loads a model when asked to chat with no messages. Failures are only logged. */
+        @Override
+        public void warmUp() {
+            try {
+                Map<String, Object> body = Map.of("model", config.model(), "messages", List.of(), "keep_alive", KEEP_ALIVE);
+                HttpRequest req = HttpRequest.newBuilder(URI.create(config.url().replaceAll("/+$", "") + "/api/chat"))
+                        .timeout(Duration.ofMinutes(5)).header("Content-Type", "application/json")
+                        .POST(HttpRequest.BodyPublishers.ofString(Json.write(body))).build();
+                int status = http.send(req, HttpResponse.BodyHandlers.discarding()).statusCode();
+                log.info("AI model {} warm-up: HTTP {}", config.model(), status);
+            } catch (Exception e) {
+                if (e instanceof InterruptedException) {
+                    Thread.currentThread().interrupt();
+                }
+                log.warn("AI model warm-up failed ({}); the tutor will use Guided Help until the model answers", e.toString());
             }
         }
 
