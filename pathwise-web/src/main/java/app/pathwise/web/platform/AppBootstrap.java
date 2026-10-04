@@ -7,6 +7,7 @@ import app.pathwise.web.admin.AdminAssessmentController;
 import app.pathwise.web.admin.AdminContentController;
 import app.pathwise.web.admin.ModerationController;
 import app.pathwise.web.community.DoubtApiServlet;
+import app.pathwise.web.rewards.RewardsController;
 import app.pathwise.web.community.DoubtController;
 import app.pathwise.web.assessment.AssessmentApiServlet;
 import app.pathwise.web.assessment.AssessmentController;
@@ -104,6 +105,7 @@ public class AppBootstrap implements ServletContextListener {
         servlet(sc, "apiGames", new GameApiServlet(), "/api/v1/games", "/api/v1/games/*");
         servlet(sc, "doubts", new DoubtController(), "/app/doubts", "/app/doubts/*", "/app/kb", "/app/kb/*");
         servlet(sc, "apiDoubts", new DoubtApiServlet(), "/api/v1/doubts", "/api/v1/doubts/*");
+        servlet(sc, "rewards", new RewardsController(), "/app/achievements", "/app/notifications", "/app/notifications/*");
         servlet(sc, "moderation", new ModerationController(), "/admin/moderation", "/admin/moderation/*");
         servlet(sc, "admin", new AdminController(), "/admin");
         servlet(sc, "adminAssessments", new AdminAssessmentController(), "/admin/assessments", "/admin/assessments/*");
@@ -135,6 +137,7 @@ public class AppBootstrap implements ServletContextListener {
             Instant cutoff = app.clock().instant().minus(Duration.ofDays(30));
             int sessions = app.database().tx().call(c -> new SessionDao().purge(c, cutoff));
             int events = app.database().tx().call(c -> new OutboxDao().purgeProcessed(c, Duration.ofDays(7)));
+            app.rewards().purgeOld();
             app.loginLimiter().evictIdle();
             app.registerLimiter().evictIdle();
             if (sessions + events > 0) {

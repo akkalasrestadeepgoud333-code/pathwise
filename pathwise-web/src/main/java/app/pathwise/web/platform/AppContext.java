@@ -6,6 +6,7 @@ import app.pathwise.data.Database;
 import app.pathwise.web.admin.AdminService;
 import app.pathwise.web.assessment.AssessmentService;
 import app.pathwise.web.community.DoubtService;
+import app.pathwise.web.rewards.RewardsService;
 import app.pathwise.web.games.GameService;
 import app.pathwise.web.rooms.AssignmentService;
 import app.pathwise.web.rooms.RoomAssessmentService;
@@ -56,6 +57,7 @@ public final class AppContext {
     private final RoomInsightService roomInsights;
     private final AssignmentService assignments;
     private final DoubtService doubts;
+    private final RewardsService rewards;
     private final RateLimiter loginLimiter;
     private final RateLimiter registerLimiter;
 
@@ -76,7 +78,7 @@ public final class AppContext {
         this.questions = new QuestionService(database.tx());
         this.learner = new LearnerService(database.tx(), events, clock);
         this.learn = new LearnService(catalog, content, learner, questions);
-        this.practice = new PracticeService(database.tx(), questions, learner, catalog, content, clock);
+        this.practice = new PracticeService(database.tx(), questions, learner, catalog, content, events, clock);
         this.recommendations = new RecommendationService(database.tx(), catalog, content, learner, questions, practice, clock);
         this.assessments = new AssessmentService(database.tx(), questions, learner, catalog, events, clock);
         this.games = new GameService(database.tx(), learner, catalog, events, clock);
@@ -85,6 +87,8 @@ public final class AppContext {
         this.roomInsights = new RoomInsightService(database.tx(), rooms, clock);
         this.assignments = new AssignmentService(database.tx(), rooms, catalog, learner, events, clock);
         this.doubts = new DoubtService(database.tx(), catalog, events, clock);
+        this.rewards = new RewardsService(database.tx(), clock);
+        this.rewards.register(events);
         this.loginLimiter = new RateLimiter(config.loginAttemptsPerMinute(), 60_000, clock);      // per IP + email
         this.registerLimiter = new RateLimiter(config.registrationsPerHour(), 3_600_000, clock);  // per IP
     }
@@ -119,6 +123,7 @@ public final class AppContext {
     public RoomInsightService roomInsights() { return roomInsights; }
     public AssignmentService assignments() { return assignments; }
     public DoubtService doubts() { return doubts; }
+    public RewardsService rewards() { return rewards; }
     public RateLimiter loginLimiter() { return loginLimiter; }
     public RateLimiter registerLimiter() { return registerLimiter; }
 }

@@ -79,12 +79,16 @@ public final class PracticeService {
     private final CatalogService catalog;
     private final ContentService content;
     private final Clock clock;
+    private final app.pathwise.web.platform.events.EventBus events;
+    public static final String EVENT_ANSWERED = "practice.answered";
+    public static final String EVENT_CHECK_SUBMITTED = "module_check.submitted";
     private final AttemptDao attempts = new AttemptDao();
     private final RecommendationDao recommendations = new RecommendationDao();
 
     public PracticeService(Tx tx, QuestionService questions, LearnerService learner, CatalogService catalog,
-                           ContentService content, Clock clock) {
+                           ContentService content, app.pathwise.web.platform.events.EventBus events, Clock clock) {
         this.tx = tx;
+        this.events = events;
         this.questions = questions;
         this.learner = learner;
         this.catalog = catalog;
@@ -243,6 +247,9 @@ public final class PracticeService {
                         item.hintsUsed(), now);
             }
             learner.recompute(c, actor.userId(), q.skillIds(), now);
+            events.publish(c, EVENT_ANSWERED, Map.of("userId", actor.userId().toString(), "questionId", q.id().toString(),
+                    "kind", kind, "correct", result.correct(), "repeat", recent.containsKey(q.id()),
+                    "skills", q.skillIds().stream().map(UUID::toString).toList()));
             boolean last = items.stream().filter(i -> i.answeredAt() == null).count() == 1;
             return Optional.of(new AnswerResult(position, items.size(), QuestionService.feedback(q, response, result, actor.userId()), last));
         });
@@ -348,6 +355,7 @@ public final class PracticeService {
             }
             attempts.complete(c, attemptId, score, items.size(), now);
             learner.recompute(c, actor.userId(), skills, now);
+            events.publish(c, EVENT_CHECK_SUBMITTED, Map.of("userId", actor.userId().toString(), "score", score, "total", items.size()));
             return attemptId;
         });
     }

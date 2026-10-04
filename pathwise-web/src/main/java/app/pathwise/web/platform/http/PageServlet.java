@@ -78,6 +78,7 @@ public abstract class PageServlet extends HttpServlet {
         req.setAttribute("csrfToken", Csrf.token(req));
         if (actor.isAuthenticated()) {
             req.setAttribute("currentUser", CurrentUser.of(actor, app().identity().theme(actor.userId())));
+            req.setAttribute("unreadNotifications", app().rewards().unread(actor.userId()));
         }
         HttpSession session = req.getSession(false);
         if (session != null && session.getAttribute(FLASH) != null) {

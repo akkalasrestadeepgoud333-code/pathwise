@@ -583,3 +583,29 @@ fieldset.field { border: 0; padding: 0; margin: 0; display: grid; gap: var(--s-2
 .resolved-next p { margin: 0; display: flex; gap: var(--s-2); align-items: center; }
 .similar { margin-bottom: var(--s-4); border-color: var(--accent); }
 .report-excerpt { white-space: pre-line; margin: var(--s-2) 0; }
+/* Rewards */
+.bell { position: relative; }
+.bell-count { position: absolute; top: 2px; right: 0; min-width: 18px; height: 18px; padding: 0 4px; border-radius: var(--r-full); background: var(--danger); color: #fff; font-size: 11px; font-weight: 700; line-height: 18px; text-align: center; }
+.level-card .progress, .badge-card .progress { margin: var(--s-2) 0; }
+.badge-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: var(--s-4); }
+.badge-card { display: grid; justify-items: center; text-align: center; gap: 4px; padding: var(--s-5); border: 1px solid var(--border); border-radius: var(--r-lg); background: var(--surface); }
+.badge-card h3 { margin: var(--s-2) 0 0; font-size: var(--text-md); }
+.badge-card .meta { margin: 0; font-size: var(--text-xs); color: var(--text-subtle); }
+.badge-desc { margin: 4px 0 0; font-size: var(--text-sm); color: var(--text-muted); }
+.badge-card .progress { width: 100%; }
+.badge-art { width: 72px; height: 72px; display: grid; place-items: center; color: #fff; background: var(--badge, var(--primary)); }
+.badge-art .icon { width: 32px; height: 32px; }
+.rarity-Common .badge-art { border-radius: 50%; }
+.rarity-Uncommon .badge-art { clip-path: polygon(25% 5%, 75% 5%, 100% 50%, 75% 95%, 25% 95%, 0 50%); }
+.rarity-Rare .badge-art { clip-path: polygon(50% 0, 100% 15%, 100% 60%, 50% 100%, 0 60%, 0 15%); }
+.rarity-Epic .badge-art { clip-path: polygon(50% 0, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%); }
+.cat-milestone { --badge: #4f6bed; } .cat-mastery { --badge: #0f9f76; } .cat-game { --badge: #d9485f; } .cat-practice { --badge: #e48a12; }
+.cat-assessment { --badge: #7a4fe0; } .cat-growth { --badge: #2a9ab8; } .cat-community { --badge: #c2410c; } .cat-streak { --badge: #e2582a; }
+.badge-card.locked .badge-art { background: var(--surface-3); color: var(--text-subtle); }
+.badge-card.earned { border-color: color-mix(in srgb, var(--badge, var(--primary)) 45%, var(--border)); }
+.xp-delta { color: var(--success); font-weight: 700; }
+.xp-delta.negative { color: var(--needs); }
+.notif-list .is-unread .title { font-weight: 700; }
+.rewards-strip { display: flex; flex-wrap: wrap; gap: var(--s-3); align-items: center; margin-bottom: var(--s-5); padding: var(--s-3) var(--s-4); }
+.rewards-strip a { text-decoration: none; color: inherit; display: inline-flex; gap: 6px; align-items: center; font-weight: 600; font-size: var(--text-sm); }
+.rewards-strip .meta { font-size: var(--text-xs); color: var(--text-muted); }

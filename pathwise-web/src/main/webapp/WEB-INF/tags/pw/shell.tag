@@ -17,6 +17,7 @@
       <a href="<c:url value='/app/practice'/>"<c:if test="${nav == 'practice'}"> aria-current="page"</c:if>><pw:icon name="target"/>Practice</a>
       <a href="<c:url value='/app/assessments'/>"<c:if test="${nav == 'assessments'}"> aria-current="page"</c:if>><pw:icon name="clipboard-check"/>Assessments</a>
       <a href="<c:url value='/app/progress'/>"<c:if test="${nav == 'progress'}"> aria-current="page"</c:if>><pw:icon name="activity"/>Progress</a>
+      <a href="<c:url value='/app/achievements'/>"<c:if test="${nav == 'achievements'}"> aria-current="page"</c:if>><pw:icon name="trophy"/>Achievements</a>
       <a href="<c:url value='/app/rooms'/>"<c:if test="${nav == 'rooms'}"> aria-current="page"</c:if>><pw:icon name="users"/>Rooms</a>
       <a href="<c:url value='/app/doubts'/>"<c:if test="${nav == 'doubts'}"> aria-current="page"</c:if>><pw:icon name="circle-help"/>Doubts</a>
       <c:if test="${user.teacher or user.admin}">
@@ -51,6 +52,7 @@
     <header class="topbar">
       <pw:logo href="/app/today"/>
       <div class="topbar-actions">
+        <a class="icon-btn bell" href="<c:url value='/app/notifications'/>" aria-label="Notifications<c:if test='${requestScope.unreadNotifications > 0}'>, <c:out value='${requestScope.unreadNotifications}'/> unread</c:if>"><pw:icon name="bell"/><c:if test="${requestScope.unreadNotifications > 0}"><span class="bell-count" aria-hidden="true"><c:out value="${requestScope.unreadNotifications > 9 ? '9+' : requestScope.unreadNotifications}"/></span></c:if></a>
         <button type="button" class="icon-btn" data-theme-toggle data-save-url="<c:url value='/app/settings/theme'/>" aria-label="Switch theme">
           <pw:icon name="moon"/>
         </button>

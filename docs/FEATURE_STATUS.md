@@ -130,6 +130,18 @@ Last updated: **2026-10-04** (end of M2, Evidence → learner model → engine).
 | Rate limits: 10 new doubts an hour, 30 answers per 10 minutes per person | `DoubtService` | code review (limits are in-process) |
 | Doubts API (list, view, ask, answer) | `/api/v1/doubts*` | `DoubtFlowTest` |
 
+## Implemented (M7: XP, streaks, badges, notifications)
+
+| Feature | Where | Evidence |
+|---|---|---|
+| XP from learning only: module finished 50, correct first practice answer on an unmastered skill 5 (100/day cap), verified game at 60%+ 15–30 (first 3 per game per day), assessment submitted 30, improved by 10+ points 20, skill Proficient 40 / Mastered 100, answer accepted 25 / teacher verified 40, badges 25–400 by rarity. Nothing for logging in, opening pages or asking | `XpRules`, `RewardsService` | `RewardsCoreTest`, `RewardsFlowTest` |
+| Idempotent by construction: every XP change has a unique key; re-delivered events change nothing; moderation removal reverses community XP with a negative event (learning XP is never taken back) | `xp_events` | `RewardsFlowTest` |
+| Levels from cumulative XP (round(100·n^1.5)), computed not stored | `Levels` | `RewardsCoreTest` |
+| Streaks of meaningful learning days (check passed, 5 practice answers, game at 50%+, assessment, challenge, accepted answer); a freeze per 7 days (max 2) covers a missed day; today never breaks a streak | `Streaks`, `activity_days` | `RewardsCoreTest`, `RewardsFlowTest` |
+| Badge engine with typed criteria and progress for locked badges; 11 badges (First Steps, Tree Explorer, Concept Master, Debug Detective, Practice Pro, Assessment Ace, Comeback, Helpful Peer, Verified Helper, Learning Streak I/II); awards are unique per user and badge; in-house badge art (rarity shape × category colour × icon) | `Badges`, `/app/achievements` | `RewardsCoreTest`, `RewardsFlowTest` |
+| In-app notifications: assessment results, doubt answers/acceptance/verification, badges, mastered skills, assignments graded, announcements, join requests, new work to grade, private doubts; grouped while unread; bell with unread count; opening one marks it read (local links only); purged after 180 days | `/app/notifications` | `RewardsFlowTest` |
+| Today shows level, XP, streak and the closest next badge | `/app/today` | `RewardsFlowTest` |
+
 ## Partially implemented
 
 | Feature | Works | Missing |
@@ -142,6 +154,7 @@ Last updated: **2026-10-04** (end of M2, Evidence → learner model → engine).
 | Assessment feedback policies | `immediate` and `manual_release` (score only until released) | the teacher release button and `after_due` (needs due dates from rooms, M5) |
 | Games in recommendations | games appear in the gallery, on Practice, and in Progress through their evidence | the engine does not yet suggest a game in the Explore slot |
 | Community (rest of the blueprint) | see the M6 table | room discussion (L2), live doubt sessions, attaching a question attempt to a doubt, KB links in modules' Common doubts, image uploads, a separate moderator role (moderation is an admin power for now) |
+| Gamification (rest of the blueprint) | see the M7 table | Web Push / email / Android push, notification preferences and quiet hours (only in-app notifications exist, and Pathwise sends no reminders), learner time zones (days use Asia/Kolkata), room leaderboards (opt-in, P2), room custom badges, challenge-pass and doubt-to-practice XP, Root Fixer / Curious Mind / Course Milestone / Team Player badges |
 | Game administration | templates can be disabled in the database (`game_templates.enabled`) | an admin screen for it (M10); the teachers' "Practice and play" panel (M5) |
 | Offline game submissions | the attempt id makes online finishing idempotent | idempotency keys for queued offline logs (M9, Android) |
 | SQL-query questions | — | deferred until a DBMS pack exists; the grader has no SQL type yet |
@@ -149,7 +162,7 @@ Last updated: **2026-10-04** (end of M2, Evidence → learner model → engine).
 
 ## Proposed (designed in the blueprint, not built)
 
-more games: Sequence Sort, True/False Sprint, Query Quest (P1) · rooms, assignments and teacher analytics (M5) · XP, streaks, badges and notifications (M7) · AI tutor with Guided Help fallback (M8) · Android app (M9) · projects, live doubt sessions and full admin console (M10).
+more games: Sequence Sort, True/False Sprint, Query Quest (P1) · rooms, assignments and teacher analytics (M5) · AI tutor with Guided Help fallback (M8) · Android app (M9) · projects, live doubt sessions and full admin console (M10).
 
 ## Future (out of scope for v1)
 

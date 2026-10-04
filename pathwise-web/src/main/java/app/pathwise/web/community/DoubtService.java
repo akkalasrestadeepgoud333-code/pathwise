@@ -49,6 +49,8 @@ public final class DoubtService {
     public static final String EVENT_ASKED = "doubt.asked";
     public static final String EVENT_ANSWERED = "doubt.answered";
     public static final String EVENT_RESOLVED = "doubt.resolved";
+    public static final String EVENT_VERIFIED = "doubt.answer_verified";
+    public static final String EVENT_POST_REMOVED = "doubt.answer_removed";
 
     private final Tx tx;
     private final CatalogService catalog;
@@ -310,8 +312,8 @@ public final class DoubtService {
             if (scope == Scope.PUBLIC) {
                 dao.alias(c, threadId, actor.userId(), DoubtRules::newAlias);
             }
-            dao.addPost(c, threadId, actor.userId(), b, named, now);
-            events.publish(c, EVENT_ANSWERED, Map.of("threadId", threadId.toString()));
+            UUID postId = dao.addPost(c, threadId, actor.userId(), b, named, now);
+            events.publish(c, EVENT_ANSWERED, Map.of("threadId", threadId.toString(), "postId", postId.toString()));
         });
     }
 
@@ -343,7 +345,7 @@ public final class DoubtService {
                 throw new DoubtRuleException("Accept someone else's answer.");
             }
             dao.accept(c, threadId, postId, clock.instant());
-            events.publish(c, EVENT_RESOLVED, Map.of("threadId", threadId.toString()));
+            events.publish(c, EVENT_RESOLVED, Map.of("threadId", threadId.toString(), "postId", postId.toString()));
         });
     }
 
@@ -361,6 +363,7 @@ public final class DoubtService {
             }
             dao.verify(c, postId, actor.userId());
             dao.moderationAction(c, actor.userId(), null, "post", postId, "verify", "Marked as teacher verified");
+            events.publish(c, EVENT_VERIFIED, Map.of("postId", postId.toString()));
         });
     }
 
@@ -438,6 +441,9 @@ public final class DoubtService {
                 }
             }
             dao.moderationAction(c, actor.userId(), reportId, r.targetKind(), r.targetId(), action, why);
+            if ("post".equals(r.targetKind()) && ("hide".equals(action) || "remove".equals(action))) {
+                events.publish(c, EVENT_POST_REMOVED, Map.of("postId", r.targetId().toString()));
+            }
             dao.closeReports(c, r.targetKind(), r.targetId(), "dismiss".equals(action) ? "dismissed" : "actioned", actor.userId(), now);
             audit.record(c, actor.userId(), "moderation." + action, r.targetKind(), r.targetId().toString(),
                     Json.write(Map.of("reason", why, "reportId", reportId.toString())), null);

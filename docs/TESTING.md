@@ -141,4 +141,18 @@ DoubtFlowTest covers:
 
 Note: this run took 48 minutes. The machine slept or ran out of memory partway (the test JVM used about 10 s of CPU over that time). No test was at fault.
 
+### 2026-10-04: M7 XP, streaks, badges and notifications
+
+Command: `.\mvnw.cmd install` (core, then data, web and app). Result: **213 tests, 213 passed, 0 failed** (core 100, data 14, web 31, app 68).
+
+New tests:
+- **RewardsCoreTest:** the level curve; streaks, including freezes covering one and two missed days and today never breaking a streak; game XP and the improvement threshold; badge progress text for unmet criteria.
+- **RewardsFlowTest:** three end-to-end tests:
+  - four perfect games earn XP only three times, the day counts toward the streak, and five Bug Hunts award Debug Detective with badge XP and a notification
+  - the achievements page, Today strip and bell; "mark all read" clears the bell
+  - assessment XP awarded once; re-inserting the same outbox event changes nothing; opening a notification redirects and marks it read, and other people's notifications go nowhere
+  - helper XP for an accepted answer, none for asking, and the XP reversed when a moderator removes the answer
+
+The ArchitectureTest caught an anonymous class using DAOs. It became a named `*Service` class.
+
 Not yet done: accessibility audit with axe-core, Android tests, load tests and the dependency vulnerability scan. All of these are planned (see the blueprint, §35).

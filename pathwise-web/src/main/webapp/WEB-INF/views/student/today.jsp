@@ -7,6 +7,12 @@
     </div>
   </div>
 
+  <div class="card rewards-strip" aria-label="Your progress">
+    <a href="<c:url value='/app/achievements'/>"><pw:icon name="trophy"/>Level <c:out value="${rewards.level}"/> · <c:out value="${rewards.xp}"/> XP</a>
+    <a href="<c:url value='/app/achievements'/>"><pw:icon name="flame"/><c:out value="${rewards.streak}"/>-day streak</a>
+    <c:if test="${not empty rewards.nextBadge}"><span class="meta">Next badge: <c:out value="${rewards.nextBadge}"/> (<c:out value="${rewards.nextBadgePercent}"/>%)</span></c:if>
+  </div>
+
   <div class="grid grid-main-aside">
     <c:choose>
       <c:when test="${not empty top}">

@@ -48,6 +48,7 @@ public class StudentController extends PageServlet {
                 .orElse(java.util.Map.of("title", "Assessments", "meta", "Timed checks that count as official evidence",
                         "href", "/app/assessments"));
         req.setAttribute("assessmentPrompt", prompt);
+        req.setAttribute("rewards", app.pathwise.web.platform.view.ViewModels.of(app().rewards().summary(actor)));
         req.setAttribute("roomNext", app.pathwise.web.platform.view.ViewModels.list(app().rooms().roomNextSteps(actor)));
         req.setAttribute("nav", "today");
         render(req, res, "student/today");
